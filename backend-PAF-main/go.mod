@@ -1,4 +1,4 @@
-module github.com/NicolasSalinasR/backend-PAF
+module github.com/NicolasAMunozR/PAF/backend-PAF
 
 go 1.23.3
 
