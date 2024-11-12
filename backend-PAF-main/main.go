@@ -19,6 +19,10 @@ func main() {
 	// Creamos una instancia del controlador
 	pafController := controller.NewPAFController(pafService)
 
+	// Crear el servicio y controlador de Persona
+	personaService := service.NewPersonaService(DB.DB)
+	personaController := controller.NewPersonaController(personaService)
+
 	// Configuramos el enrutador
 	r := mux.NewRouter()
 
@@ -35,6 +39,11 @@ func main() {
 
 	// Ruta para filtrar por nombre del profesor
 	r.HandleFunc("/pafs/buscarNombre", pafController.ObtenerPAFsPorNombreProfesor).Methods("GET")
+
+	// Rutas para los endpoints GET de Persona
+	r.HandleFunc("/persona/{id:[0-9]+}", personaController.ObtenerPersonaPorID).Methods("GET")
+	r.HandleFunc("/personas", personaController.ObtenerTodasPersonas).Methods("GET")
+	r.HandleFunc("/persona/correo/{correo}", personaController.ObtenerPersonaPorCorreo).Methods("GET")
 
 	// Iniciar el servidor
 	log.Println("Servidor escuchando en el puerto 3000...")

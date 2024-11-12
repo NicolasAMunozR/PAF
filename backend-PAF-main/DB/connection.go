@@ -25,6 +25,11 @@ func DBconnection() {
 	if err != nil {
 		panic("failed to migrate the database")
 	}
+	err = DB.AutoMigrate(models.Persona{})
+	if err != nil {
+		panic("failed to migrate the database")
+	}
+
 	fmt.Println("Conexión a la base de datos exitosa.")
 
 }
