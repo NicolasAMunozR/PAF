@@ -23,6 +23,14 @@ func main() {
 	personaService := service.NewPersonaService(DB.DB)
 	personaController := controller.NewPersonaController(personaService)
 
+	// Crear el servicio y el controlador para UnidadContratante
+	unidadService := service.NewUnidadContratanteService(DB.DB)
+	unidadController := controller.NewUnidadContratanteController(unidadService)
+
+	// Crear el servicio y el controlador de contrato
+	contratoService := service.NewContratoService(DB.DB)
+	contratoController := controller.NewContratoController(contratoService)
+
 	// Configuramos el enrutador
 	r := mux.NewRouter()
 
@@ -44,6 +52,12 @@ func main() {
 	r.HandleFunc("/persona/{id:[0-9]+}", personaController.ObtenerPersonaPorID).Methods("GET")
 	r.HandleFunc("/personas", personaController.ObtenerTodasPersonas).Methods("GET")
 	r.HandleFunc("/persona/correo/{correo}", personaController.ObtenerPersonaPorCorreo).Methods("GET")
+	r.HandleFunc("/persona/rut/{run}", personaController.ObtenerPersonaPorRUT).Methods("GET")
+
+	// Definir las rutas del controlador UnidadContratante
+	r.HandleFunc("/unidad/{id:[0-9]+}", unidadController.ObtenerUnidadPorID).Methods("GET")
+	r.HandleFunc("/unidad/codigo/{codigo}", unidadController.ObtenerUnidadPorCodigo).Methods("GET")
+	r.HandleFunc("/unidades", unidadController.ObtenerTodasUnidades).Methods("GET")
 
 	// Iniciar el servidor
 	log.Println("Servidor escuchando en el puerto 3000...")

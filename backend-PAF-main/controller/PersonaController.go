@@ -63,7 +63,7 @@ func (c *PersonaController) ObtenerPersonaPorCorreo(w http.ResponseWriter, r *ht
 
 // ObtenerPersonaPorRUT maneja la obtención de una Persona por RUT
 func (c *PersonaController) ObtenerPersonaPorRUT(w http.ResponseWriter, r *http.Request) {
-	rut := mux.Vars(r)["rut"]
+	rut := mux.Vars(r)["run"]
 
 	persona, err := c.PersonaService.ObtenerPersonaPorRUT(rut)
 	if err != nil {

@@ -44,9 +44,9 @@ func (s *PersonaService) ObtenerPersonaPorCorreo(correo string) (*models.Persona
 }
 
 // ObtenerPersonaPorRUT devuelve una Persona por su RUT
-func (s *PersonaService) ObtenerPersonaPorRUT(rut string) (*models.Persona, error) {
+func (s *PersonaService) ObtenerPersonaPorRUT(run string) (*models.Persona, error) {
 	var persona models.Persona
-	if err := s.DB.Where("rut = ?", rut).First(&persona).Error; err != nil {
+	if err := s.DB.Where("run = ?", run).First(&persona).Error; err != nil {
 		return nil, errors.New("Persona no encontrada con ese RUT")
 	}
 	return &persona, nil
