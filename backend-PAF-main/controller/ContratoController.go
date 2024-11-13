@@ -13,6 +13,13 @@ type ContratoController struct {
 	ContratoService *service.ContratoService
 }
 
+// NewContratoController crea una nueva instancia de ContratoController
+func NewContratoController(contratoService *service.ContratoService) *ContratoController {
+	return &ContratoController{
+		ContratoService: contratoService,
+	}
+}
+
 // ObtenerContratoPorID maneja la obtención de un contrato por su ID
 func (c *ContratoController) ObtenerContratoPorID(w http.ResponseWriter, r *http.Request) {
 	idStr := mux.Vars(r)["id"]
@@ -62,5 +69,19 @@ func (c *ContratoController) ObtenerContratosPorCodigoAsignatura(w http.Response
 		return
 	}
 
+	json.NewEncoder(w).Encode(contratos)
+}
+
+// ObtenerContratosUltimoMes maneja la solicitud de obtener contratos creados en el último mes
+func (c *ContratoController) ObtenerContratosUltimoMes(w http.ResponseWriter, r *http.Request) {
+	// Llamar al servicio para obtener los contratos
+	contratos, err := c.ContratoService.ObtenerContratosUltimoMes()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Responder con los contratos obtenidos
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(contratos)
 }

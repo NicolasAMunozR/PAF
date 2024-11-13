@@ -11,6 +11,13 @@ type ContratoService struct {
 	DB *gorm.DB
 }
 
+// NewContratoService crea una nueva instancia de ContratoService
+func NewContratoService(db *gorm.DB) *ContratoService {
+	return &ContratoService{
+		DB: db,
+	}
+}
+
 // ObtenerContratoPorID obtiene un contrato por su ID
 func (s *ContratoService) ObtenerContratoPorID(id uint) (*models.Contrato, error) {
 	var contrato models.Contrato
@@ -43,6 +50,23 @@ func (s *ContratoService) ObtenerContratosUltimos7Dias() ([]models.Contrato, err
 func (s *ContratoService) ObtenerContratosPorCodigoAsignatura(codigoAsignatura string) ([]models.Contrato, error) {
 	var contratos []models.Contrato
 	if err := s.DB.Where("codigo_asignatura = ?", codigoAsignatura).Find(&contratos).Error; err != nil {
+		return nil, err
+	}
+	return contratos, nil
+}
+
+// ObtenerContratosUltimoMes obtiene todos los contratos creados en el último mes
+func (s *ContratoService) ObtenerContratosUltimoMes() ([]models.Contrato, error) {
+	// Obtenemos la fecha actual
+	currentDate := time.Now()
+
+	// Calculamos la fecha de hace un mes
+	oneMonthAgo := currentDate.AddDate(0, -1, 0)
+
+	var contratos []models.Contrato
+	// Filtramos los contratos cuyo fecha_inicio esté dentro del último mes
+	err := s.DB.Where("fecha_inicio >= ?", oneMonthAgo).Find(&contratos).Error
+	if err != nil {
 		return nil, err
 	}
 	return contratos, nil

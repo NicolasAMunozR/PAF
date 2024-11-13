@@ -35,6 +35,15 @@ func DBconnection() {
 		panic("failed to migrate the database")
 	}
 
+	err = DB.AutoMigrate(models.Contrato{})
+	if err != nil {
+		panic("failed to migrate the database")
+	}
+	err = DB.AutoMigrate(models.Proceso{})
+	if err != nil {
+		panic("failed to migrate the database")
+	}
+
 	fmt.Println("Conexión a la base de datos exitosa.")
 
 }
