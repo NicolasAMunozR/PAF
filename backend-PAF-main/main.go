@@ -93,6 +93,7 @@ func main() {
 	r.HandleFunc("/pipelsoft/persona/rut/{run}", pipelsoftController.ObtenerPersonaPorRUT).Methods("GET")
 	r.HandleFunc("/pipelsoft/proceso/estado/{estado}", pipelsoftController.ObtenerProcesoPorEstado).Methods("GET")
 	r.HandleFunc("/pipelsoft/unidad/codigo/{codigo}", pipelsoftController.ObtenerUnidadPorCodigo).Methods("GET")
+	r.HandleFunc("/pipelsoft/persona", pipelsoftController.ObtenerListaPersonas).Methods("GET")
 
 	// Iniciar el servidor
 	log.Println("Servidor escuchando en el puerto 3000...")

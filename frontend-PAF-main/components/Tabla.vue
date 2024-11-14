@@ -3,10 +3,11 @@
     <table class="w-full text-sm bg-white divide-y divide-gray-200">
       <thead>
         <tr>
-          <th class="px-4 py-2 font-medium text-gray-900">ID</th>
+          <th class="px-4 py-2 font-medium text-gray-900">Codigo de la PAF</th>
+          <th class="px-4 py-2 font-medium text-gray-900">Codigo de la Asignatura</th>
           <th class="px-4 py-2 font-medium text-gray-900">Run</th>
-          <th class="px-4 py-2 font-medium text-gray-900">Nombres</th>
-          <th class="px-4 py-2 font-medium text-gray-900">Correo</th>
+          <th class="px-4 py-2 font-medium text-gray-900">Nombre</th>
+          <th class="px-4 py-2 font-medium text-gray-900">Apellido</th>
           <th class="px-4 py-2 font-medium text-gray-900">Grupo</th>
           <th class="px-4 py-2 font-medium text-gray-900">Cupos</th>
           <th class="px-4 py-2 font-medium text-gray-900">  </th>
@@ -15,10 +16,11 @@
       </thead>
       <tbody class="divide-y divide-gray-500">
         <tr v-for="persona in data" :key="persona.id">
-          <td class="px-4 py-2 font-medium text-gray-900">{{ persona.ID }}</td>
+          <td class="px-4 py-2 font-medium text-gray-900">{{ persona.CodigoPAF }}</td>
+          <td class="px-4 py-2 font-medium text-gray-900">{{ persona.CodigoAsignatura }}</td>
           <td class="px-4 py-2 text-gray-700">{{ persona.Run }}</td>
           <td class="px-4 py-2 text-gray-700">{{ persona.Nombres }}</td>
-          <td class="px-4 py-2 text-gray-700">{{ persona.Correo }}</td>
+          <td class="px-4 py-2 text-gray-700">{{ persona.PrimerApellido }}</td>
           <td class="px-4 py-2 text-gray-700"> </td>
           <td class="px-4 py-2 text-gray-700"> </td>
           <td class="px-4 py-2 text-gray-700"> </td>
@@ -54,4 +56,3 @@ table {
   table-layout: auto; /* Las columnas se ajustan automáticamente */
 }
 </style>
-  

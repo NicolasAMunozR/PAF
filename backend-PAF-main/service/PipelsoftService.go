@@ -80,3 +80,11 @@ func (s *PipelsoftService) ObtenerUnidadPorCodigo(codigo string) (*models.Pipels
 	}
 	return &pipelsoft, nil
 }
+
+func (s *PipelsoftService) ObtenerListaPersonas() ([]models.Pipelsoft, error) {
+	var pipelsofts []models.Pipelsoft
+	if err := s.DB.Find(&pipelsofts).Error; err != nil {
+		return nil, err
+	}
+	return pipelsofts, nil
+}

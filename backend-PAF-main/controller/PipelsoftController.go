@@ -84,3 +84,12 @@ func (c *PipelsoftController) ObtenerUnidadPorCodigo(w http.ResponseWriter, r *h
 	}
 	json.NewEncoder(w).Encode(pipelsoft)
 }
+
+func (c *PipelsoftController) ObtenerListaPersonas(w http.ResponseWriter, r *http.Request) {
+	pipelsofts, err := c.Service.ObtenerListaPersonas()
+	if err != nil {
+		http.Error(w, "Error al obtener registros", http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(pipelsofts)
+}
