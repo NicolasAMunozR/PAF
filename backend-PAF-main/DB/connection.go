@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var DSN = "host=localhost user=postgres password=conan2084 dbname=PAF port=5432 sslmode=disable"
+var DSN = "host=localhost user=postgres password=alonsoreyes104 dbname=PAF port=5432 sslmode=disable"
 var DB *gorm.DB
 
 // DBconnection establece la conexión a la base de datos y la asigna a la variable global DB.

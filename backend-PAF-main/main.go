@@ -8,9 +8,20 @@ import (
 	"github.com/NicolasAMunozR/PAF/backend-PAF/controller"
 	"github.com/NicolasAMunozR/PAF/backend-PAF/service"
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 func main() {
+	// Configuración de CORS
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"http://localhost:3001"},  // Asegúrate de que el puerto coincida con el de tu frontend Nuxt
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders: []string{"Content-Type"},
+	})
+
+	// Crear el enrutador y aplicar CORS
+	r := mux.NewRouter()
+	r.Use(c.Handler)
 	// Conectar a la base de datos
 	DB.DBconnection()
 	// Creamos una instancia del servicio
@@ -34,9 +45,6 @@ func main() {
 	// Inicializar los servicios y controladores
 	procesoService := service.NewProcesoService(DB.DB)
 	procesoController := controller.NewProcesoController(procesoService)
-
-	// Configuramos el enrutador
-	r := mux.NewRouter()
 
 	// Definir las rutas del controlador
 	r.HandleFunc("/paf", pafController.CrearPAF).Methods("POST")

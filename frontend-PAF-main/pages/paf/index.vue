@@ -39,8 +39,7 @@
     }
   };
   </script>
-  
-  <style scoped>
+<style scoped>
   .container {
     display: grid;
     grid-template-columns: 1fr 3fr; /* 1/4 para filtros, 3/4 para tabla */
