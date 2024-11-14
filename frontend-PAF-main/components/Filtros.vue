@@ -1,92 +1,135 @@
+<!-- Filtros.vue -->
 <template>
-    <div class="space-y-2">
-      <details class="overflow-hidden rounded border border-gray-300">
-        <summary class="flex cursor-pointer items-center justify-between gap-2 bg-white p-4 text-gray-900 transition">
-          <span class="text-sm font-medium">Availability</span>
-          <span class="transition group-open:-rotate-180">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="size-4">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-            </svg>
-          </span>
-        </summary>
-        <div class="border-t border-gray-200 bg-white">
-          <header class="flex items-center justify-between p-4">
-            <span class="text-sm text-gray-700">{{ selectedCount }} Selected</span>
-            <button type="button" @click="resetFilters" class="text-sm text-gray-900 underline">Reset</button>
-          </header>
-          <ul class="space-y-1 border-t border-gray-200 p-4">
-            <li v-for="(option, index) in availabilityOptions" :key="index">
-              <label class="inline-flex items-center gap-2">
-                <input type="checkbox" v-model="selectedOptions" :value="option.value" class="size-5 rounded border-gray-300" />
-                <span class="text-sm font-medium text-gray-700">{{ option.label }}</span>
-              </label>
-            </li>
-          </ul>
-        </div>
-      </details>
-  
-      <details class="overflow-hidden rounded border border-gray-300">
-        <summary class="flex cursor-pointer items-center justify-between gap-2 bg-white p-4 text-gray-900 transition">
-          <span class="text-sm font-medium">Price</span>
-          <span class="transition group-open:-rotate-180">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="size-4">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-            </svg>
-          </span>
-        </summary>
-        <div class="border-t border-gray-200 bg-white">
-          <header class="flex items-center justify-between p-4">
-            <span class="text-sm text-gray-700">The highest price is $600</span>
-            <button type="button" @click="resetPrice" class="text-sm text-gray-900 underline">Reset</button>
-          </header>
-          <div class="border-t border-gray-200 p-4">
-            <div class="flex justify-between gap-4">
-              <input v-model.number="priceRange.from" type="number" placeholder="From" class="w-full rounded-md border-gray-200 shadow-sm sm:text-sm" />
-              <input v-model.number="priceRange.to" type="number" placeholder="To" class="w-full rounded-md border-gray-200 shadow-sm sm:text-sm" />
-            </div>
-          </div>
-        </div>
-      </details>
+  <div class="filters">
+    <div class="filter-item">
+      <label for="nombre" class="text-sm font-medium text-gray-700">Nombre</label>
+      <input
+        id="nombre"
+        v-model="filtros.nombres"
+        type="text"
+        class="input"
+        placeholder="Filtrar por nombre"
+      />
     </div>
-  </template>
-  
-  <script>
-  export default {
-    data() {
-      return {
-        selectedOptions: [],
-        availabilityOptions: [
-          { label: 'In Stock (5+)', value: 'inStock' },
-          { label: 'Pre Order (3+)', value: 'preOrder' },
-          { label: 'Out of Stock (10+)', value: 'outOfStock' }
-        ],
-        priceRange: { from: '', to: '' }
-      };
-    },
-    computed: {
-      selectedCount() {
-        return this.selectedOptions.length;
-      }
-    },
-    methods: {
-      resetFilters() {
-        this.selectedOptions = [];
-      },
-      resetPrice() {
-        this.priceRange = { from: '', to: '' };
-      }
-    },
-    watch: {
-      selectedOptions(newVal) {
-        this.$emit('filter-changed', { availability: newVal, price: this.priceRange });
-      },
-      priceRange: {
-        deep: true,
-        handler(newVal) {
-          this.$emit('filter-changed', { availability: this.selectedOptions, price: newVal });
-        }
-      }
-    }
-  };
-  </script>
-  
+    <div class="filter-item">
+      <label for="codigoPAF" class="text-sm font-medium text-gray-700">Código de PAF</label>
+      <input
+        id="codigoPAF"
+        v-model="filtros.codigoPAF"
+        type="text"
+        class="input"
+        placeholder="Filtrar por código de PAF"
+      />
+    </div>
+    <div class="filter-item">
+      <label for="codigoAsignatura" class="text-sm font-medium text-gray-700">Código de Asignatura</label>
+      <input
+        id="codigoAsignatura"
+        v-model="filtros.codigoAsignatura"
+        type="text"
+        class="input"
+        placeholder="Filtrar por código de asignatura"
+      />
+    </div>
+    <div class="filter-item">
+      <label for="estadoProceso" class="text-sm font-medium text-gray-700">Estado de Proceso</label>
+      <select id="estadoProceso" v-model="filtros.estadoProceso" class="select">
+        <option value="">Todos</option>
+        <option value="Activo">Activo</option>
+        <option value="Inactivo">Inactivo</option>
+      </select>
+    </div>
+    <div class="filter-item">
+      <label for="calidad" class="text-sm font-medium text-gray-700">Calidad</label>
+      <select id="calidad" v-model="filtros.calidad" class="select">
+        <option value="">Todas</option>
+        <option value="Contrato Fijo">Contrato Fijo</option>
+        <option value="Contrato Temporal">Contrato Temporal</option>
+        <option value="Contrato Indefinido">Contrato Indefinido</option>
+        <option value="Contrato Parcial">Contrato Parcial</option>
+      </select>
+    </div>
+    <div class="sort-item">
+      <label for="sort" class="text-sm font-medium text-gray-700">Ordenar por</label>
+      <select v-model="sortBy" class="select">
+        <option value="Nombres">Nombre</option>
+        <option value="CodigoAsignatura">Código de Asignatura</option>
+        <option value="Run">Run</option>
+        <option value="FechaInicioContrato">Fecha de Inicio de Contrato</option>
+        <option value="FechaUltimaModificacionProceso">Ultima Actualización del Proceso</option>
+      </select>
+      <button @click="toggleSortOrder" class="btn bg-gray-300">
+        Ordenar {{ sortOrder === 'asc' ? 'Ascendente' : 'Descendente' }}
+      </button>
+    </div>
+    <div class="filter-item">
+      <button @click="resetFilters" class="btn bg-gray-600 text-white">Resetear</button>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, watch, defineEmits } from 'vue'
+
+const emit = defineEmits<{
+  (event: 'filter', filters: any): void
+  (event: 'sort', sortBy: string, order: string): void
+}>()
+
+const filtros = ref({
+  nombres: '',
+  codigoPAF: '',
+  codigoAsignatura: '',
+  estadoProceso: '',
+  calidad: ''
+})
+
+const sortBy = ref('nombres')
+const sortOrder = ref('asc')
+
+watch(filtros, (newFilters) => {
+  emit('filter', newFilters)
+}, { deep: true })
+
+const resetFilters = () => {
+  filtros.value = { nombres: '', codigoPAF: '', codigoAsignatura: '', estadoProceso: '', calidad: '' }
+  emit('filter', filtros.value)
+}
+
+const toggleSortOrder = () => {
+  sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+  emit('sort', sortBy.value, sortOrder.value)
+}
+
+watch([sortBy, sortOrder], ([newSortBy, newSortOrder]) => {
+  emit('sort', newSortBy, newSortOrder)
+})
+</script>
+
+<style scoped>
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.filter-item, .sort-item {
+  display: flex;
+  flex-direction: column;
+}
+.input, .select, .btn {
+  padding: 0.5rem;
+  margin-top: 0.25rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+.btn {
+  cursor: pointer;
+  width: 100%;
+}
+.btn:hover {
+  opacity: 0.8;
+}
+.select {
+  padding: 0.5rem;
+}
+</style>

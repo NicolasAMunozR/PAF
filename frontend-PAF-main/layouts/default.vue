@@ -1,8 +1,13 @@
 <template>
-    <header>
+    <div>
+      <header>
         <Menu />
-    </header>
-    <main>
+        <h1 class="text-3xl text-center">PAF - Sistema de Gestión</h1>
+        <br>
+        <br>
+      </header>
+      <main>
         <slot />
-    </main>
+      </main>
+    </div>
 </template>
