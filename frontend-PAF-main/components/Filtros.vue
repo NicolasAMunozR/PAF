@@ -12,6 +12,16 @@
       />
     </div>
     <div class="filter-item">
+      <label for="run" class="text-sm font-medium text-gray-700">Run</label>
+      <input
+        id="run"
+        v-model="filtros.run"
+        type="text"
+        class="input"
+        placeholder="Filtrar por Run"
+      />
+    </div>
+    <div class="filter-item">
       <label for="codigoPAF" class="text-sm font-medium text-gray-700">Código de PAF</label>
       <input
         id="codigoPAF"
@@ -79,6 +89,7 @@ const emit = defineEmits<{
 const filtros = ref({
   nombres: '',
   codigoPAF: '',
+  run: '',
   codigoAsignatura: '',
   estadoProceso: '',
   calidad: ''
@@ -92,7 +103,7 @@ watch(filtros, (newFilters) => {
 }, { deep: true })
 
 const resetFilters = () => {
-  filtros.value = { nombres: '', codigoPAF: '', codigoAsignatura: '', estadoProceso: '', calidad: '' }
+  filtros.value = { nombres: '', codigoPAF: '', codigoAsignatura: '', run: '', estadoProceso: '', calidad: '' }
   emit('filter', filtros.value)
 }
 

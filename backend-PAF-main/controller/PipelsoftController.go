@@ -65,15 +65,6 @@ func (c *PipelsoftController) ObtenerPersonaPorRUT(w http.ResponseWriter, r *htt
 	json.NewEncoder(w).Encode(pipelsoft)
 }
 
-func (c *PipelsoftController) ObtenerProcesoPorEstado(w http.ResponseWriter, r *http.Request) {
-	estado := mux.Vars(r)["estado"]
-	pipelsofts, err := c.Service.ObtenerProcesoPorEstado(estado)
-	if err != nil {
-		http.Error(w, "Error al obtener registros", http.StatusInternalServerError)
-		return
-	}
-	json.NewEncoder(w).Encode(pipelsofts)
-}
 
 func (c *PipelsoftController) ObtenerUnidadPorCodigo(w http.ResponseWriter, r *http.Request) {
 	codigo := mux.Vars(r)["codigo"]
@@ -87,6 +78,26 @@ func (c *PipelsoftController) ObtenerUnidadPorCodigo(w http.ResponseWriter, r *h
 
 func (c *PipelsoftController) ObtenerListaPersonas(w http.ResponseWriter, r *http.Request) {
 	pipelsofts, err := c.Service.ObtenerListaPersonas()
+	if err != nil {
+		http.Error(w, "Error al obtener registros", http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(pipelsofts)
+}
+
+func (c *PipelsoftController) ObtenerPersonasPorRUT(w http.ResponseWriter, r *http.Request) {
+	run := mux.Vars(r)["run"]
+	pipelsofts, err := c.Service.ObtenerPersonasPorRUT(run)
+	if err != nil {
+		http.Error(w, "Error al obtener registros", http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(pipelsofts)
+}
+
+func (c *PipelsoftController) ObtenerProcesoPorEstado(w http.ResponseWriter, r *http.Request) {
+	estado := mux.Vars(r)["estado"]
+	pipelsofts, err := c.Service.ObtenerProcesoPorEstado(estado)
 	if err != nil {
 		http.Error(w, "Error al obtener registros", http.StatusInternalServerError)
 		return

@@ -91,6 +91,7 @@ func main() {
 	r.HandleFunc("/pipelsoft/contratos/ultimomes", pipelsoftController.ObtenerContratosUltimoMes).Methods("GET")
 	r.HandleFunc("/pipelsoft/persona/correo/{correo}", pipelsoftController.ObtenerPersonaPorCorreo).Methods("GET")
 	r.HandleFunc("/pipelsoft/persona/rut/{run}", pipelsoftController.ObtenerPersonaPorRUT).Methods("GET")
+	r.HandleFunc("/pipelsoft/personas/rut/{run}", pipelsoftController.ObtenerPersonasPorRUT).Methods("GET")
 	r.HandleFunc("/pipelsoft/proceso/estado/{estado}", pipelsoftController.ObtenerProcesoPorEstado).Methods("GET")
 	r.HandleFunc("/pipelsoft/unidad/codigo/{codigo}", pipelsoftController.ObtenerUnidadPorCodigo).Methods("GET")
 	r.HandleFunc("/pipelsoft/persona", pipelsoftController.ObtenerListaPersonas).Methods("GET")

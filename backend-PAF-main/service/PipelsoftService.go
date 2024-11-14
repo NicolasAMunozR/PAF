@@ -54,6 +54,24 @@ func (s *PipelsoftService) ObtenerPersonaPorCorreo(correo string) (*models.Pipel
 	return &pipelsoft, nil
 }
 
+// ObtenerUnidadPorCodigo obtiene un registro por su código de unidad contratante
+func (s *PipelsoftService) ObtenerUnidadPorCodigo(codigo string) (*models.Pipelsoft, error) {
+	var pipelsoft models.Pipelsoft
+	if err := s.DB.Where("codigo_unidad_contratante = ?", codigo).First(&pipelsoft).Error; err != nil {
+		return nil, err
+	}
+	return &pipelsoft, nil
+}
+
+func (s *PipelsoftService) ObtenerListaPersonas() ([]models.Pipelsoft, error) {
+	var pipelsofts []models.Pipelsoft
+	if err := s.DB.Find(&pipelsofts).Error; err != nil {
+		return nil, err
+	}
+	return pipelsofts, nil
+}
+
+
 // ObtenerPersonaPorRUT devuelve un registro de `Pipelsoft` por su RUT
 func (s *PipelsoftService) ObtenerPersonaPorRUT(run string) (*models.Pipelsoft, error) {
 	var pipelsoft models.Pipelsoft
@@ -72,18 +90,9 @@ func (s *PipelsoftService) ObtenerProcesoPorEstado(estado string) ([]models.Pipe
 	return pipelsofts, nil
 }
 
-// ObtenerUnidadPorCodigo obtiene un registro por su código de unidad contratante
-func (s *PipelsoftService) ObtenerUnidadPorCodigo(codigo string) (*models.Pipelsoft, error) {
-	var pipelsoft models.Pipelsoft
-	if err := s.DB.Where("codigo_unidad_contratante = ?", codigo).First(&pipelsoft).Error; err != nil {
-		return nil, err
-	}
-	return &pipelsoft, nil
-}
-
-func (s *PipelsoftService) ObtenerListaPersonas() ([]models.Pipelsoft, error) {
+func (s *PipelsoftService) ObtenerPersonasPorRUT(run string) ([]models.Pipelsoft, error) {
 	var pipelsofts []models.Pipelsoft
-	if err := s.DB.Find(&pipelsofts).Error; err != nil {
+	if err := s.DB.Where("run = ?", run).Find(&pipelsofts).Error; err != nil {
 		return nil, err
 	}
 	return pipelsofts, nil

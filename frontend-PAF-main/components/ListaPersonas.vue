@@ -37,6 +37,7 @@ const personas = ref<Persona[]>([])
 const filtros = ref({
   nombres: '',
   codigoPAF: '',
+  run: '',
   codigoAsignatura: '',
   estadoProceso: '',
   calidad: '',
@@ -54,6 +55,7 @@ const filteredPersonas = computed(() => {
       (filtros.value.estadoProceso ? persona.EstadoProceso === filtros.value.estadoProceso : true) &&
       (filtros.value.calidad ? persona.Calidad === filtros.value.calidad : true) &&
       persona.CodigoPAF.toLowerCase().includes(filtros.value.codigoPAF.toLowerCase()) &&
+      persona.Run.toLowerCase().includes(filtros.value.run.toLowerCase()) &&
       (filtros.value.jerarquia ? persona.Jerarquia === filtros.value.jerarquia : true)
     )
   })

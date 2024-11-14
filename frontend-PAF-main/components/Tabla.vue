@@ -26,7 +26,11 @@
           <td class="px-4 py-2 text-gray-700"> </td>
           <td class="px-4 py-2">
             <a href="#" class="inline-block rounded bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700 mr-2">Ver PAF</a>
-            <a href="#" class="inline-block rounded bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700">Ver Horarios</a>
+           <!-- Enlace con query -->
+            <a :href="`/horario?run=${persona.Run}`" class="inline-block rounded bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700">
+              Ver Horarios
+            </a>
+
           </td>
         </tr>
       </tbody>
