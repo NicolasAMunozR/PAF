@@ -50,9 +50,6 @@
             <a href="/personas" class="block rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700">Listado de Personas</a>
           </li>
           <li>
-            <a href="/paf" class="block rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700">PAF</a>
-          </li>
-          <li>
             <a href="/historyPAF" class="block rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700">Historial de PAF</a>
           </li>
           <!-- Otros elementos del menú -->
