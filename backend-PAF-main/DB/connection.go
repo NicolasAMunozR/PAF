@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var DSN = "host=localhost user=postgres password=alonsoreyes104 dbname=PAF port=5432 sslmode=disable"
+var DSN = "host=localhost user=postgres password=conan2084 dbname=PAF port=5432 sslmode=disable"
 var DB *gorm.DB
 
 // DBconnection establece la conexión a la base de datos y la asigna a la variable global DB.
@@ -20,31 +20,11 @@ func DBconnection() {
 		log.Fatalf("Error al conectar a la base de datos: %v", err)
 	}
 
-	// Migrar el modelo (crear la tabla si no existe)
-	err = DB.AutoMigrate(models.PAF{})
-	if err != nil {
-		panic("failed to migrate the database")
-	}
-	err = DB.AutoMigrate(models.Persona{})
-	if err != nil {
-		panic("failed to migrate the database")
-	}
-
-	err = DB.AutoMigrate(models.UnidadContratante{})
-	if err != nil {
-		panic("failed to migrate the database")
-	}
-
-	err = DB.AutoMigrate(models.Contrato{})
-	if err != nil {
-		panic("failed to migrate the database")
-	}
-	err = DB.AutoMigrate(models.Proceso{})
-	if err != nil {
-		panic("failed to migrate the database")
-	}
-
 	err = DB.AutoMigrate(models.Pipelsoft{})
+	if err != nil {
+		panic("failed to migrate the database")
+	}
+	err = DB.AutoMigrate(models.HistorialPafAceptadas{})
 	if err != nil {
 		panic("failed to migrate the database")
 	}
