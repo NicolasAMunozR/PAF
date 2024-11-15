@@ -14,9 +14,12 @@ import (
 func main() {
 	// Configuración de CORS
 	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"http://localhost:3001"}, // Asegúrate de que el puerto coincida con el de tu frontend Nuxt
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
-		AllowedHeaders: []string{"Content-Type"},
+		AllowedOrigins:   []string{"http://localhost:3001"},                   // Tu frontend
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}, // Agregar OPTIONS si lo necesitas
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},           // Agregar Authorization si es necesario
+		ExposedHeaders:   []string{"X-Total-Count"},
+		AllowCredentials: true,
+		Debug:            true, // Agregar para más información sobre los errores de CORS
 	})
 
 	// Crear el enrutador y aplicar CORS
