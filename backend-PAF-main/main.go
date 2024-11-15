@@ -52,6 +52,8 @@ func main() {
 	r.HandleFunc("/pipelsoft/proceso/estado/{estado}", pipelsoftController.ObtenerProcesoPorEstado).Methods("GET")
 	r.HandleFunc("/pipelsoft/unidad/codigo/{codigo}", pipelsoftController.ObtenerUnidadPorCodigo).Methods("GET")
 	r.HandleFunc("/pipelsoft/persona", pipelsoftController.ObtenerListaPersonas).Methods("GET")
+	r.HandleFunc("/pipelsoft/persona/paf/{codigoPaf}", pipelsoftController.ObtenerPersonaPorPaf).Methods("GET")
+
 
 	// Instanciar el servicio y controlador de Horarios
 	horarioService := service.NewHorarioService(DB.DB)

@@ -3,6 +3,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/NicolasAMunozR/PAF/backend-PAF/service"
@@ -55,16 +56,6 @@ func (c *PipelsoftController) ObtenerPersonaPorCorreo(w http.ResponseWriter, r *
 	json.NewEncoder(w).Encode(pipelsoft)
 }
 
-func (c *PipelsoftController) ObtenerPersonaPorRUT(w http.ResponseWriter, r *http.Request) {
-	run := mux.Vars(r)["run"]
-	pipelsoft, err := c.Service.ObtenerPersonaPorRUT(run)
-	if err != nil {
-		http.Error(w, "Persona no encontrada", http.StatusNotFound)
-		return
-	}
-	json.NewEncoder(w).Encode(pipelsoft)
-}
-
 
 func (c *PipelsoftController) ObtenerUnidadPorCodigo(w http.ResponseWriter, r *http.Request) {
 	codigo := mux.Vars(r)["codigo"]
@@ -103,4 +94,35 @@ func (c *PipelsoftController) ObtenerProcesoPorEstado(w http.ResponseWriter, r *
 		return
 	}
 	json.NewEncoder(w).Encode(pipelsofts)
+}
+
+func (c *PipelsoftController) ObtenerPersonaPorPaf(w http.ResponseWriter, r *http.Request) {
+	codigoPaf := mux.Vars(r)["codigoPaf"]
+
+	// Llamada al servicio para obtener los datos
+	pipelsoft, err := c.Service.ObtenerPersonaPorPaf(codigoPaf)
+	if err != nil {
+		// Verifica si el error es de "registro no encontrado"
+		if err.Error() == fmt.Sprintf("registro con codigo_paf %s no encontrado", codigoPaf) {
+			http.Error(w, fmt.Sprintf("Persona con código PAF %s no encontrada", codigoPaf), http.StatusNotFound)
+		} else {
+			http.Error(w, "Error al obtener los datos de la persona", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	// Codifica el objeto de la persona a JSON
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(pipelsoft)
+}
+
+
+func (c *PipelsoftController) ObtenerPersonaPorRUT(w http.ResponseWriter, r *http.Request) {
+	run := mux.Vars(r)["run"]
+	pipelsoft, err := c.Service.ObtenerPersonaPorRUT(run)
+	if err != nil {
+		http.Error(w, "Persona no encontrada", http.StatusNotFound)
+		return
+	}
+	json.NewEncoder(w).Encode(pipelsoft)
 }

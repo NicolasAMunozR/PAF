@@ -68,6 +68,7 @@ const router = useRouter() // Obtén el enrutador
 const { $axios } = useNuxtApp() as unknown as { $axios: typeof import('axios').default }
 
 const run = ref(route.query.run || '')
+
 interface Persona {
   CodigoAsignatura: string;
   NombreAsignatura: string;

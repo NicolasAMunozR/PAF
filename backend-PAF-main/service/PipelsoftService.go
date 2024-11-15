@@ -139,3 +139,17 @@ func (s *PipelsoftService) ObtenerPersonasPorRUT(run string) ([]models.Pipelsoft
 
 	return pipelsofts, nil
 }
+
+// ObtenerPersonaPorPaf obtiene un registro de `Pipelsoft` por su código PAF
+func (s *PipelsoftService) ObtenerPersonaPorPaf(codigoPaf string) (*models.Pipelsoft, error) {
+	var pipelsoft models.Pipelsoft
+
+	// Excluir registros cuyo CodigoPAF exista en la tabla HistorialPafAceptadas
+	if err := s.DB.Where("codigo_paf = ?", codigoPaf).
+		Not("codigo_paf IN (?)", s.DB.Table("historial_paf_aceptadas").Select("codigo_paf")).
+		First(&pipelsoft).Error; err != nil {
+		return nil, err
+	}
+
+	return &pipelsoft, nil
+}
