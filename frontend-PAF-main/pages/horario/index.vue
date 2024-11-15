@@ -1,7 +1,14 @@
 <template>
   <div class="flex">
+    <!-- Botón para volver en la esquina superior izquierda -->
+    <div class="absolute top-4 left-4">
+      <button @click="volver" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+        Volver
+      </button>
+    </div>
+
     <!-- Tabla de horarios -->
-    <div class="w-2/3">
+    <div class="w-2/3 mt-12">
       <h1>Horario para: {{ persona[0]?.Nombres }} {{ persona[0]?.PrimerApellido }} {{ persona[0]?.SegundoApellido }}</h1>
 
       <div v-if="persona.length > 0">
@@ -28,7 +35,7 @@
     </div>
 
     <!-- Cuadro de asignaturas al lado de la tabla -->
-    <div class="w-1/3 pl-4">
+    <div class="w-1/3 pl-4 mt-12">
       <h2 class="font-semibold text-lg">Asignaturas</h2>
       <div v-if="persona.length > 0">
         <div
@@ -51,11 +58,13 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { onMounted, ref } from 'vue'
 import { useNuxtApp } from '#app'
 
 const route = useRoute()
+const router = useRouter() // Obtén el enrutador
+
 const { $axios } = useNuxtApp() as unknown as { $axios: typeof import('axios').default }
 
 const run = ref(route.query.run || '')
@@ -103,6 +112,11 @@ const obtenerAsignaturaPorDia = (dia: string, horario: any) => {
   return '' // Esto debe cambiarse según los datos obtenidos
 }
 
+// Función para volver a la página anterior
+const volver = () => {
+  router.go(-1) // Esto hace que el usuario regrese a la página anterior
+}
+
 onMounted(() => {
   obtenerDatosPersona()
 })
@@ -119,5 +133,11 @@ th,
 td {
   border: 1px solid #d1d5db; /* Borde para diferenciar módulos */
 }
-</style>
 
+button {
+  position: absolute;
+  top: 4rem; /* Ajusta la posición según lo necesario */
+  left: 1rem; /* Ajusta la distancia desde la izquierda */
+  z-index: 10; /* Asegura que el botón esté por encima de otros elementos */
+}
+</style>
