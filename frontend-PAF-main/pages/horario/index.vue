@@ -2,28 +2,28 @@
   <div class="flex">
     <!-- Tabla de horarios -->
     <div class="w-2/3">
-      <h1>Horario para el RUN: {{ run }}</h1>
+      <h1>Horario para: {{ persona[0]?.Nombres }} {{ persona[0]?.PrimerApellido }} {{ persona[0]?.SegundoApellido }}</h1>
 
-      <div v-if="persona">
-        <table class="w-full text-sm bg-white divide-y divide-gray-200">
+      <div v-if="persona.length > 0">
+        <table class="w-full text-sm bg-white divide-y divide-gray-300 border">
           <thead>
-            <tr>
-              <th class="px-4 py-2 font-medium text-gray-900">Módulo</th>
-              <th v-for="dia in dias" :key="dia" class="px-4 py-2 font-medium text-gray-900">{{ dia }}</th>
+            <tr class="bg-gray-200">
+              <th class="px-4 py-2 font-medium text-gray-900 border-r">Módulo</th>
+              <th v-for="dia in dias" :key="dia" class="px-4 py-2 font-medium text-gray-900 border-r">{{ dia }}</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(horario, index) in horarios" :key="index">
-              <td class="px-4 py-2 text-gray-700">{{ horario.modulo }}</td>
-              <td v-for="dia in dias" :key="dia" class="px-4 py-2 text-gray-700">
-                {{ obtenerAsignaturaPorDia(dia, horario) }}
+            <tr v-for="(horario, index) in horarios" :key="index" :class="index % 2 === 0 ? 'bg-gray-100' : 'bg-white'">
+              <td class="px-4 py-2 text-gray-700 border-r">{{ horario.modulo }}</td>
+              <td v-for="dia in dias" :key="dia" class="px-4 py-2 text-gray-700 border-r">
+                {{ obtenerAsignaturaPorDia(dia, horario.modulo) }}
               </td>
             </tr>
           </tbody>
         </table>
       </div>
       <div v-else>
-        <p>Cargando datos...</p>
+        <p>Cargando datos o no se encontraron registros para el RUN.</p>
       </div>
     </div>
 
@@ -31,18 +31,18 @@
     <div class="w-1/3 pl-4">
       <h2 class="font-semibold text-lg">Asignaturas</h2>
       <div v-if="persona.length > 0">
-      <div
-        v-for="(p, index) in persona"
-        :key="index"
-        class="p-4 mb-4 bg-gray-100 rounded shadow"
-      >
-        <p><strong>Código de Asignatura:</strong> {{ p.CodigoAsignatura }}</p>
-        <p><strong>Nombre de Asignatura:</strong> {{ p.NombreAsignatura }}</p>
-        <p><strong>Horas Semanales:</strong> {{ p.CantidadHoras }}</p>
-        <p><strong>Jefatura:</strong> {{ p.NombreUnidadContratante }}</p>
+        <div
+          v-for="(p, index) in persona"
+          :key="index"
+          :style="{ backgroundColor: colores[index % colores.length] }"
+          class="p-4 mb-4 rounded shadow"
+        >
+          <p><strong>Código de Asignatura:</strong> {{ p.CodigoAsignatura }}</p>
+          <p><strong>Nombre de Asignatura:</strong> {{ p.NombreAsignatura }}</p>
+          <p><strong>Horas Semanales:</strong> {{ p.CantidadHoras }}</p>
+          <p><strong>Jefatura:</strong> {{ p.NombreUnidadContratante }}</p>
+        </div>
       </div>
-    </div>
-
       <div v-else>
         <p>No se encontraron asignaturas.</p>
       </div>
@@ -64,9 +64,15 @@ interface Persona {
   NombreAsignatura: string;
   CantidadHoras: number;
   NombreUnidadContratante: string;
+  Nombres: string;
+  PrimerApellido: string;
+  SegundoApellido: string;
 }
 
 const persona = ref<Persona[]>([]) // Cambiar de 'Persona | null' a 'Persona[]'
+
+// Colores para los cuadros de asignaturas
+const colores = ['#FFCDD2', '#F8BBD0', '#E1BEE7', '#D1C4E9', '#C5CAE9', '#BBDEFB', '#B3E5FC', '#B2EBF2', '#B2DFDB', '#C8E6C9']
 
 const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 const horarios = ref([
@@ -91,9 +97,10 @@ const obtenerDatosPersona = async () => {
     console.error('Error al obtener los datos de las personas:', error)
   }
 }
+
 // Función para obtener la asignatura según el día y el horario
 const obtenerAsignaturaPorDia = (dia: string, horario: any) => {
-  return 'Asignatura ejemplo' // Esto debe cambiarse según los datos obtenidos
+  return '' // Esto debe cambiarse según los datos obtenidos
 }
 
 onMounted(() => {
@@ -105,5 +112,12 @@ onMounted(() => {
 table {
   width: 100%;
   table-layout: auto;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid #d1d5db; /* Borde para diferenciar módulos */
 }
 </style>
+
