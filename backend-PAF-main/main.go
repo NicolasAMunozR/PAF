@@ -22,9 +22,9 @@ func main() {
 		Debug:            true, // Agregar para más información sobre los errores de CORS
 	})
 
-	// Crear el enrutador y aplicar CORS
+	// Crear el enrutador
 	r := mux.NewRouter()
-	r.Use(c.Handler)
+
 	// Conectar a la base de datos
 	DB.DBconnection()
 
@@ -33,11 +33,13 @@ func main() {
 	historialPafAceptadasController := controller.HistorialPafAceptadasController{
 		Service: historialPafAceptadasService,
 	}
+
 	// Rutas para el controlador HistorialPafAceptadas
 	r.HandleFunc("/historial", historialPafAceptadasController.CrearHistorialHandler).Methods("POST")
 	r.HandleFunc("/historial", historialPafAceptadasController.ObtenerTodosLosHistorialesHandler).Methods("GET")
 	r.HandleFunc("/historial/{codigo_paf}", historialPafAceptadasController.EliminarHistorialHandler).Methods("DELETE")
 
+	// Servicios y controladores adicionales
 	pipelsoftService := service.NewPipelsoftService(DB.DB)
 	pipelsoftController := controller.NewPipelsoftController(pipelsoftService)
 
@@ -58,7 +60,10 @@ func main() {
 	// Ruta para obtener los horarios por Run
 	r.HandleFunc("/horarios/{run}", horarioController.ObtenerHorariosPorRun).Methods("GET")
 
+	// Aplicar CORS al enrutador
+	handler := c.Handler(r)
+
 	// Iniciar el servidor
 	log.Println("Servidor escuchando en el puerto 3000...")
-	log.Fatal(http.ListenAndServe(":3000", r))
+	log.Fatal(http.ListenAndServe(":3000", handler))
 }
