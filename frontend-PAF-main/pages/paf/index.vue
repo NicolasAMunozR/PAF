@@ -29,16 +29,17 @@ export default {
       this.$router.go(-1); // Vuelve a la página anterior
     },
     async markPafAsReady() {
-      try {
-        const response = await this.$axios.post('/historial', {
-          codigo_paf: this.paf.codigo_paf,
-        });
+  try {
+    const response = await this.$axios.post('/historial', {
+      Codigo_paf: this.paf.codigo_paf, // Usar la clave esperada por el backend
+    });
 
-        console.log('Historial creado:', response.data);
-      } catch (error) {
-        console.error('Error al crear el historial:', error);
-      }
-    },
-  },
+    console.log('Historial creado:', response.data);
+  } catch (error) {
+    console.error('Error al crear el historial:', error);
+  }
+},
+
+  },  
 };
 </script>
