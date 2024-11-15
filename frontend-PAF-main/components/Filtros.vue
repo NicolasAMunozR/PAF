@@ -1,8 +1,7 @@
-<!-- Filtros.vue -->
 <template>
   <div class="filters">
     <div class="filter-item">
-      <label for="nombre" class="text-sm font-medium text-gray-700">Nombre</label>
+      <label for="nombre" class="label">Nombre</label>
       <input
         id="nombre"
         v-model="filtros.nombres"
@@ -12,7 +11,7 @@
       />
     </div>
     <div class="filter-item">
-      <label for="run" class="text-sm font-medium text-gray-700">Run</label>
+      <label for="run" class="label">Run</label>
       <input
         id="run"
         v-model="filtros.run"
@@ -22,7 +21,7 @@
       />
     </div>
     <div class="filter-item">
-      <label for="codigoPAF" class="text-sm font-medium text-gray-700">Código de PAF</label>
+      <label for="codigoPAF" class="label">Código de PAF</label>
       <input
         id="codigoPAF"
         v-model="filtros.codigoPAF"
@@ -32,7 +31,7 @@
       />
     </div>
     <div class="filter-item">
-      <label for="codigoAsignatura" class="text-sm font-medium text-gray-700">Código de Asignatura</label>
+      <label for="codigoAsignatura" class="label">Código de Asignatura</label>
       <input
         id="codigoAsignatura"
         v-model="filtros.codigoAsignatura"
@@ -42,7 +41,7 @@
       />
     </div>
     <div class="filter-item">
-      <label for="estadoProceso" class="text-sm font-medium text-gray-700">Estado de Proceso</label>
+      <label for="estadoProceso" class="label">Estado de Proceso</label>
       <select id="estadoProceso" v-model="filtros.estadoProceso" class="select">
         <option value="">Todos</option>
         <option value="Activo">Activo</option>
@@ -50,7 +49,7 @@
       </select>
     </div>
     <div class="filter-item">
-      <label for="calidad" class="text-sm font-medium text-gray-700">Calidad</label>
+      <label for="calidad" class="label">Calidad</label>
       <select id="calidad" v-model="filtros.calidad" class="select">
         <option value="">Todas</option>
         <option value="Contrato Fijo">Contrato Fijo</option>
@@ -60,7 +59,7 @@
       </select>
     </div>
     <div class="sort-item">
-      <label for="sort" class="text-sm font-medium text-gray-700">Ordenar por</label>
+      <label for="sort" class="label">Ordenar por</label>
       <select v-model="sortBy" class="select">
         <option value="Nombres">Nombre</option>
         <option value="CodigoAsignatura">Código de Asignatura</option>
@@ -68,12 +67,12 @@
         <option value="FechaInicioContrato">Fecha de Inicio de Contrato</option>
         <option value="FechaUltimaModificacionProceso">Ultima Actualización del Proceso</option>
       </select>
-      <button @click="toggleSortOrder" class="btn bg-gray-300">
+      <button @click="toggleSortOrder" class="btn sort-btn">
         Ordenar {{ sortOrder === 'asc' ? 'Ascendente' : 'Descendente' }}
       </button>
     </div>
     <div class="filter-item">
-      <button @click="resetFilters" class="btn bg-gray-600 text-white">Resetear</button>
+      <button @click="resetFilters" class="btn reset-btn">Resetear</button>
     </div>
   </div>
 </template>
@@ -122,25 +121,65 @@ watch([sortBy, sortOrder], ([newSortBy, newSortOrder]) => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  padding: 1.5rem;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
+
 .filter-item, .sort-item {
   display: flex;
   flex-direction: column;
 }
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
 .input, .select, .btn {
   padding: 0.5rem;
   margin-top: 0.25rem;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  transition: all 0.2s ease;
 }
-.btn {
-  cursor: pointer;
-  width: 100%;
+
+.input:focus, .select:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 1px #4f46e5;
 }
-.btn:hover {
-  opacity: 0.8;
-}
+
 .select {
   padding: 0.5rem;
+  background-color: #f9fafb;
+}
+
+.btn {
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.reset-btn {
+  background-color: #4b5563;
+  color: #ffffff;
+}
+
+.reset-btn:hover {
+  background-color: #374151;
+}
+
+.sort-btn {
+  background-color: #e5e7eb;
+  color: #1f2937;
+  margin-top: 0.5rem;
+}
+
+.sort-btn:hover {
+  background-color: #d1d5db;
 }
 </style>
