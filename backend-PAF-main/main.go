@@ -48,6 +48,13 @@ func main() {
 	r.HandleFunc("/pipelsoft/unidad/codigo/{codigo}", pipelsoftController.ObtenerUnidadPorCodigo).Methods("GET")
 	r.HandleFunc("/pipelsoft/persona", pipelsoftController.ObtenerListaPersonas).Methods("GET")
 
+	// Instanciar el servicio y controlador de Horarios
+	horarioService := service.NewHorarioService(DB.DB)
+	horarioController := controller.NewHorarioController(horarioService)
+
+	// Ruta para obtener los horarios por Run
+	r.HandleFunc("/horarios/{run}", horarioController.ObtenerHorariosPorRun).Methods("GET")
+
 	// Iniciar el servidor
 	log.Println("Servidor escuchando en el puerto 3000...")
 	log.Fatal(http.ListenAndServe(":3000", r))
