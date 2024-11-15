@@ -25,7 +25,7 @@
           <td class="px-4 py-3 text-gray-700"> </td>
           <td class="px-4 py-3 text-gray-700"> </td>
           <td class="px-4 py-3">
-            <a href="#" class="button">Ver PAF</a>
+            <a :href="`/paf?run=${persona.CodigoAsignatura}`" class="button">Ver PAF</a>
             <a :href="`/horario?run=${persona.Run}`" class="button">Ver Horarios</a>
           </td>
         </tr>
