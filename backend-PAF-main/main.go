@@ -26,10 +26,10 @@ func main() {
 	r := mux.NewRouter()
 
 	// Conectar a la base de datos
-	DB.DBconnection()
+	DB.InitDBConnections()
 
 	// Instanciar el servicio y controlador de HistorialPafAceptadas
-	historialPafAceptadasService := service.NewHistorialPafAceptadasService(DB.DB)
+	historialPafAceptadasService := service.NewHistorialPafAceptadasService(DB.DBPersonal, DB.DBPipelsoft)
 	historialPafAceptadasController := controller.HistorialPafAceptadasController{
 		Service: historialPafAceptadasService,
 	}
@@ -40,9 +40,19 @@ func main() {
 	r.HandleFunc("/historial/{codigo_paf}", historialPafAceptadasController.EliminarHistorialHandler).Methods("DELETE")
 
 	// Servicios y controladores adicionales
-	pipelsoftService := service.NewPipelsoftService(DB.DB)
+	pipelsoftService := service.NewPipelsoftService(DB.DBPipelsoft, DB.DBPersonal, DB.DBProfesor)
 	pipelsoftController := controller.NewPipelsoftController(pipelsoftService)
 
+<<<<<<< HEAD
+	// Definir las rutas y asignarlas a los controladores correspondientes
+	r.HandleFunc("/pipelsoft/ultimos7dias", pipelsoftController.ObtenerContratosUltimos7Dias).Methods("GET")
+	r.HandleFunc("/pipelsoft/codigo-asignatura", pipelsoftController.ObtenerContratosPorCodigoAsignatura).Methods("GET")
+	r.HandleFunc("/pipelsoft/ultimo-mes", pipelsoftController.ObtenerContratosUltimoMes).Methods("GET")
+	r.HandleFunc("/pipelsoft/correo", pipelsoftController.ObtenerPersonaPorCorreo).Methods("GET")
+	r.HandleFunc("/pipelsoft/codigo", pipelsoftController.ObtenerUnidadPorCodigo).Methods("GET")
+	r.HandleFunc("/pipelsoft/personas", pipelsoftController.ObtenerListaPersonas).Methods("GET")
+	r.HandleFunc("/pipelsoft/estadisticas", pipelsoftController.ObtenerEstadisticas).Methods("GET") // Nueva ruta para estadísticas
+=======
 	r.HandleFunc("/pipelsoft/contratos/ultimos7dias", pipelsoftController.ObtenerContratosUltimos7Dias).Methods("GET")
 	r.HandleFunc("/pipelsoft/contratos/codigo/{codigoAsignatura}", pipelsoftController.ObtenerContratosPorCodigoAsignatura).Methods("GET")
 	r.HandleFunc("/pipelsoft/contratos/ultimomes", pipelsoftController.ObtenerContratosUltimoMes).Methods("GET")
@@ -55,8 +65,9 @@ func main() {
 	r.HandleFunc("/pipelsoft/persona/paf/{codigoPaf}", pipelsoftController.ObtenerPersonaPorPaf).Methods("GET")
 
 
+>>>>>>> a7d672ab4f0028fefa78de043e7169f61c75e505
 	// Instanciar el servicio y controlador de Horarios
-	horarioService := service.NewHorarioService(DB.DB)
+	horarioService := service.NewHorarioService(DB.DBPersonal)
 	horarioController := controller.NewHorarioController(horarioService)
 
 	// Ruta para obtener los horarios por Run

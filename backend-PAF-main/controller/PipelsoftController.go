@@ -1,4 +1,3 @@
-// controller/pipelsoft_controller.go
 package controller
 
 import (
@@ -7,85 +6,141 @@ import (
 	"net/http"
 
 	"github.com/NicolasAMunozR/PAF/backend-PAF/service"
-	"github.com/gorilla/mux"
 )
 
 type PipelsoftController struct {
-	Service *service.PipelsoftService
+	PipelsoftService *service.PipelsoftService
 }
 
-func NewPipelsoftController(service *service.PipelsoftService) *PipelsoftController {
-	return &PipelsoftController{Service: service}
+// NewPipelsoftController crea un nuevo controlador que maneja las rutas relacionadas con Pipelsoft.
+func NewPipelsoftController(pipelsoftService *service.PipelsoftService) *PipelsoftController {
+	return &PipelsoftController{
+		PipelsoftService: pipelsoftService,
+	}
 }
 
-func (c *PipelsoftController) ObtenerContratosUltimos7Dias(w http.ResponseWriter, r *http.Request) {
-	pipelsofts, err := c.Service.ObtenerContratosUltimos7Dias()
+// ObtenerContratosUltimos7Dias maneja la solicitud para obtener contratos de los últimos 7 días.
+func (pc *PipelsoftController) ObtenerContratosUltimos7Dias(w http.ResponseWriter, r *http.Request) {
+	contratos, err := pc.PipelsoftService.ObtenerContratosUltimos7Dias()
 	if err != nil {
-		http.Error(w, "Error al obtener registros", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(pipelsofts)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(contratos)
 }
 
-func (c *PipelsoftController) ObtenerContratosPorCodigoAsignatura(w http.ResponseWriter, r *http.Request) {
-	codigoAsignatura := mux.Vars(r)["codigoAsignatura"]
-	pipelsofts, err := c.Service.ObtenerContratosPorCodigoAsignatura(codigoAsignatura)
-	if err != nil {
-		http.Error(w, "Error al obtener registros", http.StatusInternalServerError)
+// ObtenerContratosPorCodigoAsignatura maneja la solicitud para obtener contratos por código de asignatura.
+func (pc *PipelsoftController) ObtenerContratosPorCodigoAsignatura(w http.ResponseWriter, r *http.Request) {
+	codigoAsignatura := r.URL.Query().Get("codigoAsignatura")
+	if codigoAsignatura == "" {
+		http.Error(w, "El parámetro 'codigoAsignatura' es obligatorio", http.StatusBadRequest)
 		return
 	}
-	json.NewEncoder(w).Encode(pipelsofts)
-}
 
-func (c *PipelsoftController) ObtenerContratosUltimoMes(w http.ResponseWriter, r *http.Request) {
-	pipelsofts, err := c.Service.ObtenerContratosUltimoMes()
+	contratos, err := pc.PipelsoftService.ObtenerContratosPorCodigoAsignatura(codigoAsignatura)
 	if err != nil {
-		http.Error(w, "Error al obtener registros", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(pipelsofts)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(contratos)
 }
 
-func (c *PipelsoftController) ObtenerPersonaPorCorreo(w http.ResponseWriter, r *http.Request) {
-	correo := mux.Vars(r)["correo"]
-	pipelsoft, err := c.Service.ObtenerPersonaPorCorreo(correo)
+// ObtenerContratosUltimoMes maneja la solicitud para obtener contratos del último mes.
+func (pc *PipelsoftController) ObtenerContratosUltimoMes(w http.ResponseWriter, r *http.Request) {
+	contratos, err := pc.PipelsoftService.ObtenerContratosUltimoMes()
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(contratos)
+}
+
+// ObtenerPersonaPorCorreo maneja la solicitud para obtener una persona por correo.
+func (pc *PipelsoftController) ObtenerPersonaPorCorreo(w http.ResponseWriter, r *http.Request) {
+	correo := r.URL.Query().Get("correo")
+	if correo == "" {
+		http.Error(w, "El parámetro 'correo' es obligatorio", http.StatusBadRequest)
+		return
+	}
+
+	persona, err := pc.PipelsoftService.ObtenerPersonaPorCorreo(correo)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if persona == nil {
 		http.Error(w, "Persona no encontrada", http.StatusNotFound)
 		return
 	}
-	json.NewEncoder(w).Encode(pipelsoft)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(persona)
 }
 
+<<<<<<< HEAD
+// ObtenerUnidadPorCodigo maneja la solicitud para obtener una unidad por código.
+func (pc *PipelsoftController) ObtenerUnidadPorCodigo(w http.ResponseWriter, r *http.Request) {
+	codigo := r.URL.Query().Get("codigo")
+	if codigo == "" {
+		http.Error(w, "El parámetro 'codigo' es obligatorio", http.StatusBadRequest)
+		return
+	}
+
+	unidad, err := pc.PipelsoftService.ObtenerUnidadPorCodigo(codigo)
+=======
 
 func (c *PipelsoftController) ObtenerUnidadPorCodigo(w http.ResponseWriter, r *http.Request) {
 	codigo := mux.Vars(r)["codigo"]
 	pipelsoft, err := c.Service.ObtenerUnidadPorCodigo(codigo)
+>>>>>>> a7d672ab4f0028fefa78de043e7169f61c75e505
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if unidad == nil {
 		http.Error(w, "Unidad no encontrada", http.StatusNotFound)
 		return
 	}
-	json.NewEncoder(w).Encode(pipelsoft)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(unidad)
 }
 
-func (c *PipelsoftController) ObtenerListaPersonas(w http.ResponseWriter, r *http.Request) {
-	pipelsofts, err := c.Service.ObtenerListaPersonas()
+// ObtenerListaPersonas maneja la solicitud para obtener la lista de personas.
+func (pc *PipelsoftController) ObtenerListaPersonas(w http.ResponseWriter, r *http.Request) {
+	personas, err := pc.PipelsoftService.ObtenerListaPersonas()
 	if err != nil {
-		http.Error(w, "Error al obtener registros", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(pipelsofts)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(personas)
 }
 
-func (c *PipelsoftController) ObtenerPersonasPorRUT(w http.ResponseWriter, r *http.Request) {
-	run := mux.Vars(r)["run"]
-	pipelsofts, err := c.Service.ObtenerPersonasPorRUT(run)
+// ObtenerEstadisticas maneja la solicitud para obtener las estadísticas calculadas.
+func (pc *PipelsoftController) ObtenerEstadisticas(w http.ResponseWriter, r *http.Request) {
+	// Llamar al servicio para calcular las estadísticas
+	estadisticas, err := pc.PipelsoftService.CalcularEstadisticas()
 	if err != nil {
-		http.Error(w, "Error al obtener registros", http.StatusInternalServerError)
+		http.Error(w, "No se pudieron calcular las estadísticas: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(pipelsofts)
-}
 
+<<<<<<< HEAD
+	// Preparar la respuesta en formato JSON
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(estadisticas)
+}
+=======
 func (c *PipelsoftController) ObtenerProcesoPorEstado(w http.ResponseWriter, r *http.Request) {
 	estado := mux.Vars(r)["estado"]
 	pipelsofts, err := c.Service.ObtenerProcesoPorEstado(estado)
@@ -126,3 +181,4 @@ func (c *PipelsoftController) ObtenerPersonaPorRUT(w http.ResponseWriter, r *htt
 	}
 	json.NewEncoder(w).Encode(pipelsoft)
 }
+>>>>>>> a7d672ab4f0028fefa78de043e7169f61c75e505
