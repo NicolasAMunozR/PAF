@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/NicolasAMunozR/PAF/backend-PAF/service"
@@ -84,7 +83,6 @@ func (pc *PipelsoftController) ObtenerPersonaPorCorreo(w http.ResponseWriter, r 
 	json.NewEncoder(w).Encode(persona)
 }
 
-<<<<<<< HEAD
 // ObtenerUnidadPorCodigo maneja la solicitud para obtener una unidad por código.
 func (pc *PipelsoftController) ObtenerUnidadPorCodigo(w http.ResponseWriter, r *http.Request) {
 	codigo := r.URL.Query().Get("codigo")
@@ -94,12 +92,6 @@ func (pc *PipelsoftController) ObtenerUnidadPorCodigo(w http.ResponseWriter, r *
 	}
 
 	unidad, err := pc.PipelsoftService.ObtenerUnidadPorCodigo(codigo)
-=======
-
-func (c *PipelsoftController) ObtenerUnidadPorCodigo(w http.ResponseWriter, r *http.Request) {
-	codigo := mux.Vars(r)["codigo"]
-	pipelsoft, err := c.Service.ObtenerUnidadPorCodigo(codigo)
->>>>>>> a7d672ab4f0028fefa78de043e7169f61c75e505
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -135,50 +127,7 @@ func (pc *PipelsoftController) ObtenerEstadisticas(w http.ResponseWriter, r *htt
 		return
 	}
 
-<<<<<<< HEAD
 	// Preparar la respuesta en formato JSON
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(estadisticas)
 }
-=======
-func (c *PipelsoftController) ObtenerProcesoPorEstado(w http.ResponseWriter, r *http.Request) {
-	estado := mux.Vars(r)["estado"]
-	pipelsofts, err := c.Service.ObtenerProcesoPorEstado(estado)
-	if err != nil {
-		http.Error(w, "Error al obtener registros", http.StatusInternalServerError)
-		return
-	}
-	json.NewEncoder(w).Encode(pipelsofts)
-}
-
-func (c *PipelsoftController) ObtenerPersonaPorPaf(w http.ResponseWriter, r *http.Request) {
-	codigoPaf := mux.Vars(r)["codigoPaf"]
-
-	// Llamada al servicio para obtener los datos
-	pipelsoft, err := c.Service.ObtenerPersonaPorPaf(codigoPaf)
-	if err != nil {
-		// Verifica si el error es de "registro no encontrado"
-		if err.Error() == fmt.Sprintf("registro con codigo_paf %s no encontrado", codigoPaf) {
-			http.Error(w, fmt.Sprintf("Persona con código PAF %s no encontrada", codigoPaf), http.StatusNotFound)
-		} else {
-			http.Error(w, "Error al obtener los datos de la persona", http.StatusInternalServerError)
-		}
-		return
-	}
-
-	// Codifica el objeto de la persona a JSON
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(pipelsoft)
-}
-
-
-func (c *PipelsoftController) ObtenerPersonaPorRUT(w http.ResponseWriter, r *http.Request) {
-	run := mux.Vars(r)["run"]
-	pipelsoft, err := c.Service.ObtenerPersonaPorRUT(run)
-	if err != nil {
-		http.Error(w, "Persona no encontrada", http.StatusNotFound)
-		return
-	}
-	json.NewEncoder(w).Encode(pipelsoft)
-}
->>>>>>> a7d672ab4f0028fefa78de043e7169f61c75e505

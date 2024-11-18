@@ -272,8 +272,8 @@ func (s *PipelsoftService) ObtenerPersonaPorPaf(codigoPaf string) (*models.Pipel
 	var pipelsoft models.Pipelsoft
 
 	// Excluir registros cuyo CodigoPAF exista en la tabla HistorialPafAceptadas
-	if err := s.DB.Where("codigo_paf = ?", codigoPaf).
-		Not("codigo_paf IN (?)", s.DB.Table("historial_paf_aceptadas").Select("codigo_paf")).
+	if err := s.DBPipelsoft.Where("codigo_paf = ?", codigoPaf).
+		Not("codigo_paf IN (?)", s.DBPipelsoft.Table("historial_paf_aceptadas").Select("codigo_paf")).
 		First(&pipelsoft).Error; err != nil {
 		return nil, err
 	}

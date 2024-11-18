@@ -43,7 +43,6 @@ func main() {
 	pipelsoftService := service.NewPipelsoftService(DB.DBPipelsoft, DB.DBPersonal, DB.DBProfesor)
 	pipelsoftController := controller.NewPipelsoftController(pipelsoftService)
 
-<<<<<<< HEAD
 	// Definir las rutas y asignarlas a los controladores correspondientes
 	r.HandleFunc("/pipelsoft/ultimos7dias", pipelsoftController.ObtenerContratosUltimos7Dias).Methods("GET")
 	r.HandleFunc("/pipelsoft/codigo-asignatura", pipelsoftController.ObtenerContratosPorCodigoAsignatura).Methods("GET")
@@ -52,20 +51,6 @@ func main() {
 	r.HandleFunc("/pipelsoft/codigo", pipelsoftController.ObtenerUnidadPorCodigo).Methods("GET")
 	r.HandleFunc("/pipelsoft/personas", pipelsoftController.ObtenerListaPersonas).Methods("GET")
 	r.HandleFunc("/pipelsoft/estadisticas", pipelsoftController.ObtenerEstadisticas).Methods("GET") // Nueva ruta para estadísticas
-=======
-	r.HandleFunc("/pipelsoft/contratos/ultimos7dias", pipelsoftController.ObtenerContratosUltimos7Dias).Methods("GET")
-	r.HandleFunc("/pipelsoft/contratos/codigo/{codigoAsignatura}", pipelsoftController.ObtenerContratosPorCodigoAsignatura).Methods("GET")
-	r.HandleFunc("/pipelsoft/contratos/ultimomes", pipelsoftController.ObtenerContratosUltimoMes).Methods("GET")
-	r.HandleFunc("/pipelsoft/persona/correo/{correo}", pipelsoftController.ObtenerPersonaPorCorreo).Methods("GET")
-	r.HandleFunc("/pipelsoft/persona/rut/{run}", pipelsoftController.ObtenerPersonaPorRUT).Methods("GET")
-	r.HandleFunc("/pipelsoft/personas/rut/{run}", pipelsoftController.ObtenerPersonasPorRUT).Methods("GET")
-	r.HandleFunc("/pipelsoft/proceso/estado/{estado}", pipelsoftController.ObtenerProcesoPorEstado).Methods("GET")
-	r.HandleFunc("/pipelsoft/unidad/codigo/{codigo}", pipelsoftController.ObtenerUnidadPorCodigo).Methods("GET")
-	r.HandleFunc("/pipelsoft/persona", pipelsoftController.ObtenerListaPersonas).Methods("GET")
-	r.HandleFunc("/pipelsoft/persona/paf/{codigoPaf}", pipelsoftController.ObtenerPersonaPorPaf).Methods("GET")
-
-
->>>>>>> a7d672ab4f0028fefa78de043e7169f61c75e505
 	// Instanciar el servicio y controlador de Horarios
 	horarioService := service.NewHorarioService(DB.DBPersonal)
 	horarioController := controller.NewHorarioController(horarioService)

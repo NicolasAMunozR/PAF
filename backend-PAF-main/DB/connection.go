@@ -9,16 +9,13 @@ import (
 	"gorm.io/gorm"
 )
 
-<<<<<<< HEAD
 var (
 	DBPipelsoft *gorm.DB
 	DBProfesor  *gorm.DB
 	DBPersonal  *gorm.DB
 )
-=======
 var DSN = "host=localhost user=postgres password=alonsoreyes104 dbname=PAF port=5432 sslmode=disable"
 var DB *gorm.DB
->>>>>>> a7d672ab4f0028fefa78de043e7169f61c75e505
 
 // Conexiones para múltiples bases de datos
 var (
