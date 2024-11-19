@@ -14,7 +14,7 @@ var (
 	DBProfesor  *gorm.DB
 	DBPersonal  *gorm.DB
 )
-var DSN = "host=localhost user=postgres password=alonsoreyes104 dbname=PAF port=5432 sslmode=disable"
+var DSN = "host=localhost user=postgres password=conan2084 dbname=PAF port=5432 sslmode=disable"
 var DB *gorm.DB
 
 // Conexiones para múltiples bases de datos
@@ -37,6 +37,7 @@ func InitDBConnections() {
 	if err != nil {
 		log.Fatalf("Error al migrar la base de datos Pipelsoft: %v", err)
 	}
+
 	fmt.Println("Conexión a la base de datos Pipelsoft exitosa.")
 
 	// Conectar a la base de datos ProfesorDB
@@ -65,5 +66,14 @@ func InitDBConnections() {
 	if err != nil {
 		log.Fatalf("Error al migrar la base de datos ProfesorDB: %v", err)
 	}
+	err = DBPersonal.AutoMigrate(models.Pipelsoft{})
+	if err != nil {
+		log.Fatalf("Error al migrar la base de datos ProfesorDB: %v", err)
+	}
+	err = DBPersonal.AutoMigrate(models.ProfesorDB{})
+	if err != nil {
+		log.Fatalf("Error al migrar la base de datos ProfesorDB: %v", err)
+	}
+
 	fmt.Println("Conexión a la base de datos TerceraDB exitosa.")
 }

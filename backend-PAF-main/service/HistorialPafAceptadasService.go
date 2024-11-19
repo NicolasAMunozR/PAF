@@ -1,41 +1,47 @@
 package service
 
 import (
-	"time"
-
-	"github.com/NicolasAMunozR/PAF/backend-PAF/models" // Asegúrate de que los modelos estén correctos
+	"github.com/NicolasAMunozR/PAF/backend-PAF/models"
 	"gorm.io/gorm"
 )
 
 type HistorialPafAceptadasService struct {
-	DBPersonal  *gorm.DB // Conexión a DBPersonal
-	DBPipelsoft *gorm.DB // Conexión a DBPipelsoft
+	DB *gorm.DB // Conexión única a DBPersonal
 }
 
-func NewHistorialPafAceptadasService(dbPersonal, dbPipelsoft *gorm.DB) *HistorialPafAceptadasService {
+func NewHistorialPafAceptadasService(db *gorm.DB) *HistorialPafAceptadasService {
 	return &HistorialPafAceptadasService{
-		DBPersonal:  dbPersonal,
-		DBPipelsoft: dbPipelsoft,
+		DB: db,
 	}
 }
 
 // CrearHistorial crea un nuevo registro en HistorialPafAceptadas en la DBPersonal
 func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF string) (*models.HistorialPafAceptadas, error) {
-	// Primero, obtener los datos desde la base de datos de Pipelsoft (DBPipelsoft)
+	// Obtener los datos desde la tabla correspondiente en DBPersonal
 	var pipelsoft models.Pipelsoft
-	if err := s.DBPipelsoft.Where("codigo_paf = ?", codigoPAF).First(&pipelsoft).Error; err != nil {
+	if err := s.DB.Where("codigo_paf = ?", codigoPAF).First(&pipelsoft).Error; err != nil {
 		return nil, err
 	}
 
+	var estado = pipelsoft.EstadoProceso
+	estado = estado + 1
+
 	// Crear el nuevo historial en DBPersonal
 	historial := models.HistorialPafAceptadas{
-		Run:                pipelsoft.Run,
-		CodigoPAF:          codigoPAF,
-		FechaAceptacionPaf: time.Now(),
+		CodigoPAF:           pipelsoft.CodigoPAF,
+		FechaInicioContrato: pipelsoft.FechaInicioContrato,
+		FechaFinContrato:    pipelsoft.FechaFinContrato,
+		CodigoAsignatura:    pipelsoft.CodigoAsignatura,
+		NombreAsignatura:    pipelsoft.NombreAsignatura,
+		CantidadHoras:       pipelsoft.CantidadHoras,
+		Jerarquia:           pipelsoft.Jerarquia,
+		Calidad:             pipelsoft.Calidad,
+		EstadoProceso:       estado, // la idea es que cuando ellas aceptan la paf el estado ya deberia aumentar
+
 	}
 
 	// Insertar el historial en DBPersonal
-	if err := s.DBPersonal.Create(&historial).Error; err != nil {
+	if err := s.DB.Create(&historial).Error; err != nil {
 		return nil, err
 	}
 
@@ -46,7 +52,7 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF string) (*models
 func (s *HistorialPafAceptadasService) ObtenerHistorialPorID(id uint) (*models.HistorialPafAceptadas, error) {
 	var historial models.HistorialPafAceptadas
 	// Buscar el historial en DBPersonal por su ID
-	if err := s.DBPersonal.First(&historial, id).Error; err != nil {
+	if err := s.DB.First(&historial, id).Error; err != nil {
 		return nil, err
 	}
 	return &historial, nil
@@ -54,20 +60,15 @@ func (s *HistorialPafAceptadasService) ObtenerHistorialPorID(id uint) (*models.H
 
 // EliminarHistorial elimina un registro de HistorialPafAceptadas por su CodigoPAF en DBPersonal
 func (s *HistorialPafAceptadasService) EliminarHistorial(codigoPAF string) error {
-	var historial models.HistorialPafAceptadas
-	// Buscar el registro en DBPersonal por CodigoPAF
-	if err := s.DBPersonal.Where("codigo_paf = ?", codigoPAF).First(&historial).Error; err != nil {
-		return err
-	}
-	// Eliminar el registro en DBPersonal
-	return s.DBPersonal.Delete(&historial).Error
+	// Eliminar directamente usando la condición
+	return s.DB.Where("codigo_paf = ?", codigoPAF).Delete(&models.HistorialPafAceptadas{}).Error
 }
 
 // ObtenerTodosLosHistoriales devuelve todos los registros de HistorialPafAceptadas desde DBPersonal
 func (s *HistorialPafAceptadasService) ObtenerTodosLosHistoriales() ([]models.HistorialPafAceptadas, error) {
 	var historiales []models.HistorialPafAceptadas
 	// Obtener todos los historiales desde DBPersonal
-	if err := s.DBPersonal.Find(&historiales).Error; err != nil {
+	if err := s.DB.Find(&historiales).Error; err != nil {
 		return nil, err
 	}
 	return historiales, nil

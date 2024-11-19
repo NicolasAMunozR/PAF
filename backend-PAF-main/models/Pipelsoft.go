@@ -33,6 +33,6 @@ type Pipelsoft struct {
 	Calidad             string `gorm:"type:text;not null"`
 
 	// Campos de Proceso
-	EstadoProceso                  string    `gorm:"type:text;not null"`
+	EstadoProceso                  int       `gorm:"type:text;not null"`
 	FechaUltimaModificacionProceso time.Time `gorm:"type:timestamp;not null"`
 }

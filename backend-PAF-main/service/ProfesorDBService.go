@@ -6,19 +6,19 @@ import (
 )
 
 type ProfesorDBService struct {
-	DBProfesor *gorm.DB // Conexión a la base de datos ProfesorDB
+	DBPersonal *gorm.DB // Conexión a la base de datos DBPersonal
 }
 
-func NewProfesorDBService(dbProfesor *gorm.DB) *ProfesorDBService {
-	return &ProfesorDBService{DBProfesor: dbProfesor}
+func NewProfesorDBService(dbPersonal *gorm.DB) *ProfesorDBService {
+	return &ProfesorDBService{DBPersonal: dbPersonal}
 }
 
-// ObtenerProfesoresPorCodigoAsignatura obtiene todos los profesores con el mismo código de asignatura en la DB ProfesorDB
+// ObtenerProfesoresPorCodigoAsignatura obtiene todos los profesores con el mismo código de asignatura en la DB DBPersonal
 func (s *ProfesorDBService) ObtenerProfesoresPorCodigoAsignatura(codigoAsignatura string) ([]models.ProfesorDB, error) {
 	var profesores []models.ProfesorDB
 
-	// Realizar la consulta en la base de datos ProfesorDB
-	if err := s.DBProfesor.Where("cod_asignatura = ?", codigoAsignatura).
+	// Realizar la consulta en la base de datos DBPersonal
+	if err := s.DBPersonal.Where("cod_asignatura = ?", codigoAsignatura).
 		Find(&profesores).Error; err != nil {
 		return nil, err
 	}
@@ -26,37 +26,24 @@ func (s *ProfesorDBService) ObtenerProfesoresPorCodigoAsignatura(codigoAsignatur
 	return profesores, nil
 }
 
-// ObtenerProfesorPorCorreo obtiene un profesor por su correo electrónico desde la DB ProfesorDB
-//func (s *ProfesorDBService) ObtenerProfesorPorCorreo(correo string) (*models.ProfesorDB, error) {
-//	var profesor models.ProfesorDB
-
-// Buscar profesor por correo en ProfesorDB
-//	if err := s.DBProfesor.Where("correo = ?", correo).
-//		First(&profesor).Error; err != nil {
-//		return nil, err
-//	}
-
-//	return &profesor, nil
-//}
-
-// ObtenerListaProfesores obtiene todos los registros de profesores en la DB ProfesorDB
+// ObtenerListaProfesores obtiene todos los registros de profesores en la DB DBPersonal
 func (s *ProfesorDBService) ObtenerListaProfesores() ([]models.ProfesorDB, error) {
 	var profesores []models.ProfesorDB
 
-	// Obtener todos los profesores desde ProfesorDB
-	if err := s.DBProfesor.Find(&profesores).Error; err != nil {
+	// Obtener todos los profesores desde DBPersonal
+	if err := s.DBPersonal.Find(&profesores).Error; err != nil {
 		return nil, err
 	}
 
 	return profesores, nil
 }
 
-// ObtenerProfesorPorRUT obtiene un profesor por su RUT desde la DB ProfesorDB
+// ObtenerProfesorPorRUT obtiene un profesor por su RUT desde la DB DBPersonal
 func (s *ProfesorDBService) ObtenerProfesorPorRUT(run string) (*models.ProfesorDB, error) {
 	var profesor models.ProfesorDB
 
-	// Buscar profesor por RUT en ProfesorDB
-	if err := s.DBProfesor.Where("run = ?", run).
+	// Buscar profesor por RUT en DBPersonal
+	if err := s.DBPersonal.Where("run = ?", run).
 		First(&profesor).Error; err != nil {
 		return nil, err
 	}

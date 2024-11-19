@@ -5,22 +5,24 @@ import (
 	"net/http"
 
 	"github.com/NicolasAMunozR/PAF/backend-PAF/service"
+	"github.com/gorilla/mux"
 )
 
 type PipelsoftController struct {
-	PipelsoftService *service.PipelsoftService
+	Service *service.PipelsoftService
 }
 
-// NewPipelsoftController crea un nuevo controlador que maneja las rutas relacionadas con Pipelsoft.
-func NewPipelsoftController(pipelsoftService *service.PipelsoftService) *PipelsoftController {
-	return &PipelsoftController{
-		PipelsoftService: pipelsoftService,
-	}
+// Constructor del controlador
+func NewPipelsoftController(service *service.PipelsoftService) *PipelsoftController {
+	return &PipelsoftController{Service: service}
 }
 
-// ObtenerContratosUltimos7Dias maneja la solicitud para obtener contratos de los últimos 7 días.
-func (pc *PipelsoftController) ObtenerContratosUltimos7Dias(w http.ResponseWriter, r *http.Request) {
-	contratos, err := pc.PipelsoftService.ObtenerContratosUltimos7Dias()
+// Obtener contratos por código de curso
+func (c *PipelsoftController) ObtenerContratosPorCodigoCurso(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	codigoCurso := vars["codigo_curso"]
+
+	contratos, err := c.Service.ObtenerContratosPorCodigoCurso(codigoCurso)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -30,15 +32,9 @@ func (pc *PipelsoftController) ObtenerContratosUltimos7Dias(w http.ResponseWrite
 	json.NewEncoder(w).Encode(contratos)
 }
 
-// ObtenerContratosPorCodigoAsignatura maneja la solicitud para obtener contratos por código de asignatura.
-func (pc *PipelsoftController) ObtenerContratosPorCodigoAsignatura(w http.ResponseWriter, r *http.Request) {
-	codigoAsignatura := r.URL.Query().Get("codigoAsignatura")
-	if codigoAsignatura == "" {
-		http.Error(w, "El parámetro 'codigoAsignatura' es obligatorio", http.StatusBadRequest)
-		return
-	}
-
-	contratos, err := pc.PipelsoftService.ObtenerContratosPorCodigoAsignatura(codigoAsignatura)
+// Obtener todos los contratos
+func (c *PipelsoftController) ObtenerTodosLosContratos(w http.ResponseWriter, r *http.Request) {
+	contratos, err := c.Service.ObtenerTodosLosContratos()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -48,9 +44,12 @@ func (pc *PipelsoftController) ObtenerContratosPorCodigoAsignatura(w http.Respon
 	json.NewEncoder(w).Encode(contratos)
 }
 
-// ObtenerContratosUltimoMes maneja la solicitud para obtener contratos del último mes.
-func (pc *PipelsoftController) ObtenerContratosUltimoMes(w http.ResponseWriter, r *http.Request) {
-	contratos, err := pc.PipelsoftService.ObtenerContratosUltimoMes()
+// Obtener contratos por RUN
+func (c *PipelsoftController) ObtenerContratosPorRUN(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	run := vars["run"]
+
+	contratos, err := c.Service.ObtenerContratosPorRUN(run)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -60,74 +59,35 @@ func (pc *PipelsoftController) ObtenerContratosUltimoMes(w http.ResponseWriter, 
 	json.NewEncoder(w).Encode(contratos)
 }
 
-// ObtenerPersonaPorCorreo maneja la solicitud para obtener una persona por correo.
-func (pc *PipelsoftController) ObtenerPersonaPorCorreo(w http.ResponseWriter, r *http.Request) {
-	correo := r.URL.Query().Get("correo")
-	if correo == "" {
-		http.Error(w, "El parámetro 'correo' es obligatorio", http.StatusBadRequest)
-		return
-	}
+// Obtener contratos por Código PAF
+func (c *PipelsoftController) ObtenerPorCodigoPAF(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	codigoPAF := vars["codigo_paf"]
 
-	persona, err := pc.PipelsoftService.ObtenerPersonaPorCorreo(correo)
+	datos, err := c.Service.ObtenerPorCodigoPAF(codigoPAF)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	if persona == nil {
-		http.Error(w, "Persona no encontrada", http.StatusNotFound)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(persona)
+	json.NewEncoder(w).Encode(datos)
 }
 
-// ObtenerUnidadPorCodigo maneja la solicitud para obtener una unidad por código.
-func (pc *PipelsoftController) ObtenerUnidadPorCodigo(w http.ResponseWriter, r *http.Request) {
-	codigo := r.URL.Query().Get("codigo")
-	if codigo == "" {
-		http.Error(w, "El parámetro 'codigo' es obligatorio", http.StatusBadRequest)
-		return
-	}
-
-	unidad, err := pc.PipelsoftService.ObtenerUnidadPorCodigo(codigo)
+// Obtener PAF de los últimos 7 días
+func (c *PipelsoftController) ObtenerPAFUltimos7Dias(w http.ResponseWriter, r *http.Request) {
+	datos, err := c.Service.ObtenerPAFUltimos7Dias()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	if unidad == nil {
-		http.Error(w, "Unidad no encontrada", http.StatusNotFound)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(unidad)
+	json.NewEncoder(w).Encode(datos)
 }
 
-// ObtenerListaPersonas maneja la solicitud para obtener la lista de personas.
-func (pc *PipelsoftController) ObtenerListaPersonas(w http.ResponseWriter, r *http.Request) {
-	personas, err := pc.PipelsoftService.ObtenerListaPersonas()
+// Obtener PAF del último mes
+func (c *PipelsoftController) ObtenerPAFUltimoMes(w http.ResponseWriter, r *http.Request) {
+	datos, err := c.Service.ObtenerPAFUltimoMes()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(personas)
-}
-
-// ObtenerEstadisticas maneja la solicitud para obtener las estadísticas calculadas.
-func (pc *PipelsoftController) ObtenerEstadisticas(w http.ResponseWriter, r *http.Request) {
-	// Llamar al servicio para calcular las estadísticas
-	estadisticas, err := pc.PipelsoftService.CalcularEstadisticas()
-	if err != nil {
-		http.Error(w, "No se pudieron calcular las estadísticas: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Preparar la respuesta en formato JSON
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(estadisticas)
+	json.NewEncoder(w).Encode(datos)
 }
