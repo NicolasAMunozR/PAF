@@ -79,7 +79,7 @@ func iniciarCronJob() {
 	c := cron.New()
 
 	// Ejecutar cada 1 hora con 10 minutos
-	c.AddFunc("@every 40m", func() {
+	c.AddFunc("@every 1m", func() {
 		actualizarModificaciones()
 	})
 	c.Start()
@@ -96,8 +96,8 @@ func actualizarModificaciones() {
 	var historial []models.HistorialPafAceptadas
 	var pipelsoft models.Pipelsoft
 
-	// Obtener los registros de HistorialPafAceptadas donde CodigoModificacion != 0
-	if err := db.Where("codigo_modificacion != 0").Find(&historial).Error; err != nil {
+	// Obtener todos los registros de HistorialPafAceptadas
+	if err := db.Find(&historial).Error; err != nil {
 		log.Println("Error al obtener historial:", err)
 		return
 	}

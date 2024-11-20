@@ -18,20 +18,41 @@ func NewHistorialPafAceptadasService(db *gorm.DB) *HistorialPafAceptadasService 
 	}
 }
 
-// CrearHistorial crea un nuevo registro en HistorialPafAceptadas en la DBPersonal
 func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF string) (*models.HistorialPafAceptadas, error) {
-	// Obtener los datos desde la tabla correspondiente en DBPersonal
-	var pipelsoft models.Pipelsoft
-	if err := s.DB.Where("codigo_paf = ?", codigoPAF).First(&pipelsoft).Error; err != nil {
-		return nil, err
+	// Iniciar una transacción para garantizar consistencia
+	tx := s.DB.Begin()
+	if err := tx.Error; err != nil {
+		return nil, fmt.Errorf("error al iniciar la transacción: %w", err)
 	}
 
-	var estado = pipelsoft.EstadoProceso
-	estado = estado + 1
+	// Verificar si ya existe un registro con el Código PAF
+	var historialExistente models.HistorialPafAceptadas
+	if err := tx.Where("codigo_paf = ?", codigoPAF).First(&historialExistente).Error; err == nil {
+		// Si el registro existe, eliminarlo
+		if err := tx.Delete(&historialExistente).Error; err != nil {
+			tx.Rollback() // Rollback si ocurre un error al eliminar
+			return nil, fmt.Errorf("error al eliminar el historial existente: %w", err)
+		}
+		log.Println("Registro existente eliminado correctamente")
+	} else if err != gorm.ErrRecordNotFound { // Si ocurre un error distinto de "registro no encontrado"
+		tx.Rollback() // Rollback si no se encuentra el registro
+		return nil, fmt.Errorf("error al buscar historial existente: %w", err)
+	}
 
-	// Crear el nuevo historial en DBPersonal
+	// Obtener los datos desde la tabla "pipelsoft"
+	var pipelsoft models.Pipelsoft
+	if err := tx.Where("codigo_paf = ?", codigoPAF).First(&pipelsoft).Error; err != nil {
+		tx.Rollback()
+		return nil, fmt.Errorf("error al obtener datos de Pipelsoft: %w", err)
+	}
+
+	// Incrementar el estado del proceso
+	estado := pipelsoft.EstadoProceso + 1
+
+	// Crear el nuevo registro de historial
 	historial := models.HistorialPafAceptadas{
 		CodigoPAF:           pipelsoft.CodigoPAF,
+		Run:                 pipelsoft.Run,
 		FechaInicioContrato: pipelsoft.FechaInicioContrato,
 		FechaFinContrato:    pipelsoft.FechaFinContrato,
 		CodigoAsignatura:    pipelsoft.CodigoAsignatura,
@@ -39,16 +60,23 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF string) (*models
 		CantidadHoras:       pipelsoft.CantidadHoras,
 		Jerarquia:           pipelsoft.Jerarquia,
 		Calidad:             pipelsoft.Calidad,
-		EstadoProceso:       estado, // la idea es que cuando ellas aceptan la paf el estado ya deberia aumentar
+		EstadoProceso:       estado,
 		CodigoModificacion:  0,
 		BanderaModificacion: 0,
 	}
 
-	// Insertar el historial en DBPersonal
-	if err := s.DB.Create(&historial).Error; err != nil {
-		return nil, err
+	// Insertar el nuevo historial en la base de datos
+	if err := tx.Create(&historial).Error; err != nil {
+		tx.Rollback() // Rollback si no se puede crear el historial
+		return nil, fmt.Errorf("error al crear el historial: %w", err)
 	}
 
+	// Confirmar la transacción
+	if err := tx.Commit().Error; err != nil {
+		return nil, fmt.Errorf("error al confirmar la transacción: %w", err)
+	}
+
+	log.Println("Nuevo registro creado con éxito")
 	return &historial, nil
 }
 
