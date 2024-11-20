@@ -49,6 +49,7 @@ func main() {
 
 	// Rutas para el controlador de Pipelsoft (actualizadas)
 	r.HandleFunc("/pipelsoft/contratos-curso/{codigo_curso}", pipelsoftController.ObtenerContratosPorCodigoCurso).Methods("GET")
+	//obtener todos los contratos
 	r.HandleFunc("/pipelsoft/contratos", pipelsoftController.ObtenerTodosLosContratos).Methods("GET")
 	r.HandleFunc("/pipelsoft/contratos-run/{run}", pipelsoftController.ObtenerContratosPorRUN).Methods("GET")
 	r.HandleFunc("/contratos/codigo_paf/{codigo_paf}", pipelsoftController.ObtenerPorCodigoPAF).Methods("GET")
