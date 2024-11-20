@@ -22,9 +22,12 @@ type HistorialPafAceptadas struct {
 	// Campos de Proceso
 	EstadoProceso int `gorm:"type:text;not null"`
 
+	//solo puede ser 0 o 1 e indica cuando se detecta que se modifico, si es un cero no se modifico, si es un 1 se modifico
+	CodigoModificacion int `gorm:"type:text;null" json:"codigo_modificacion"`
+
 	// Código que indica el tipo de modificación (puede ser nulo)
 	// 0 = todo bien, 1 = modificación, 2 = eliminada, 3 = rechazada
-	CodigoModificacion *string `gorm:"type:text;null" json:"codigo_modificacion"`
+	BanderaModificacion int `gorm:"type:text;null" json:"bandera_modificacion"`
 
 	// Descripción detallada de la modificación (puede ser nulo)
 	DescripcionModificacion *string `gorm:"type:text;null" json:"descripcion_modificacion"`
