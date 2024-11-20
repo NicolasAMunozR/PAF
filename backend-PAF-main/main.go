@@ -63,6 +63,13 @@ func main() {
 	// Ruta para obtener los horarios por Run
 	r.HandleFunc("/horarios/{run}", horarioController.ObtenerHorariosPorRun).Methods("GET")
 
+	// Instanciar el servicio y controlador de Estadísticas
+	estadisticasService := service.NewEstadisticasService(DB.DBPersonal)
+	estadisticasController := controller.NewEstadisticasController(estadisticasService)
+
+	// Ruta para obtener las estadísticas
+	r.HandleFunc("/estadisticas", estadisticasController.ObtenerEstadisticas).Methods("GET")
+
 	// Aplicar CORS al enrutador
 	handler := c.Handler(r)
 
