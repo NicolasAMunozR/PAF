@@ -13,25 +13,34 @@ const { $axios } = useNuxtApp() as unknown as { $axios: typeof import('axios').d
 
 // Definición completa de la interfaz Persona
 interface Persona {
-  ID: number
-  CodigoPAF: string
-  CodigoAsignatura: string
-  Run: string
-  Nombres: string
-  PrimerApellido: string
-  SegundoApellido: string
-  Correo: string
-  EstadoProceso: string
-  Calidad: string
-  Jerarquia: string
-  CantidadHoras: number
-  FechaInicioContrato: string
-  FechaFinContrato: string
-  FechaUltimaModificacionProceso: string
-  NombreAsignatura: string
-  NombreUnidadContratante: string
-  NombreUnidadMayor: string
+  ID: number;
+  CodigoPAF: string;
+  CodigoAsignatura: string;
+  Run: string;
+  Nombres: string;
+  PrimerApellido: string;
+  SegundoApellido: string;
+  Correo: string;
+  EstadoProceso: string; // Convertido a string
+  Calidad: string;
+  Jerarquia: string;
+  CantidadHoras: number;
+  FechaInicioContrato: string;
+  FechaFinContrato: string;
+  FechaUltimaModificacionProceso: string;
+  NombreAsignatura: string; // Del profesor_data
+  NombreUnidadContratante: string;
+  NombreUnidadMayor: string;
+
+  // Nuevos campos relacionados con profesor_data
+  CodigoUnidadContratante?: string; // Del pipelsoft_data
+  Bloque?: string; // Horario (ejemplo: "M2-M5-V1")
+  Dia?: string; // Día de clases (ejemplo: "Lunes")
+  Seccion?: string; // Ejemplo: "A"
+  Semestre?: string; // Ejemplo: "2024-1"
+  Cupo?: number; // Capacidad de estudiantes
 }
+
 
 const personas = ref<Persona[]>([])
 const filtros = ref({
@@ -65,8 +74,10 @@ const filteredPersonas = computed(() => {
     const compareA = a[sortBy.value as keyof Persona]
     const compareB = b[sortBy.value as keyof Persona]
 
-    if (compareA < compareB) return sortOrder.value === 'asc' ? -1 : 1
-    if (compareA > compareB) return sortOrder.value === 'asc' ? 1 : -1
+    if (compareA !== undefined && compareB !== undefined) {
+      if (compareA < compareB) return sortOrder.value === 'asc' ? -1 : 1
+      if (compareA > compareB) return sortOrder.value === 'asc' ? 1 : -1
+    }
     return 0
   })
 
@@ -75,13 +86,35 @@ const filteredPersonas = computed(() => {
 
 onMounted(async () => {
   try {
-    const response = await $axios.get('/pipelsoft/persona')
-    personas.value = response.data
-    console.log('Personas:', personas.value)
+    const response = await $axios.get('/pipelsoft/contratos');
+    console.log('Personas obtenidas:', response.data);
+    personas.value = response.data.map((item: any) => ({
+      ID: item.pipelsoft_data.ID,
+      CodigoPAF: item.pipelsoft_data.CodigoPAF,
+      CodigoAsignatura: item.pipelsoft_data.CodigoAsignatura,
+      Run: item.pipelsoft_data.Run,
+      Nombres: item.pipelsoft_data.Nombres,
+      PrimerApellido: item.pipelsoft_data.PrimerApellido,
+      SegundoApellido: item.pipelsoft_data.SegundoApellido,
+      Correo: item.pipelsoft_data.Correo,
+      EstadoProceso: item.pipelsoft_data.EstadoProceso.toString(), // Asegurar que sea string
+      Calidad: item.pipelsoft_data.Calidad,
+      Jerarquia: item.pipelsoft_data.Jerarquia,
+      CantidadHoras: item.pipelsoft_data.CantidadHoras,
+      FechaInicioContrato: item.pipelsoft_data.FechaInicioContrato,
+      FechaFinContrato: item.pipelsoft_data.FechaFinContrato,
+      FechaUltimaModificacionProceso: item.pipelsoft_data.FechaUltimaModificacionProceso,
+      NombreAsignatura: item.profesor_data?.nombre_asignatura || '',
+      NombreUnidadContratante: item.pipelsoft_data.NombreUnidadContratante,
+      NombreUnidadMayor: item.pipelsoft_data.NombreUnidadMayor,
+      Cupo: item.profesor_data?.cupo || 0,
+    }));
+    console.log('Personas transformadas:', personas.value);
   } catch (error) {
-    console.error('Error al obtener personas:', error)
+    console.error('Error al obtener personas:', error);
   }
-})
+});
+
 
 const filterData = (newFilters: any) => {
   filtros.value = newFilters

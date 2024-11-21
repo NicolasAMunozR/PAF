@@ -52,6 +52,9 @@
           <li>
             <a href="/historyPAF" class="block rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700">Historial de PAF</a>
           </li>
+          <li>
+            <a href="/seguimientoPAF" class="block rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700">Seguimiento de la PAF</a>
+          </li>
           <!-- Otros elementos del menú -->
         </ul>
       </div>

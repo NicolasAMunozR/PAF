@@ -1,6 +1,6 @@
 <template>
   <div class="flex">
-    <!-- Botón para volver en la esquina superior izquierda -->
+    <!-- Botón para volver -->
     <div class="absolute top-4 left-4">
       <button @click="volver" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
         Volver
@@ -12,6 +12,13 @@
       <h1>Horario para: {{ persona[0]?.Nombres }} {{ persona[0]?.PrimerApellido }} {{ persona[0]?.SegundoApellido }}</h1>
 
       <div v-if="persona.length > 0">
+        <div class="mb-4">
+          <label for="semestre">Seleccionar Semestre:</label>
+          <select id="semestre" v-model="semestreSeleccionado" class="ml-2">
+            <option v-for="sem in semestres" :key="sem" :value="sem">{{ sem }}</option>
+          </select>
+        </div>
+
         <table class="w-full text-sm bg-white divide-y divide-gray-300 border">
           <thead>
             <tr class="bg-gray-200">
@@ -23,7 +30,9 @@
             <tr v-for="(horario, index) in horarios" :key="index" :class="index % 2 === 0 ? 'bg-gray-100' : 'bg-white'">
               <td class="px-4 py-2 text-gray-700 border-r">{{ horario.modulo }}</td>
               <td v-for="dia in dias" :key="dia" class="px-4 py-2 text-gray-700 border-r">
-                {{ obtenerAsignaturaPorDia(dia, horario.modulo) }}
+                <div v-for="bloque in bloquesPorDia(dia, index + 1)" :key="bloque.nombre" :style="{ backgroundColor: bloque.color }" class="rounded p-1 text-black">
+                  {{ bloque.nombre }}
+                </div>
               </td>
             </tr>
           </tbody>
@@ -34,12 +43,12 @@
       </div>
     </div>
 
-    <!-- Cuadro de asignaturas al lado de la tabla -->
+    <!-- Cuadro lateral -->
     <div class="w-1/3 pl-4 mt-12">
-      <h2 class="font-semibold text-lg">Asignaturas</h2>
+      <h2 class="font-semibold text-lg">PAF</h2>
       <div v-if="persona.length > 0">
         <div
-          v-for="(p, index) in persona"
+          v-for="(p, index) in personaFiltrada"
           :key="index"
           :style="{ backgroundColor: colores[index % colores.length] }"
           class="p-4 mb-4 rounded shadow"
@@ -48,6 +57,10 @@
           <p><strong>Nombre de Asignatura:</strong> {{ p.NombreAsignatura }}</p>
           <p><strong>Horas Semanales:</strong> {{ p.CantidadHoras }}</p>
           <p><strong>Jefatura:</strong> {{ p.NombreUnidadContratante }}</p>
+          <p><strong>Bloque:</strong> {{ p.Bloque }}</p>
+          <p><strong>Cupo:</strong> {{ p.Cupo }}</p>
+          <p><strong>Sección:</strong> {{ p.Seccion }}</p>
+          <p><strong>Semestre:</strong> {{ p.Semestre }}</p>
         </div>
       </div>
       <div v-else>
@@ -59,11 +72,11 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useNuxtApp } from '#app'
 
 const route = useRoute()
-const router = useRouter() // Obtén el enrutador
+const router = useRouter()
 
 const { $axios } = useNuxtApp() as unknown as { $axios: typeof import('axios').default }
 
@@ -77,13 +90,15 @@ interface Persona {
   Nombres: string;
   PrimerApellido: string;
   SegundoApellido: string;
+  Dia?: string;
+  Bloque?: string;
+  Cupo?: number;
+  Seccion?: string;
+  Semestre?: string;
 }
 
-const persona = ref<Persona[]>([]) // Cambiar de 'Persona | null' a 'Persona[]'
-
-// Colores para los cuadros de asignaturas
-const colores = ['#FFCDD2', '#F8BBD0', '#E1BEE7', '#D1C4E9', '#C5CAE9', '#BBDEFB', '#B3E5FC', '#B2EBF2', '#B2DFDB', '#C8E6C9']
-
+const persona = ref<Persona[]>([])
+const colores = ['#FFCDD2', '#F8BBD0', '#E1BEE7', '#D1C4E9', '#C5CAE9']
 const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 const horarios = ref([
   { modulo: '08:15 - 09:35' },
@@ -97,31 +112,77 @@ const horarios = ref([
   { modulo: '21:25 - 22:45' }
 ])
 
-// Función para obtener datos de la persona usando el RUN
+const semestreSeleccionado = ref('')
+const semestres = computed(() => [...new Set(persona.value.map(p => p.Semestre))])
+const personaFiltrada = computed(() => persona.value.filter(p => p.Semestre === semestreSeleccionado.value))
+
+const bloquesPorDia = (dia: string, modulo: number) => {
+  // Mapear iniciales de días con sus nombres completos
+  const inicialDia: { [key: string]: string } = {
+    Lunes: 'L',
+    Martes: 'M',
+    Miércoles: 'W', // 'W' para distinguir de miércoles
+    Jueves: 'J',
+    Viernes: 'V',
+    Sábado: 'S',
+  };
+
+  // Filtrar asignaturas para el día específico y el módulo actual
+  return personaFiltrada.value
+    .filter((p) => {
+      if (!p.Bloque) return false;
+
+      // Separar bloques (por ejemplo: M2-M5-V1 se divide en ["M2", "M5", "V1"])
+      const bloques = p.Bloque.split('-');
+
+      // Buscar un bloque que coincida con el día y el módulo
+      return bloques.some((b) => {
+        const diaBloque = b.charAt(0); // Primera letra es el día (M, V, etc.)
+        const moduloBloque = b.slice(1); // Resto es el número de módulo
+
+        // Comparar con el día actual y el módulo actual
+        return inicialDia[dia] === diaBloque && parseInt(moduloBloque) === modulo;
+      });
+    })
+    .map((p) => ({
+      nombre: p.NombreAsignatura,
+      seccion: p.Seccion,
+      color: colores[persona.value.indexOf(p) % colores.length],
+    }));
+};
+
+
 const obtenerDatosPersona = async () => {
   try {
-    const response = await $axios.get(`/pipelsoft/personas/rut/${run.value}`)
-    persona.value = response.data // Ahora es un array de personas
-    console.log('Datos de las personas:', persona.value)
+    const response = await $axios.get(`/pipelsoft/contratos-run/${run.value}`)
+    persona.value = response.data.map((item: any) => ({
+      CodigoAsignatura: item.pipelsoft_data.CodigoAsignatura,
+      Nombres: item.pipelsoft_data.Nombres,
+      NombreAsignatura: item.pipelsoft_data.NombreAsignatura,
+      PrimerApellido: item.pipelsoft_data.PrimerApellido,
+      SegundoApellido: item.pipelsoft_data.SegundoApellido,
+      CantidadHoras: item.pipelsoft_data.CantidadHoras,
+      NombreUnidadContratante: item.pipelsoft_data.NombreUnidadContratante,
+      Dia: item.profesor_data.dia,
+      Bloque: item.profesor_data.bloque,
+      Cupo: item.profesor_data.cupo,
+      Seccion: item.profesor_data.seccion,
+      Semestre: item.profesor_data.semestre,
+    }))
   } catch (error) {
-    console.error('Error al obtener los datos de las personas:', error)
+    console.error('Error al obtener los datos:', error)
   }
 }
 
-// Función para obtener la asignatura según el día y el horario
-const obtenerAsignaturaPorDia = (dia: string, horario: any) => {
-  return '' // Esto debe cambiarse según los datos obtenidos
-}
-
-// Función para volver a la página anterior
 const volver = () => {
-  router.go(-1) // Esto hace que el usuario regrese a la página anterior
+  router.go(-1)
 }
 
 onMounted(() => {
   obtenerDatosPersona()
 })
 </script>
+
 
 <style scoped>
 table {

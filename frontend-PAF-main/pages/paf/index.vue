@@ -1,32 +1,42 @@
 <template>
-  <div class="flex">
-    <!-- Botón para volver en la esquina superior izquierda -->
-    <div class="absolute top-4 left-4">
+  <div class="flex flex-col">
+    <!-- Botón para volver debajo de la barra superior pero encima de la información de la PAF -->
+    <div class="mt-4 ml-4">
       <button @click="volver" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
         Volver
       </button>
     </div>
 
     <!-- Información de la PAF -->
-    <div class="w-2/3 mt-12">
-      <h1 v-if="paf.length > 0">Información de las PAFs:</h1>
+    <div class="w-2/3 mt-6">
+      <h1 v-if="paf.length > 0" class="mb-4">Información de la PAF:</h1>
 
       <!-- Mostrar la lista de personas -->
       <div v-if="paf.length > 0">
-        <div v-for="persona in paf" :key="persona.CodigoPaf">
-          <p><strong>Código PAF:</strong> {{ persona.CodigoPaf }}</p>
-          <p><strong>RUN:</strong> {{ persona.Run }}</p>
-          <p><strong>Nombre:</strong> {{ persona.Nombres }} {{ persona.PrimerApellido }} {{ persona.SegundoApellido }}</p>
-          <p><strong>Correo:</strong> {{ persona.Correo }}</p>
-          <div class="action-buttons">
-            <button @click="dejarListaPaf(persona.CodigoPaf)" class="bg-blue-500 text-white py-2 px-4 rounded mr-4">Dejar lista la PAF</button>
+        <div
+          v-for="persona in paf"
+          :key="persona.pipelsoft_data.CodigoPAF"
+          class="paf-container mb-6 border rounded p-4 shadow-md"
+        >
+          <p><strong>Código PAF:</strong> {{ persona.pipelsoft_data.CodigoPAF }}</p>
+          <p><strong>RUN:</strong> {{ persona.pipelsoft_data.Run }}</p>
+          <p><strong>Nombre:</strong> {{ persona.pipelsoft_data.Nombres }} {{ persona.pipelsoft_data.PrimerApellido }} {{ persona.pipelsoft_data.SegundoApellido }}</p>
+          <p><strong>Correo:</strong> {{ persona.pipelsoft_data.Correo }}</p>
+          <p><strong>Asignatura:</strong> {{ persona.profesor_data.nombre_asignatura }}</p>
+          <p><strong>Bloque:</strong> {{ persona.profesor_data.bloque }}</p>
+          <p><strong>Unidad Contratante:</strong> {{ persona.pipelsoft_data.NombreUnidadContratante }}</p>
+
+          <!-- Botón ubicado en la parte inferior -->
+          <div class="flex justify-end mt-4">
+            <button @click="dejarListaPaf(persona.pipelsoft_data.CodigoPAF)" class="bg-blue-500 text-white py-2 px-4 rounded">
+              Dejar lista la PAF
+            </button>
           </div>
-          <hr />
         </div>
       </div>
 
       <div v-else>
-        <p>Cargando datos o no se encontraron registros para las PAFs.</p>
+        <p>Cargando datos o no se encontraron registros para la PAF.</p>
       </div>
     </div>
   </div>
@@ -47,15 +57,22 @@ const codigoPaf = ref(route.query.codigoPaf || '')
 console.log('Código PAF desde los parámetros de la ruta:', route.params.codigoPaf)
 
 interface Paf {
-  CodigoPaf: string;
-  Run: string;
-  Nombres: string;
-  PrimerApellido: string;
-  SegundoApellido: string;
-  Correo: string;
+  pipelsoft_data: {
+    CodigoPAF: string;
+    Run: string;
+    Nombres: string;
+    PrimerApellido: string;
+    SegundoApellido: string;
+    Correo: string;
+    NombreUnidadContratante: string;
+  };
+  profesor_data: {
+    nombre_asignatura: string;
+    bloque: string;
+  };
 }
 
-const paf = ref<Paf[]>([])  // Cambiado de null a un array vacío
+const paf = ref<Paf[]>([])
 
 const obtenerDatosPaf = async () => {
   try {
@@ -64,10 +81,9 @@ const obtenerDatosPaf = async () => {
       console.error('Código PAF no está disponible')
       return
     }
-    console.log('Obteniendo datos de la PAF con código:', codigoPaf.value)
-    const response = await $axios.get(`/pipelsoft/persona/paf/${codigoPaf.value}`)
+    const response = await $axios.get(`/contratos/codigo_paf/${codigoPaf.value}`)
     if (response.data) {
-      paf.value = Array.isArray(response.data) ? response.data : [response.data] // Si no es un arreglo, lo convierte a uno
+      paf.value = Array.isArray(response.data) ? response.data : [response.data] 
       console.log('Datos de las PAFs:', paf.value)
     } else {
       console.log('No se encontraron datos para el código PAF:', codigoPaf.value)
@@ -77,49 +93,42 @@ const obtenerDatosPaf = async () => {
   }
 }
 
-
-// Función para volver a la página anterior
 const volver = () => {
-  router.go(-1) // Esto hace que el usuario regrese a la página anterior
+  router.go(-1)
 }
 
-// Función para dejar lista la PAF (POST + DELETE)
 const dejarListaPaf = async (codigoPaf: string) => {
   try {
-    // Realizar el POST para registrar el historial
-    const postResponse = await $axios.post('/historial', {
-      Codigo_paf: codigoPaf, // Usar la clave esperada por el backend
-    })
+    const postResponse = await $axios.post('/historial', { Codigo_paf: codigoPaf })
     console.log('Historial creado:', postResponse.data)
-
-    // Realizar el DELETE después del POST
-    const deleteResponse = await $axios.delete(`/historial/${codigoPaf}`)
-    console.log('Historial eliminado:', deleteResponse.data)
-
+    
+    router.push('/personas')
   } catch (error) {
     console.error('Error al procesar la PAF:', error)
   }
 }
 
-// Cargar los datos de la PAF cuando el componente se monta
 onMounted(() => {
   obtenerDatosPaf()
 })
 </script>
 
 <style scoped>
-.table-container {
-  width: 100%;
-  padding: 20px;
-  overflow-x: auto;
-  background-color: #f9fafb;
+.paf-container {
+  display: flex;
+  flex-direction: column;
 }
 
 button {
-  position: absolute;
-  top: 4rem; /* Ajusta la posición según lo necesario */
-  left: 1rem; /* Ajusta la distancia desde la izquierda */
-  z-index: 10; /* Asegura que el botón esté por encima de otros elementos */
+  cursor: pointer;
+}
+
+.flex.justify-end {
+  margin-top: auto;
+}
+
+.mt-4.ml-4 {
+  margin-top: 16px;
+  margin-left: 16px;
 }
 </style>
-

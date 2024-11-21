@@ -6,25 +6,21 @@
           <th class="px-4 py-3 text-left font-semibold">Codigo de la PAF</th>
           <th class="px-4 py-3 text-left font-semibold">Codigo de la Asignatura</th>
           <th class="px-4 py-3 text-left font-semibold">Run</th>
-          <th class="px-4 py-3 text-left font-semibold">Nombre</th>
-          <th class="px-4 py-3 text-left font-semibold">Apellido</th>
+          <th class="px-4 py-3 text-left font-semibold">Nombre de asignatura</th>
           <th class="px-4 py-3 text-left font-semibold">Grupo</th>
           <th class="px-4 py-3 text-left font-semibold">Cupos</th>
-          <th class="px-4 py-3 text-left font-semibold"> </th>
-          <th class="px-4 py-3 text-left font-semibold">Opciones</th>
+          <th v-if="showButtons" class="px-4 py-3 text-left font-semibold">Opciones</th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
-        <tr v-for="persona in data" :key="persona.id" class="hover:bg-gray-50 transition-colors">
+        <tr v-for="persona in data" :key="persona.CodigoPAF" class="hover:bg-gray-50 transition-colors">
           <td class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoPAF }}</td>
           <td class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoAsignatura }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.Run }}</td>
-          <td class="px-4 py-3 text-gray-700">{{ persona.Nombres }}</td>
-          <td class="px-4 py-3 text-gray-700">{{ persona.PrimerApellido }}</td>
+          <td class="px-4 py-3 text-gray-700">{{ persona.NombreAsignatura }}</td>
           <td class="px-4 py-3 text-gray-700"> </td>
-          <td class="px-4 py-3 text-gray-700"> </td>
-          <td class="px-4 py-3 text-gray-700"> </td>
-          <td class="px-4 py-3">
+          <td class="px-4 py-3 text-gray-700">{{ persona.Cupo }} </td>
+          <td v-if="showButtons" class="px-4 py-3">
             <a :href="`/paf?codigoPaf=${persona.CodigoPAF}`" class="button">Ver PAF</a>
             <a :href="`/horario?run=${persona.Run}`" class="button">Ver Horarios</a>
           </td>
@@ -40,10 +36,16 @@ export default {
     data: {
       type: Array,
       required: true
+    },
+    showButtons: {
+      type: Boolean,
+      default: true // Por defecto, se muestran los botones
     }
   }
 }
 </script>
+
+
 
 <style scoped>
 .table-container {
