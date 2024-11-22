@@ -1,14 +1,27 @@
 <template>
   <div>
-      <Menu />
+    <!-- Mostrar el menú solo en las páginas permitidas -->
+    <Menu v-if="showMenu" />
     <main class="main-content">
       <slot />
     </main>
   </div>
 </template>
 
+<script>
+export default {
+  computed: {
+    showMenu() {
+      // Rutas donde NO quieres que aparezca el menú
+      const noMenuRoutes = ["/"];
+      return !noMenuRoutes.includes(this.$route.path); // Retorna true si la ruta no está en la lista
+    },
+  },
+};
+</script>
+
 <style scoped>
-/* Definir una paleta de colores */
+/* Estilos existentes */
 :root {
   --primary-color: #4A90E2;
   --secondary-color: #50E3C2;
@@ -39,3 +52,4 @@
   background-color: #f4f7f6;
 }
 </style>
+

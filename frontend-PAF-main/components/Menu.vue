@@ -31,9 +31,18 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
+
       <div class="header-container flex-1 text-center">
         <h1 class="header-title">PAF - Sistema de Gestión</h1>
       </div>
+
+      <!-- Botón de cerrar sesión -->
+      <button
+        @click="logout"
+        class="text-white bg-red-600 p-2 rounded-lg hover:bg-red-700 focus:outline-none"
+      >
+        Cerrar sesión
+      </button>
     </div>
 
     <!-- Menú desplegable como barra lateral fija -->
@@ -43,19 +52,14 @@
     >
       <div class="px-4 py-6">
         <ul class="mt-6 space-y-1">
-          <li>
-            <a href="/" class="block rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700">Home</a>
+          <li v-for="link in filteredMenu" :key="link.path">
+            <a
+              :href="link.path"
+              class="block rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700"
+            >
+              {{ link.label }}
+            </a>
           </li>
-          <li>
-            <a href="/personas" class="block rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700">Listado de Personas</a>
-          </li>
-          <li>
-            <a href="/historyPAF" class="block rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700">Historial de PAF</a>
-          </li>
-          <li>
-            <a href="/seguimientoPAF" class="block rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700">Seguimiento de la PAF</a>
-          </li>
-          <!-- Otros elementos del menú -->
         </ul>
       </div>
     </div>
@@ -63,6 +67,7 @@
     <!-- Contenido principal -->
     <div :class="{'ml-64': isMenuOpen, 'ml-0': !isMenuOpen}" class="content transition-all duration-300 ease-in-out">
       <!-- Contenido de la página -->
+      <slot></slot>
     </div>
   </div>
 </template>
@@ -72,11 +77,50 @@ export default {
   data() {
     return {
       isMenuOpen: false,
+      menuItems: [
+        {
+          path: "/personas",
+          label: "Listado de Personas",
+          pages: ["/personas", "/historyPAF", "/horario", "/paf"],
+        },
+        {
+          path: "/historyPAF",
+          label: "Historial de PAF",
+          pages: ["/personas", "/historyPAF", "/horario", "/paf"],
+        },
+        {
+          path: "/seguimientoPAF",
+          label: "Seguimiento de la PAF",
+          pages: ["/seguimientoPAF", "/estadisticaPAF"],
+        },
+        {
+          path: "/profesorPAF",
+          label: "Gestión de Profesor",
+          pages: [],
+        },
+        {
+          path: "/estadisticaPAF",
+          label: "Estadísticas de PAF",
+          pages: ["/seguimientoPAF", "/estadisticaPAF"],
+        },
+      ],
     };
+  },
+  computed: {
+    filteredMenu() {
+      const currentPage = this.$route.path; // Ruta actual
+      return this.menuItems.filter((item) =>
+        item.pages.includes(currentPage)
+      );
+    },
   },
   methods: {
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen;
+    },
+    logout() {
+      // Redirigir al usuario a la página principal ("/") para cerrar sesión
+      this.$router.push('/');
     },
   },
 };
