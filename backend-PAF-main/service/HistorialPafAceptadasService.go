@@ -18,7 +18,7 @@ func NewHistorialPafAceptadasService(db *gorm.DB) *HistorialPafAceptadasService 
 	}
 }
 
-func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF string) (*models.HistorialPafAceptadas, error) {
+func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF string, profesor models.ProfesorDB) (*models.HistorialPafAceptadas, error) {
 	// Iniciar una transacción para garantizar consistencia
 	tx := s.DB.Begin()
 	if err := tx.Error; err != nil {
@@ -35,34 +35,34 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF string) (*models
 		}
 		log.Println("Registro existente eliminado correctamente")
 	} else if err != gorm.ErrRecordNotFound { // Si ocurre un error distinto de "registro no encontrado"
-		tx.Rollback() // Rollback si no se encuentra el registro
+		tx.Rollback()
 		return nil, fmt.Errorf("error al buscar historial existente: %w", err)
 	}
 
-	// Obtener los datos desde la tabla "pipelsoft"
+	// Obtener los valores de jerarquía y calidad desde la tabla Pipelsoft
 	var pipelsoft models.Pipelsoft
 	if err := tx.Where("codigo_paf = ?", codigoPAF).First(&pipelsoft).Error; err != nil {
 		tx.Rollback()
 		return nil, fmt.Errorf("error al obtener datos de Pipelsoft: %w", err)
 	}
 
-	// Incrementar el estado del proceso
-	estado := pipelsoft.EstadoProceso + 1
-
 	// Crear el nuevo registro de historial
 	historial := models.HistorialPafAceptadas{
-		CodigoPAF:           pipelsoft.CodigoPAF,
-		Run:                 pipelsoft.Run,
+		Run:                 profesor.RUN,
+		CodigoPAF:           codigoPAF,
 		FechaInicioContrato: pipelsoft.FechaInicioContrato,
 		FechaFinContrato:    pipelsoft.FechaFinContrato,
-		CodigoAsignatura:    pipelsoft.CodigoAsignatura,
-		NombreAsignatura:    pipelsoft.NombreAsignatura,
-		CantidadHoras:       pipelsoft.CantidadHoras,
-		Jerarquia:           pipelsoft.Jerarquia,
-		Calidad:             pipelsoft.Calidad,
-		EstadoProceso:       estado,
+		CodigoAsignatura:    profesor.CodigoAsignatura,
+		NombreAsignatura:    profesor.NombreAsignatura,
+		CantidadHoras:       profesor.Cupo,
+		Jerarquia:           pipelsoft.Jerarquia, // Obtenido desde Pipelsoft
+		Calidad:             pipelsoft.Calidad,   // Obtenido desde Pipelsoft
+		EstadoProceso:       1,
 		CodigoModificacion:  0,
 		BanderaModificacion: 0,
+		DescripcionModificacion: nil,
+		ProfesorData:        profesor,
+		BanderaAceptacion:   0,
 	}
 
 	// Insertar el nuevo historial en la base de datos
@@ -166,5 +166,38 @@ func (service *HistorialPafAceptadasService) ActualizarModificaciones() error {
 		}
 	}
 
+	return nil
+}
+
+// ActualizarBanderaAceptacion actualiza la BanderaAceptacion de un historial en HistorialPafAceptadas a partir del codigoPAF
+func (s *HistorialPafAceptadasService) ActualizarBanderaAceptacion(codigoPAF string, nuevaBanderaAceptacion int) error {
+	// Iniciar una transacción para garantizar consistencia
+	tx := s.DB.Begin()
+	if err := tx.Error; err != nil {
+		return fmt.Errorf("error al iniciar la transacción: %w", err)
+	}
+
+	// Buscar el historial correspondiente al codigoPAF
+	var historial models.HistorialPafAceptadas
+	if err := tx.Where("codigo_paf = ?", codigoPAF).First(&historial).Error; err != nil {
+		tx.Rollback() // Rollback si ocurre un error al buscar el historial
+		return fmt.Errorf("error al buscar historial con codigoPAF %s: %w", codigoPAF, err)
+	}
+
+	// Actualizar la BanderaAceptacion
+	historial.BanderaAceptacion = nuevaBanderaAceptacion
+
+	// Guardar los cambios en la base de datos
+	if err := tx.Save(&historial).Error; err != nil {
+		tx.Rollback() // Rollback si no se puede guardar el historial
+		return fmt.Errorf("error al actualizar BanderaAceptacion: %w", err)
+	}
+
+	// Confirmar la transacción
+	if err := tx.Commit().Error; err != nil {
+		return fmt.Errorf("error al confirmar la transacción: %w", err)
+	}
+
+	log.Printf("BanderaAceptacion actualizada a %d para el historial con codigoPAF %s", nuevaBanderaAceptacion, codigoPAF)
 	return nil
 }

@@ -39,9 +39,12 @@ func main() {
 	}
 
 	// Rutas para el controlador HistorialPafAceptadas
-	r.HandleFunc("/historial", historialPafAceptadasController.CrearHistorialHandler).Methods("POST")
+// Definir rutas para el controlador
+	r.HandleFunc("/historial/post/{codigoPAF}", historialController.CrearHistorialHandler).Methods("POST")
 	r.HandleFunc("/historial", historialPafAceptadasController.ObtenerTodosLosHistorialesHandler).Methods("GET")
 	r.HandleFunc("/historial/{codigo_paf}", historialPafAceptadasController.EliminarHistorialHandler).Methods("DELETE")
+	// Ruta para actualizar la BanderaAceptacion por codigoPAF
+	r.HandleFunc("/historial/{codigoPAF}/actualizarBanderaAceptacion", historialController.ActualizarBanderaAceptacion).Methods("PUT")
 
 	// Servicios y controladores adicionales
 	pipelsoftService := service.NewPipelsoftService(DB.DBPersonal)

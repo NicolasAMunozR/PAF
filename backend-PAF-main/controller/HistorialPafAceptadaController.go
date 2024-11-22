@@ -13,28 +13,38 @@ type HistorialPafAceptadasController struct {
 	Service *service.HistorialPafAceptadasService
 }
 
-// CrearHistorialHandler maneja la solicitud de creación de un nuevo HistorialPafAceptadas
-func (c *HistorialPafAceptadasController) CrearHistorialHandler(w http.ResponseWriter, r *http.Request) {
-	var input struct {
-		CodigoPAF string `json:"codigo_paf"`
+// CrearHistorialHandler maneja la creación de un nuevo historial
+func (h *HistorialPafAceptadasController) CrearHistorialHandler(w http.ResponseWriter, r *http.Request) {
+	// Obtener el código PAF desde los parámetros de la URL
+	vars := mux.Vars(r)
+	codigoPAF, ok := vars["codigoPAF"]
+	if !ok {
+		http.Error(w, "El parámetro 'codigoPAF' es obligatorio", http.StatusBadRequest)
+		return
 	}
 
-	// Decodificar el JSON de la solicitud
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, "Datos inválidos", http.StatusBadRequest)
+	// Parsear el cuerpo de la solicitud para obtener los datos del profesor
+	var profesor models.ProfesorDB
+	if err := json.NewDecoder(r.Body).Decode(&profesor); err != nil {
+		http.Error(w, fmt.Sprintf("Error al parsear el cuerpo de la solicitud: %v", err), http.StatusBadRequest)
 		return
 	}
 
 	// Llamar al servicio para crear el historial
-	historial, err := c.Service.CrearHistorial(input.CodigoPAF)
+	historial, err := h.Service.CrearHistorial(codigoPAF, profesor)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Error al crear el historial: %v\n", err)
+		http.Error(w, fmt.Sprintf("Error al crear el historial: %v", err), http.StatusInternalServerError)
 		return
 	}
 
-	// Devolver el historial creado como JSON
+	// Responder con el historial creado
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(historial)
+	w.WriteHeader(http.StatusCreated)
+	if err := json.NewEncoder(w).Encode(historial); err != nil {
+		log.Printf("Error al codificar la respuesta: %v\n", err)
+		http.Error(w, "Error al generar la respuesta", http.StatusInternalServerError)
+	}
 }
 
 // ObtenerTodosLosHistorialesHandler maneja la solicitud para obtener todos los historiales

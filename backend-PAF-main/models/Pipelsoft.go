@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// Pipelsoft representa todos los campos de Contrato, Persona, Proceso, y UnidadContratante en un solo modelo
+
 type Pipelsoft struct {
 	gorm.Model
 	// Campos de Persona
