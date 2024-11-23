@@ -32,7 +32,9 @@ type HistorialPafAceptadas struct {
 	// Descripción detallada de la modificación (puede ser nulo)
 	DescripcionModificacion *string `gorm:"type:text;null" json:"descripcion_modificacion"`
 
-	ProfesorData  ProfesorDB `json:"profesor_data"`
+	ProfesorDataID uint       `gorm:"not null"` // Clave foránea
+
+	ProfesorData ProfesorDB `json:"profesor_data"`
 
 	BanderaAceptacion int `gorm:"type:int;not null"`
 }

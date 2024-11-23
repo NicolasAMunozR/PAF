@@ -1,12 +1,12 @@
 <template>
     <div class="container">
       <h1>Información del Profesor</h1>
-
+  
       <div v-if="contratos.length > 0">
-      <p><strong>Nombre:</strong> {{ contratos[0].pipelsoft_data.Nombres }}</p>
-      <p><strong>Apellido:</strong> {{ contratos[0].pipelsoft_data.PrimerApellido }}</p>
-    </div>
-
+        <p><strong>Nombre:</strong> {{ contratos[0].pipelsoft_data.Nombres }}</p>
+        <p><strong>Apellido:</strong> {{ contratos[0].pipelsoft_data.PrimerApellido }}</p>
+      </div>
+  
       <div v-if="contratos.length > 0" class="contratos">
         <h2>Contratos Relacionados</h2>
         <table>
@@ -16,6 +16,7 @@
               <th>Jefatura</th>
               <th>Nombre de Asignatura</th>
               <th>Estado del Proceso</th>
+              <th>Historial de Estados</th>
             </tr>
           </thead>
           <tbody>
@@ -24,6 +25,12 @@
               <td>{{ contrato.pipelsoft_data.Jerarquia }}</td>
               <td>{{ contrato.pipelsoft_data.NombreAsignatura }}</td>
               <td>{{ estadoProceso(contrato.pipelsoft_data.EstadoProceso) }}</td>
+              <td>
+                <div v-for="(estado, idx) in contrato.pipelsoft_data.historialEstados" :key="idx">
+                  <p><strong>{{ estadoProceso(estado.estado) }}</strong>: 
+                  {{ calcularTiempoEnEstado(estado.fechaInicio) }} días</p>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -59,6 +66,14 @@
         return "Desconocido";
     }
   };
+  
+  // Función para calcular el tiempo en cada estado en días
+  const calcularTiempoEnEstado = (fechaInicio: string): number => {
+    const fechaActual = new Date();
+    const fechaInicioEstado = new Date(fechaInicio);
+    const diferenciaTiempo = fechaActual.getTime() - fechaInicioEstado.getTime();
+    return Math.floor(diferenciaTiempo / (1000 * 3600 * 24)); // Devuelve los días
+  }
   
   // Función para buscar la información del profesor y sus contratos
   const fetchProfesorYContratos = async () => {
@@ -129,5 +144,4 @@
     font-weight: bold;
   }
   </style>
-  
   

@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/NicolasAMunozR/PAF/backend-PAF/service"
@@ -64,7 +65,7 @@ func (ctrl *HistorialPafAceptadasController) ActualizarBanderaAceptacion(w http.
 	}
 
 	// Llamar al servicio para actualizar la BanderaAceptacion
-	err = ctrl.HistorialService.ActualizarBanderaAceptacion(codigoPAF, requestBody.NuevaBanderaAceptacion)
+	err = ctrl.Service.ActualizarBanderaAceptacion(codigoPAF, requestBody.NuevaBanderaAceptacion)
 	if err != nil {
 		log.Printf("Error al actualizar BanderaAceptacion: %v", err)
 		http.Error(w, fmt.Sprintf("Error al actualizar BanderaAceptacion: %v", err), http.StatusInternalServerError)

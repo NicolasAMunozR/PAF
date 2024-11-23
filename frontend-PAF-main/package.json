@@ -14,10 +14,12 @@
     "@nuxtjs/axios": "^5.13.6",
     "@nuxtjs/proxy": "^2.1.0",
     "axios": "^1.7.7",
+    "chart.js": "^4.4.6",
     "cors": "^2.8.5",
     "nuxt": "^3.13.2",
     "nuxt-app": "file:",
     "vue": "latest",
+    "vue-chartjs": "^5.3.2",
     "vue-router": "latest"
   },
   "devDependencies": {

@@ -88,27 +88,7 @@ onMounted(async () => {
   try {
     const response = await $axios.get('/pipelsoft/contratos');
     console.log('Personas obtenidas:', response.data);
-    personas.value = response.data.map((item: any) => ({
-      ID: item.pipelsoft_data.ID,
-      CodigoPAF: item.pipelsoft_data.CodigoPAF,
-      CodigoAsignatura: item.pipelsoft_data.CodigoAsignatura,
-      Run: item.pipelsoft_data.Run,
-      Nombres: item.pipelsoft_data.Nombres,
-      PrimerApellido: item.pipelsoft_data.PrimerApellido,
-      SegundoApellido: item.pipelsoft_data.SegundoApellido,
-      Correo: item.pipelsoft_data.Correo,
-      EstadoProceso: item.pipelsoft_data.EstadoProceso.toString(), // Asegurar que sea string
-      Calidad: item.pipelsoft_data.Calidad,
-      Jerarquia: item.pipelsoft_data.Jerarquia,
-      CantidadHoras: item.pipelsoft_data.CantidadHoras,
-      FechaInicioContrato: item.pipelsoft_data.FechaInicioContrato,
-      FechaFinContrato: item.pipelsoft_data.FechaFinContrato,
-      FechaUltimaModificacionProceso: item.pipelsoft_data.FechaUltimaModificacionProceso,
-      NombreAsignatura: item.profesor_data?.nombre_asignatura || '',
-      NombreUnidadContratante: item.pipelsoft_data.NombreUnidadContratante,
-      NombreUnidadMayor: item.pipelsoft_data.NombreUnidadMayor,
-      Cupo: item.profesor_data?.cupo || 0,
-    }));
+    personas.value = response.data;
     console.log('Personas transformadas:', personas.value);
   } catch (error) {
     console.error('Error al obtener personas:', error);

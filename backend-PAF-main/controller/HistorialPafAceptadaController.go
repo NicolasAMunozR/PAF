@@ -3,8 +3,11 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 
+	"github.com/NicolasAMunozR/PAF/backend-PAF/models"
 	"github.com/NicolasAMunozR/PAF/backend-PAF/service"
 	"github.com/gorilla/mux"
 )
