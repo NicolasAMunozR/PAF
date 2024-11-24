@@ -49,39 +49,53 @@ func (s *PipelsoftService) filterRecords(records []models.Pipelsoft, aceptadosMa
 	return filtered
 }
 
-// Combinar datos de Pipelsoft con datos de la tabla "profesor_dbs" por RUT
-func (s *PipelsoftService) combinarDatosPorRUT(pipelsofts []models.Pipelsoft) ([]models.DatosCombinados, error) {
-	runSet := make(map[string]struct{})
+func (s *PipelsoftService) comprobarYCombinarDatosPorCodigoPAF(pipelsofts []models.Pipelsoft) ([]models.DatosCombinados, error) {
+	// Crear un conjunto único de los códigos PAF presentes en los registros de Pipelsoft
+	codigoPAFSet := make(map[string]struct{})
 	for _, pipel := range pipelsofts {
-		runSet[pipel.Run] = struct{}{}
+		codigoPAFSet[pipel.CodigoPAF] = struct{}{}
 	}
 
-	var profesores []models.ProfesorDB
-	runs := make([]string, 0, len(runSet))
-	for run := range runSet {
-		runs = append(runs, run)
+	// Crear una lista para almacenar los datos de HistorialPafAceptadas
+	var historialPafAceptadas []models.HistorialPafAceptadas
+	codigosPAF := make([]string, 0, len(codigoPAFSet))
+	for codigoPAF := range codigoPAFSet {
+		codigosPAF = append(codigosPAF, codigoPAF)
 	}
 
-	if err := s.DBPersonal.Where("run IN ?", runs).Find(&profesores).Error; err != nil {
+	// Consultar los datos de HistorialPafAceptadas cuyo CódigoPAF esté en la lista de códigos
+	if err := s.DBPersonal.Where("codigo_paf IN ?", codigosPAF).Find(&historialPafAceptadas).Error; err != nil {
 		return nil, err
 	}
 
-	profesoresMap := make(map[string]models.ProfesorDB)
-	for _, profesor := range profesores {
-		profesoresMap[profesor.RUN] = profesor
+	// Crear un map para almacenar los registros de HistorialPafAceptadas por CódigoPAF
+	historialPafMap := make(map[string]models.HistorialPafAceptadas)
+	for _, historial := range historialPafAceptadas {
+		historialPafMap[historial.CodigoPAF] = historial
 	}
 
+	// Crear una lista para almacenar los datos combinados
 	var datosCombinados []models.DatosCombinados
 	for _, pipel := range pipelsofts {
+		// Crear un nuevo objeto DatosCombinados solo con los datos de Pipelsoft
 		dato := models.DatosCombinados{
 			PipelsoftData: pipel,
 		}
-		if profesor, found := profesoresMap[pipel.Run]; found {
-			dato.ProfesorData = profesor
+
+		// Buscar si el CódigoPAF del registro de Pipelsoft está en HistorialPafAceptadas
+		if historial, found := historialPafMap[pipel.CodigoPAF]; found {
+			// Si se encuentra, agregar los datos del historialPafAceptadas al objeto DatosCombinados
+			dato.HistorialPafData = historial
+		} else {
+			// Si no se encuentra, dejar HistorialPafData vacío (nulo o una estructura vacía)
+			dato.HistorialPafData = models.HistorialPafAceptadas{}
 		}
+
+		// Agregar el objeto DatosCombinados a la lista
 		datosCombinados = append(datosCombinados, dato)
 	}
 
+	// Devolver los datos combinados
 	return datosCombinados, nil
 }
 
@@ -99,7 +113,7 @@ func (s *PipelsoftService) ObtenerContratosPorCodigoCurso(codigoCurso string) ([
 	}
 	contratosFiltrados := s.filterRecords(pipelsofts, aceptadosMap)
 
-	return s.combinarDatosPorRUT(contratosFiltrados)
+	return s.comprobarYCombinarDatosPorCodigoPAF(contratosFiltrados)
 }
 
 // Obtener todos los contratos
@@ -116,7 +130,7 @@ func (s *PipelsoftService) ObtenerTodosLosContratos() ([]models.DatosCombinados,
 	}
 	contratosFiltrados := s.filterRecords(pipelsofts, aceptadosMap)
 
-	return s.combinarDatosPorRUT(contratosFiltrados)
+	return s.comprobarYCombinarDatosPorCodigoPAF(contratosFiltrados)
 }
 
 // Obtener contratos por profesor (RUN)
@@ -133,7 +147,7 @@ func (s *PipelsoftService) ObtenerContratosPorRUN(run string) ([]models.DatosCom
 	}
 	contratosFiltrados := s.filterRecords(pipelsofts, aceptadosMap)
 
-	return s.combinarDatosPorRUT(contratosFiltrados)
+	return s.comprobarYCombinarDatosPorCodigoPAF(contratosFiltrados)
 }
 
 // Obtener contratos por Código PAF
@@ -150,7 +164,7 @@ func (s *PipelsoftService) ObtenerPorCodigoPAF(codigoPAF string) ([]models.Datos
 	}
 	contratosFiltrados := s.filterRecords(pipelsofts, aceptadosMap)
 
-	return s.combinarDatosPorRUT(contratosFiltrados)
+	return s.comprobarYCombinarDatosPorCodigoPAF(contratosFiltrados)
 }
 
 // Obtener PAF de los últimos 7 días
@@ -168,7 +182,7 @@ func (s *PipelsoftService) ObtenerPAFUltimos7Dias() ([]models.DatosCombinados, e
 	}
 	contratosFiltrados := s.filterRecords(pipelsofts, aceptadosMap)
 
-	return s.combinarDatosPorRUT(contratosFiltrados)
+	return s.comprobarYCombinarDatosPorCodigoPAF(contratosFiltrados)
 }
 
 // Obtener PAF del último mes
@@ -186,7 +200,7 @@ func (s *PipelsoftService) ObtenerPAFUltimoMes() ([]models.DatosCombinados, erro
 	}
 	contratosFiltrados := s.filterRecords(pipelsofts, aceptadosMap)
 
-	return s.combinarDatosPorRUT(contratosFiltrados)
+	return s.comprobarYCombinarDatosPorCodigoPAF(contratosFiltrados)
 }
 
 // Crear una nueva estructura de Pipelsoft sin guardar nada en la base de datos
