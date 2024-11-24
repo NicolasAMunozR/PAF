@@ -9,10 +9,12 @@ import (
 
 // Estructura para almacenar la respuesta
 type EstadisticasResponse struct {
-	TotalProfesores         int64
-	TotalPipelsoft          int64
-	ProfesoresNoEnPipelsoft int
-	EstadoProcesoCount      map[int]int // Mapa que almacena la cantidad de registros por EstadoProceso
+	TotalProfesores          int64
+	TotalPipelsoft           int64
+	ProfesoresNoEnPipelsoft  int
+	EstadoProcesoCount       map[int]int // Mapa que almacena la cantidad de registros por EstadoProceso
+	TotalPipelsoftUnicos     int64       // Nuevo campo para contar los Run únicos
+	RegistrosPorNombreUnidad int64       // Nuevo campo para contar los registros por nombre de unidad contratante
 }
 
 // EstadisticasService define los métodos para obtener estadísticas de las tablas
@@ -39,6 +41,11 @@ func (s *EstadisticasService) ObtenerEstadisticas() (*EstadisticasResponse, erro
 		return nil, fmt.Errorf("error al contar los registros en pipelsofts: %w", err)
 	}
 
+	// Contar los registros únicos de Run en la tabla pipelsofts
+	if err := s.DB.Model(&models.Pipelsoft{}).Distinct("run").Count(&resp.TotalPipelsoftUnicos).Error; err != nil {
+		return nil, fmt.Errorf("error al contar los registros únicos de Run en pipelsofts: %w", err)
+	}
+
 	// Contar los Run de los profesores que no existen en pipelsofts
 	var profesoresNoEnPipelsoft int64
 	if err := s.DB.Table("profesor_dbs").Where("run NOT IN (SELECT run FROM pipelsofts)").Count(&profesoresNoEnPipelsoft).Error; err != nil {
@@ -57,4 +64,16 @@ func (s *EstadisticasService) ObtenerEstadisticas() (*EstadisticasResponse, erro
 	}
 
 	return &resp, nil
+}
+
+// ContarRegistrosPorNombreUnidadContratante cuenta los registros en Pipelsoft que coinciden con el nombre de la unidad contratante
+func (s *EstadisticasService) ContarRegistrosPorNombreUnidadContratante(nombreUnidadContratante string) (int64, error) {
+	var count int64
+
+	// Contar los registros que coinciden con el nombre de unidad contratante
+	if err := s.DB.Model(&models.Pipelsoft{}).Where("nombre_unidad_contratante = ?", nombreUnidadContratante).Count(&count).Error; err != nil {
+		return 0, fmt.Errorf("error al contar los registros por nombre de unidad contratante: %w", err)
+	}
+
+	return count, nil
 }

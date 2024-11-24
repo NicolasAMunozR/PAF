@@ -3,49 +3,64 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
-	"github.com/NicolasAMunozR/PAF/backend-PAF/service"
-
-	// Cambiar con la ruta del paquete del servicio
+	"github.com/NicolasAMunozR/PAF/backend-PAF/service" // Cambiar según la ruta correcta del paquete
 	"github.com/gorilla/mux"
 )
 
-// Controlador que maneja las estadísticas
+// EstadisticasController gestiona las solicitudes relacionadas con las estadísticas
 type EstadisticasController struct {
 	Service *service.EstadisticasService
 }
 
-// Nueva instancia de EstadisticasController
+// NewEstadisticasController crea una nueva instancia de EstadisticasController
 func NewEstadisticasController(service *service.EstadisticasService) *EstadisticasController {
 	return &EstadisticasController{Service: service}
 }
 
-// ObtenerEstadisticas maneja la solicitud para obtener las estadísticas
+// ObtenerEstadisticas maneja la solicitud para obtener las estadísticas generales
 func (c *EstadisticasController) ObtenerEstadisticas(w http.ResponseWriter, r *http.Request) {
-	// Obtener las estadísticas del servicio
+	// Llamar al servicio para obtener las estadísticas
 	estadisticas, err := c.Service.ObtenerEstadisticas()
 	if err != nil {
-		// Si ocurre un error, devolver respuesta con el código de error
-		http.Error(w, fmt.Sprintf("Error al obtener las estadísticas: %v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Error al obtener estadísticas: %v", err), http.StatusInternalServerError)
 		return
 	}
 
-	// Configurar el encabezado de la respuesta
+	// Responder con las estadísticas en formato JSON
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-
-	// Convertir la respuesta a JSON
 	if err := json.NewEncoder(w).Encode(estadisticas); err != nil {
-		http.Error(w, fmt.Sprintf("Error al convertir la respuesta a JSON: %v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Error al codificar la respuesta: %v", err), http.StatusInternalServerError)
 	}
 }
 
-// Configurar las rutas del controlador
-func (c *EstadisticasController) SetupRoutes(r *mux.Router) {
-	r.HandleFunc("/estadisticas", c.ObtenerEstadisticas).Methods("GET")
+// ContarRegistrosPorUnidadContratante maneja la solicitud para contar registros por nombre de unidad contratante
+func (c *EstadisticasController) ContarRegistrosPorUnidadContratante(w http.ResponseWriter, r *http.Request) {
+	// Obtener el nombre de la unidad contratante desde los parámetros de la URL
+	nombreUnidadContratante := mux.Vars(r)["nombreUnidadContratante"]
+
+	// Llamar al servicio para contar los registros
+	count, err := c.Service.ContarRegistrosPorNombreUnidadContratante(nombreUnidadContratante)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error al contar registros: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Responder con el conteo en formato JSON
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	response := map[string]interface{}{
+		"nombreUnidadContratante": nombreUnidadContratante,
+		"conteo":                  count,
+	}
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, fmt.Sprintf("Error al codificar la respuesta: %v", err), http.StatusInternalServerError)
+	}
 }
+
+//esto NO DEBERIA IR AQUI MOVER
 
 // Nuevo controlador para actualizar la BanderaAceptacion
 func (ctrl *HistorialPafAceptadasController) ActualizarBanderaAceptacion(w http.ResponseWriter, r *http.Request) {
@@ -67,7 +82,7 @@ func (ctrl *HistorialPafAceptadasController) ActualizarBanderaAceptacion(w http.
 	// Llamar al servicio para actualizar la BanderaAceptacion
 	err = ctrl.Service.ActualizarBanderaAceptacion(codigoPAF, requestBody.NuevaBanderaAceptacion)
 	if err != nil {
-		log.Printf("Error al actualizar BanderaAceptacion: %v", err)
+
 		http.Error(w, fmt.Sprintf("Error al actualizar BanderaAceptacion: %v", err), http.StatusInternalServerError)
 		return
 	}
