@@ -32,9 +32,13 @@ type HistorialPafAceptadas struct {
 	// Descripción detallada de la modificación (puede ser nulo)
 	DescripcionModificacion *string `gorm:"type:text;null" json:"descripcion_modificacion"`
 
-	ProfesorDataID uint       `gorm:"not null"` // Clave foránea
+	ProfesorRun              string `json:"run"`               // RUN (identificador único)
+	Semestre                 string `json:"semestre"`          // Semestre de la asignatura
+	ProfesorCodigoAsignatura string `json:"codigo_asignatura"` // Código de la asignatura
+	ProfesorNombreAsignatura string `json:"nombre_asignatura"` // Nombre de la asignatura
+	Seccion                  string `json:"seccion"`           // Sección o grupo
+	Cupo                     int    `json:"cupo"`              // Capacidad del grupo
+	Bloque                   string `json:"bloque"`            // Bloque horario
 
-	ProfesorData ProfesorDB `json:"profesor_data"`
-
-	BanderaAceptacion int `gorm:"type:int;not null"`
+	BanderaAceptacion int `gorm:"type:int;null"`
 }

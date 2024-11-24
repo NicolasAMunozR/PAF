@@ -26,7 +26,7 @@ func (s *PipelsoftService) getAcceptedCodes() (map[string]struct{}, error) {
 	// Modificación: agregamos la condición BanderaAceptacion = 1
 	if err := s.DBPersonal.Table("historial_paf_aceptadas").
 		Select("codigo_paf").
-		Where("BanderaAceptacion = ?", 1). // Condición para filtrar por BanderaAceptacion = 1
+		Where("bandera_aceptacion = ?", 1). // Condición para filtrar por BanderaAceptacion = 1
 		Find(&historialAceptadas).Error; err != nil {
 		return nil, err
 	}
@@ -189,30 +189,27 @@ func (s *PipelsoftService) ObtenerPAFUltimoMes() ([]models.DatosCombinados, erro
 	return s.combinarDatosPorRUT(contratosFiltrados)
 }
 
-
-
-
 // Crear una nueva estructura de Pipelsoft sin guardar nada en la base de datos
 func (s *PipelsoftService) crearEstructuraPipelsoft() models.Pipelsoft {
 	// Crear una nueva instancia del modelo Pipelsoft con valores vacíos o predeterminados
 	pipelsoft := models.Pipelsoft{
-		Run:                    "",  // valor vacío, puede ser ajustado
-		Nombres:                "",  // valor vacío
-		PrimerApellido:         "",  // valor vacío
-		SegundoApellido:        "",  // valor vacío
-		Correo:                 "",  // valor vacío
-		CodigoUnidadContratante: "",  // valor vacío
-		NombreUnidadContratante: "",  // valor vacío
-		NombreUnidadMayor:      "",  // valor vacío
-		CodigoPAF:              "",  // valor vacío
-		FechaInicioContrato:    "",  // valor vacío
-		FechaFinContrato:       "",  // valor vacío
-		CodigoAsignatura:       "",  // valor vacío
-		NombreAsignatura:       "",  // valor vacío
-		CantidadHoras:          0,   // valor predeterminado (0)
-		Jerarquia:              "",  // valor vacío
-		Calidad:                "",  // valor vacío
-		EstadoProceso:          0,   // valor predeterminado (0)
+		Run:                            "",          // valor vacío, puede ser ajustado
+		Nombres:                        "",          // valor vacío
+		PrimerApellido:                 "",          // valor vacío
+		SegundoApellido:                "",          // valor vacío
+		Correo:                         "",          // valor vacío
+		CodigoUnidadContratante:        "",          // valor vacío
+		NombreUnidadContratante:        "",          // valor vacío
+		NombreUnidadMayor:              "",          // valor vacío
+		CodigoPAF:                      "",          // valor vacío
+		FechaInicioContrato:            "",          // valor vacío
+		FechaFinContrato:               "",          // valor vacío
+		CodigoAsignatura:               "",          // valor vacío
+		NombreAsignatura:               "",          // valor vacío
+		CantidadHoras:                  0,           // valor predeterminado (0)
+		Jerarquia:                      "",          // valor vacío
+		Calidad:                        "",          // valor vacío
+		EstadoProceso:                  0,           // valor predeterminado (0)
 		FechaUltimaModificacionProceso: time.Time{}, // valor vacío (cero)
 	}
 

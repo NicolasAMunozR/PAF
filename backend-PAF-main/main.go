@@ -39,7 +39,7 @@ func main() {
 	}
 
 	// Rutas para el controlador HistorialPafAceptadas
-// Definir rutas para el controlador
+	// Definir rutas para el controlador
 	r.HandleFunc("/historial/post/{codigoPAF}", historialPafAceptadasController.CrearHistorialHandler).Methods("POST")
 	r.HandleFunc("/historial", historialPafAceptadasController.ObtenerTodosLosHistorialesHandler).Methods("GET")
 	r.HandleFunc("/historial/{codigo_paf}", historialPafAceptadasController.EliminarHistorialHandler).Methods("DELETE")
@@ -104,7 +104,6 @@ func actualizarModificaciones() {
 	db := DB.DBPersonal
 
 	var historial []models.HistorialPafAceptadas
-	var pipelsoft models.Pipelsoft
 
 	// Obtener todos los registros de HistorialPafAceptadas
 	if err := db.Find(&historial).Error; err != nil {
@@ -112,10 +111,11 @@ func actualizarModificaciones() {
 		return
 	}
 
-	// Iterar sobre cada registro de HistorialPafAceptadas
 	for _, h := range historial {
+		var pipelsoft models.Pipelsoft // Inicializa la variable limpia para evitar conflictos.
+
 		// Buscar el registro correspondiente en Pipelsoft
-		if err := db.Where("codigo_paf = ?", h.CodigoPAF).First(&pipelsoft).Error; err != nil {
+		if err := db.Where("codigo_paf = ?", h.CodigoPAF).Take(&pipelsoft).Error; err != nil {
 			// Si no se encuentra en Pipelsoft, marcamos como eliminada
 			if err := db.Model(&h).Updates(map[string]interface{}{
 				"codigo_modificacion":      1, // Se marca como modificada (en este caso, eliminada)

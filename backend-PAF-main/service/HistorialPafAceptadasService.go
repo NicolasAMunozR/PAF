@@ -48,21 +48,27 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF string, profesor
 
 	// Crear el nuevo registro de historial
 	historial := models.HistorialPafAceptadas{
-		Run:                 profesor.RUN,
-		CodigoPAF:           codigoPAF,
-		FechaInicioContrato: pipelsoft.FechaInicioContrato,
-		FechaFinContrato:    pipelsoft.FechaFinContrato,
-		CodigoAsignatura:    profesor.CodigoAsignatura,
-		NombreAsignatura:    profesor.NombreAsignatura,
-		CantidadHoras:       profesor.Cupo,
-		Jerarquia:           pipelsoft.Jerarquia, // Obtenido desde Pipelsoft
-		Calidad:             pipelsoft.Calidad,   // Obtenido desde Pipelsoft
-		EstadoProceso:       1,
-		CodigoModificacion:  0,
-		BanderaModificacion: 0,
-		DescripcionModificacion: nil,
-		ProfesorData:        profesor,
-		BanderaAceptacion:   0,
+		Run:                      profesor.RUN,
+		CodigoPAF:                codigoPAF,
+		FechaInicioContrato:      pipelsoft.FechaInicioContrato,
+		FechaFinContrato:         pipelsoft.FechaFinContrato,
+		CodigoAsignatura:         profesor.CodigoAsignatura,
+		NombreAsignatura:         profesor.NombreAsignatura,
+		CantidadHoras:            profesor.Cupo,
+		Jerarquia:                pipelsoft.Jerarquia, // Obtenido desde Pipelsoft
+		Calidad:                  pipelsoft.Calidad,   // Obtenido desde Pipelsoft
+		EstadoProceso:            1,
+		CodigoModificacion:       0,
+		BanderaModificacion:      0,
+		DescripcionModificacion:  nil,
+		ProfesorRun:              profesor.RUN,
+		Semestre:                 profesor.Semestre,
+		ProfesorCodigoAsignatura: profesor.CodigoAsignatura,
+		ProfesorNombreAsignatura: profesor.NombreAsignatura,
+		Seccion:                  profesor.Seccion,
+		Cupo:                     profesor.Cupo,
+		Bloque:                   profesor.Bloque,
+		BanderaAceptacion:        0,
 	}
 
 	// Insertar el nuevo historial en la base de datos

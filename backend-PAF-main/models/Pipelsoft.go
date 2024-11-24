@@ -7,7 +7,6 @@ import (
 	"gorm.io/gorm"
 )
 
-
 type Pipelsoft struct {
 	gorm.Model
 	// Campos de Persona
@@ -33,6 +32,6 @@ type Pipelsoft struct {
 	Calidad             string `gorm:"type:text;not null"`
 
 	// Campos de Proceso
-	EstadoProceso                  int       `gorm:"type:text;not null"`
+	EstadoProceso                  int       `gorm:"type:int;not null"`
 	FechaUltimaModificacionProceso time.Time `gorm:"type:timestamp;not null"`
 }
