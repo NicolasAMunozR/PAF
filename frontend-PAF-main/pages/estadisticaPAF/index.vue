@@ -36,6 +36,10 @@
           <h4>PAF por estado</h4>
           <Pie :data="pafPorEstadoChartData" />
         </div>
+        <div class="pie-chart">
+          <h4>PAF por Unidad Mayor</h4>
+          <Pie :data="pafPorUnidadMayorChartData" />
+        </div>
       </div>
     </div>
   </template>
@@ -58,6 +62,7 @@
   const pafPorEstadoChartData = ref(null);
   const estadoSeleccionado = ref(null);
   const totalPaf = ref(0);
+  const pafPorUnidadMayorChartData = ref(null);
   
   // Funciones para obtener datos
   const fetchCantidadPersonasSai = async () => {
@@ -85,10 +90,31 @@
       const response = await $axios.get('/estadisticas')
       cantidadPafPorEstado.value = response.data.EstadoProcesoCount;
       totalPaf.value = Object.values(response.data).reduce((a, b) => a + b, 0);
+      
     } catch (error) {
       console.error('Error al obtener la cantidad de PAF por estado:', error);
     }
   };
+
+  const fetchPafPorUnidadMayor = async () => {
+  try {
+    const response = await $axios.get('/estadisticas/frecuencia-unidades-mayores');
+    const unidadesData = response.data;
+
+    pafPorUnidadMayorChartData.value = {
+      labels: Object.keys(unidadesData),
+      datasets: [
+        {
+          label: 'Cantidad de PAF por Unidad Mayor',
+          data: Object.values(unidadesData),
+          backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#AB47BC', '#EF5350'], // Colores para las barras
+        },
+      ],
+    };
+  } catch (error) {
+    console.error('Error al obtener la cantidad de PAF por unidad mayor:', error);
+  }
+};
   
   const fetchPromedioTiempoPorEstado = async () => {
     try {
@@ -128,6 +154,8 @@
         },
       ],
     };
+
+    
   };
   
   // Función para mostrar detalles del estado seleccionado
@@ -142,6 +170,7 @@
       fetchCantidadPafUnicas(),
       fetchCantidadPafPorEstado(),
       fetchPromedioTiempoPorEstado(),
+      fetchPafPorUnidadMayor(),
     ]);
     configurarGraficos();
   });
