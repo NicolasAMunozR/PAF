@@ -45,6 +45,8 @@
   import { Pie } from 'vue-chartjs';
   import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale } from 'chart.js';
   
+  const { $axios } = useNuxtApp()
+  
   ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale);
   
   // Variables reactivas
@@ -60,8 +62,8 @@
   // Funciones para obtener datos
   const fetchCantidadPersonasSai = async () => {
     try {
-      const response = { data: { cantidad: 100 } }; // Simulación de API
-      cantidadPersonasSai.value = response.data.cantidad;
+      const response = await $axios.get('/estadisticas')
+      cantidadPersonasSai.value = response.data.TotalProfesores;
     } catch (error) {
       console.error('Error al obtener la cantidad de personas del SAI:', error);
     }
@@ -69,8 +71,10 @@
   
   const fetchCantidadPafUnicas = async () => {
     try {
-      const response = { data: { cantidad: 40 } }; // Simulación de API
-      cantidadPafUnicas.value = response.data.cantidad;
+      const response = await $axios.get('/estadisticas')
+      console.log(response.data)
+      cantidadPafUnicas.value = response.data.TotalPipelsoftUnicos
+      ;
     } catch (error) {
       console.error('Error al obtener la cantidad de PAF únicas:', error);
     }
@@ -78,14 +82,8 @@
   
   const fetchCantidadPafPorEstado = async () => {
     try {
-      const response = {
-        data: {
-          1: 20, // PAF en estado 1
-          2: 15, // PAF en estado 2
-          3: 5,  // PAF en estado 3
-        },
-      };
-      cantidadPafPorEstado.value = response.data;
+      const response = await $axios.get('/estadisticas')
+      cantidadPafPorEstado.value = response.data.EstadoProcesoCount;
       totalPaf.value = Object.values(response.data).reduce((a, b) => a + b, 0);
     } catch (error) {
       console.error('Error al obtener la cantidad de PAF por estado:', error);
@@ -126,7 +124,7 @@
         {
           label: 'Cantidad de PAF por estado',
           data: Object.values(cantidadPafPorEstado.value),
-          backgroundColor: ['#66BB6A', '#FFA726', '#AB47BC'],
+          backgroundColor: ['#66BB6A', '#FFA726', '#AB47BC', 'black', 'red', 'brown'],
         },
       ],
     };
@@ -203,6 +201,17 @@
     background-color: #AB47BC;
   }
   
+  .estado-4 {
+    background-color: black;
+  }
+
+  .estado-5 {
+    background-color: red;
+  }
+
+  .estado-6 {
+    background-color: brown;
+  }
   .estado-seleccionado {
     border: 2px solid #FFFFFF;
     background-color: #333333;

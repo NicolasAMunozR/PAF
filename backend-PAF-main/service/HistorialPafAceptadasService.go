@@ -179,24 +179,28 @@ func (service *HistorialPafAceptadasService) ActualizarModificaciones() error {
 func (s *HistorialPafAceptadasService) ActualizarBanderaAceptacion(codigoPAF string, nuevaBanderaAceptacion int) error {
 	// Iniciar una transacción para garantizar consistencia
 	tx := s.DB.Begin()
-	if err := tx.Error; err != nil {
-		return fmt.Errorf("error al iniciar la transacción: %w", err)
+	if tx.Error != nil {
+		return fmt.Errorf("error al iniciar la transacción: %w", tx.Error)
 	}
 
 	// Buscar el historial correspondiente al codigoPAF
 	var historial models.HistorialPafAceptadas
-	if err := tx.Where("codigo_paf = ?", codigoPAF).First(&historial).Error; err != nil {
+	err := tx.Where("codigo_paf = ?", codigoPAF).First(&historial).Error
+	if err != nil {
 		tx.Rollback() // Rollback si ocurre un error al buscar el historial
+		if err == gorm.ErrRecordNotFound {
+			return fmt.Errorf("historial con codigoPAF %s no encontrado", codigoPAF)
+		}
 		return fmt.Errorf("error al buscar historial con codigoPAF %s: %w", codigoPAF, err)
 	}
 
-	// Actualizar la BanderaAceptacion
+	// Actualizar el valor de BanderaAceptacion
 	historial.BanderaAceptacion = nuevaBanderaAceptacion
 
 	// Guardar los cambios en la base de datos
 	if err := tx.Save(&historial).Error; err != nil {
 		tx.Rollback() // Rollback si no se puede guardar el historial
-		return fmt.Errorf("error al actualizar BanderaAceptacion: %w", err)
+		return fmt.Errorf("error al actualizar BanderaAceptacion para codigoPAF %s: %w", codigoPAF, err)
 	}
 
 	// Confirmar la transacción
@@ -204,6 +208,8 @@ func (s *HistorialPafAceptadasService) ActualizarBanderaAceptacion(codigoPAF str
 		return fmt.Errorf("error al confirmar la transacción: %w", err)
 	}
 
+	// Log exitoso
 	log.Printf("BanderaAceptacion actualizada a %d para el historial con codigoPAF %s", nuevaBanderaAceptacion, codigoPAF)
 	return nil
 }
+

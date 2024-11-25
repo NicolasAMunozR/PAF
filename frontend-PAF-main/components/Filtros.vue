@@ -1,13 +1,13 @@
 <template>
   <div class="filters">
     <div class="filter-item">
-      <label for="nombre" class="label">Nombre</label>
+      <label for="nombreAsignatura" class="label">Nombre Asignatura</label>
       <input
-        id="nombre"
-        v-model="filtros.nombres"
+        id="nombreAsignatura"
+        v-model="filtros.nombreAsignatura"
         type="text"
         class="input"
-        placeholder="Filtrar por nombre"
+        placeholder="Filtrar por nombre de asignatura"
       />
     </div>
     <div class="filter-item">
@@ -44,27 +44,29 @@
       <label for="estadoProceso" class="label">Estado de Proceso</label>
       <select id="estadoProceso" v-model="filtros.estadoProceso" class="select">
         <option value="">Todos</option>
-        <option value="Activo">Activo</option>
-        <option value="Inactivo">Inactivo</option>
+        <option value=1>Estado 1</option>
+        <option value=2>Estado 2</option>
+        <option value=3>Estado 3</option>
+        <option value=4>Estado 4</option>
+        <option value=5>Estado 5</option>
+        <option value=6>Estado 6</option>
       </select>
     </div>
     <div class="filter-item">
       <label for="calidad" class="label">Calidad</label>
       <select id="calidad" v-model="filtros.calidad" class="select">
         <option value="">Todas</option>
-        <option value="Contrato Fijo">Contrato Fijo</option>
-        <option value="Contrato Temporal">Contrato Temporal</option>
-        <option value="Contrato Indefinido">Contrato Indefinido</option>
-        <option value="Contrato Parcial">Contrato Parcial</option>
+        <option value="Baja">Calidad Baja</option>
+        <option value="Media">calidad Media</option>
+        <option value="Alta">Calidad Alta</option>
       </select>
     </div>
     <div class="sort-item">
       <label for="sort" class="label">Ordenar por</label>
       <select v-model="sortBy" class="select">
-        <option value="Nombres">Nombre</option>
+        <option value="NombreAsignatura">Nombre de Asignatura</option>
         <option value="CodigoAsignatura">Código de Asignatura</option>
-        <option value="Run">Run</option>
-        <option value="FechaInicioContrato">Fecha de Inicio de Contrato</option>
+        <option value="Run">Run</option>  
         <option value="FechaUltimaModificacionProceso">Ultima Actualización del Proceso</option>
       </select>
       <button @click="toggleSortOrder" class="btn sort-btn">
@@ -79,6 +81,7 @@
 
 <script setup lang="ts">
 import { ref, watch, defineEmits } from 'vue'
+import { jsx, jsxDEV } from 'vue/jsx-runtime';
 
 const emit = defineEmits<{
   (event: 'filter', filters: any): void
@@ -86,12 +89,13 @@ const emit = defineEmits<{
 }>()
 
 const filtros = ref({
-  nombres: '',
   codigoPAF: '',
   run: '',
   codigoAsignatura: '',
   estadoProceso: '',
-  calidad: ''
+  calidad: '',
+  nombreAsignatura: '',
+  fechaUltimaModificacionProceso: ''
 })
 
 const sortBy = ref('nombres')
@@ -102,7 +106,7 @@ watch(filtros, (newFilters) => {
 }, { deep: true })
 
 const resetFilters = () => {
-  filtros.value = { nombres: '', codigoPAF: '', codigoAsignatura: '', run: '', estadoProceso: '', calidad: '' }
+  filtros.value = { nombreAsignatura: '', codigoPAF: '', codigoAsignatura: '', run: '', estadoProceso: '', calidad: '', fechaUltimaModificacionProceso: '' }
   emit('filter', filtros.value)
 }
 

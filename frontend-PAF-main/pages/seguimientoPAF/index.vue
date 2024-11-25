@@ -16,17 +16,19 @@
             <th>Jefatura</th>
             <th>Nombre de Asignatura</th>
             <th>Estado del Proceso</th>
+            <th>Fecha de la ultima Actualización de Estado</th>
             <th>Historial de Estados</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(contrato, index) in contratos" :key="index">
-            <td>{{ contrato.pipelsoft_data.CodigoPAF }}</td>
-            <td>{{ contrato.pipelsoft_data.Jerarquia }}</td>
-            <td>{{ contrato.pipelsoft_data.NombreAsignatura }}</td>
-            <td>{{ estadoProceso(contrato.pipelsoft_data.EstadoProceso) }}</td>
+            <td>{{ contrato.PipelsoftData.CodigoPAF }}</td>
+            <td>{{ contrato.PipelsoftData.Jerarquia }}</td>
+            <td>{{ contrato.PipelsoftData.NombreAsignatura }}</td>
+            <td>{{ estadoProceso(contrato.PipelsoftData.EstadoProceso) }}</td>
+            <td>{{ new Date(contrato.PipelsoftData.FechaUltimaModificacionProceso).toLocaleTimeString() }} {{ new Date(contrato.PipelsoftData.FechaUltimaModificacionProceso).toLocaleDateString() }}</td>
             <td>
-              <div v-for="(estado, idx) in contrato.pipelsoft_data.historialEstados" :key="idx">
+              <div v-for="(estado, idx) in contrato.PipelsoftData.historialEstados" :key="idx">
                 <p><strong>{{ estadoProceso(estado.estado) }}</strong>: 
                 {{ calcularTiempoEnEstado(estado.fechaInicio) }} días</p>
               </div>
@@ -54,11 +56,17 @@ const errorMessage = ref('')
 const estadoProceso = (estado: number): string => {
   switch (estado) {
     case 1:
-      return "Activo"
+      return "Estado 1"
     case 2:
-      return "Inactivo"
+      return "Estado 2"
     case 3:
-      return "Finalizado"
+      return "Estado 3"
+    case 4:
+      return "Estado 4"
+    case 5:
+      return "Estado 5"
+    case 6:
+      return "Estado 6"
     default:
       return "Desconocido"
   }

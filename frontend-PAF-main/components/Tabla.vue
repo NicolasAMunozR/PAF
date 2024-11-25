@@ -19,7 +19,7 @@
           <td class="px-4 py-3 text-gray-700">{{ persona.Run }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.NombreAsignatura }}</td>
           <td class="px-4 py-3 text-gray-700"> </td>
-          <td class="px-4 py-3 text-gray-700">{{ persona.Cupo }} </td>
+          <td class="px-4 py-3 text-gray-700">{{ persona.Cupo }} {{ persona.cupo }} </td>
           <td v-if="showButtons" class="px-4 py-3">
             <a :href="`/paf?codigoPaf=${persona.CodigoPAF}`" class="button">Ver PAF</a>
             <a :href="`/horario?run=${persona.Run}`" class="button">Ver Horarios</a>

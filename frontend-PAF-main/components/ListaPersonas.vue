@@ -21,7 +21,7 @@ interface Persona {
   PrimerApellido: string;
   SegundoApellido: string;
   Correo: string;
-  EstadoProceso: string; // Convertido a string
+  EstadoProceso: number // Convertido a string
   Calidad: string;
   Jerarquia: string;
   CantidadHoras: number;
@@ -50,7 +50,9 @@ const filtros = ref({
   codigoAsignatura: '',
   estadoProceso: '',
   calidad: '',
-  jerarquia: ''
+  jerarquia: '',
+  nombreAsignatura: '',
+  fechaUltimaModificacionProceso: ''
 })
 const sortBy = ref('nombres')
 const sortOrder = ref('asc')
@@ -59,13 +61,14 @@ const sortOrder = ref('asc')
 const filteredPersonas = computed(() => {
   let filtered = personas.value.filter(persona => {
     return (
-      persona.Nombres.toLowerCase().includes(filtros.value.nombres.toLowerCase()) &&
+      persona.NombreAsignatura.toLowerCase().includes(filtros.value.nombreAsignatura.toLowerCase()) &&
       persona.CodigoAsignatura.toLowerCase().includes(filtros.value.codigoAsignatura.toLowerCase()) &&
-      (filtros.value.estadoProceso ? persona.EstadoProceso === filtros.value.estadoProceso : true) &&
+      (filtros.value.estadoProceso ? persona.EstadoProceso.toString() === filtros.value.estadoProceso : true) &&
       (filtros.value.calidad ? persona.Calidad === filtros.value.calidad : true) &&
       persona.CodigoPAF.toLowerCase().includes(filtros.value.codigoPAF.toLowerCase()) &&
       persona.Run.toLowerCase().includes(filtros.value.run.toLowerCase()) &&
-      (filtros.value.jerarquia ? persona.Jerarquia === filtros.value.jerarquia : true)
+      (filtros.value.jerarquia ? persona.Jerarquia === filtros.value.jerarquia : true) &&
+      persona.FechaUltimaModificacionProceso.toLowerCase().includes(filtros.value.fechaUltimaModificacionProceso.toLowerCase())
     )
   })
 
@@ -87,8 +90,21 @@ const filteredPersonas = computed(() => {
 onMounted(async () => {
   try {
     const response = await $axios.get('/pipelsoft/contratos');
-    console.log('Personas obtenidas:', response.data);
-    personas.value = response.data;
+    console.log('Personas:', response.data);
+    personas.value = response.data.map((item: any) => ({
+      CodigoAsignatura: item.PipelsoftData.CodigoAsignatura,
+      Nombres: item.PipelsoftData.Nombres,
+      PrimerApellido: item.PipelsoftData.PrimerApellido,
+      SegundoApellido: item.PipelsoftData.SegundoApellido,
+      CodigoPAF: item.PipelsoftData.CodigoPAF,
+      Calidad: item.PipelsoftData.Calidad,
+      Jerarquia: item.PipelsoftData.Jerarquia,
+      EstadoProceso: item.PipelsoftData.EstadoProceso,
+      Run: item.PipelsoftData.Run,
+      Cupo: item.HistorialPafData.cupo,
+      NombreAsignatura: item.PipelsoftData.NombreAsignatura,
+      FechaUltimaModificacionProceso: item.PipelsoftData.FechaUltimaModificacionProceso,
+    }))
     console.log('Personas transformadas:', personas.value);
   } catch (error) {
     console.error('Error al obtener personas:', error);

@@ -43,37 +43,102 @@
       </div>
     </div>
 
-    <!-- Cuadro lateral -->
+    <!-- Fichas de historial, PAF y asignaturas -->
     <div class="w-1/3 pl-4 mt-12">
-      <h2 class="font-semibold text-lg">PAF</h2>
-      <div v-if="persona.length > 0">
+      <!-- Ficha del historial -->
+      <div v-if="historialSeleccionado">
+        <h2 class="font-semibold text-lg">PAF macheada</h2>
+        <div class="p-4 mb-4 rounded shadow bg-yellow-200">
+          <p><strong>Código PAF:</strong> {{ historialSeleccionado?.CodigoPaf }}</p>
+          <p><strong>Código Asignatura:</strong> {{ historialSeleccionado?.CodigoAsignatura }}</p>
+          <p><strong>Nombre Asignatura:</strong> {{ historialSeleccionado?.NombreAsignatura }}</p>
+          <p><strong>Semestre:</strong> {{ historialSeleccionado?.semestre }}</p>
+        </div>
+      </div>
+
+      <!-- Fichas de PAF -->
+      <h2 class="font-semibold text-lg mt-8">PAF</h2>
+      <div v-if="fichasPAF.length > 0">
         <div
-          v-for="(p, index) in personaFiltrada"
+          v-for="(p, index) in fichasPAF"
           :key="index"
-          :style="{ backgroundColor: colores[index % colores.length] }"
-          class="p-4 mb-4 rounded shadow"
+          :style="{ 
+            backgroundColor: fichaSeleccionadaPAF === p 
+              ? 'lightblue' 
+              : coloresPAF[index % coloresPAF.length] 
+          }"
+          class="p-4 mb-4 rounded shadow cursor-pointer"
+          @click="fichaSeleccionadaPAF = p"
         >
-          <p><strong>Código de Asignatura:</strong> {{ p.CodigoAsignatura }}</p>
-          <p><strong>Nombre de Asignatura:</strong> {{ p.NombreAsignatura }}</p>
-          <p><strong>Horas Semanales:</strong> {{ p.CantidadHoras }}</p>
+          <p><strong>Nombres:</strong> {{ p.Nombres }}</p>
+          <p><strong>Apellidos:</strong> {{ p.PrimerApellido }} {{ p.SegundoApellido }}</p>
           <p><strong>Jefatura:</strong> {{ p.NombreUnidadContratante }}</p>
-          <p><strong>Bloque:</strong> {{ p.Bloque }}</p>
-          <p><strong>Cupo:</strong> {{ p.Cupo }}</p>
-          <p><strong>Sección:</strong> {{ p.Seccion }}</p>
-          <p><strong>Semestre:</strong> {{ p.Semestre }}</p>
+          <p><strong>Cantidad de Horas:</strong> {{ p.CantidadHoras }}</p>
         </div>
       </div>
       <div v-else>
-        <p>No se encontraron asignaturas.</p>
+        <p>No se encontraron registros de PAF.</p>
       </div>
+
+      <!-- Fichas de asignaturas -->
+      <h2 class="font-semibold text-lg mt-8">Horario Asignatura</h2>
+      <div v-if="fichasAsignaturas.length > 0">
+        <div
+          v-for="(p, index) in fichasAsignaturas"
+          :key="index"
+          :style="{ 
+            backgroundColor: fichaSeleccionadaAsignatura === p 
+              ? 'lightblue' 
+              : coloresAsignaturas[index % coloresAsignaturas.length] 
+          }"
+          class="p-4 mb-4 rounded shadow cursor-pointer"
+          @click="fichaSeleccionadaAsignatura = p"
+        >
+          <p><strong>Código de Asignatura:</strong> {{ p.codigo_asignatura }}</p>
+          <p><strong>Nombre de Asignatura:</strong> {{ p.nombre_asignatura }}</p>
+          <p><strong>Bloque:</strong> {{ p.bloque }}</p>
+          <p><strong>Cupo:</strong> {{ p.cupo }}</p>
+          <p><strong>Sección:</strong> {{ p.seccion }}</p>
+          <p><strong>Semestre:</strong> {{ p.semestre }}</p>
+        </div>
+      </div>
+      <div v-else>
+        <p>No se encontraron asignaturas filtradas.</p>
+      </div>
+            <!-- Botón ubicado en la parte inferior -->
+            <div class="flex justify-end mt-4">
+            <button v-if="fichaSeleccionadaPAF && fichaSeleccionadaAsignatura"
+            @click="enviarSeleccion" class="bg-blue-500 text-white py-2 px-4 rounded">
+            Enviar Selección
+            </button>
+          </div>
     </div>
   </div>
 </template>
+
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import { onMounted, ref, computed } from 'vue'
 import { useNuxtApp } from '#app'
+
+const historialSeleccionado = computed(() => persona.value.find((p) => p.ID !== 0) || null);
+
+const fichasPAF = computed(() =>
+  persona.value.filter((p) => 
+    p.CodigoPaf !== historialSeleccionado.value?.CodigoPaf
+  )
+);
+
+const fichasAsignaturas = computed(() =>
+  persona1.value.filter((p) => 
+    p.codigo_asignatura !== historialSeleccionado.value?.CodigoAsignatura
+  )
+);
+
+
+const fichaSeleccionadaPAF = ref<Persona | null>(null);
+const fichaSeleccionadaAsignatura = ref<Horario | null>(null);
 
 const route = useRoute()
 const router = useRouter()
@@ -83,6 +148,7 @@ const { $axios } = useNuxtApp() as unknown as { $axios: typeof import('axios').d
 const run = ref(route.query.run || '')
 
 interface Persona {
+  CodigoPaf: string;
   CodigoAsignatura: string;
   NombreAsignatura: string;
   CantidadHoras: number;
@@ -90,15 +156,24 @@ interface Persona {
   Nombres: string;
   PrimerApellido: string;
   SegundoApellido: string;
-  Dia?: string;
-  Bloque?: string;
-  Cupo?: number;
-  Seccion?: string;
-  Semestre?: string;
+  ID: number;
+  semestre?: string; // Add the 'semestre' property
+}
+
+interface Horario {
+  run: string;
+  codigo_asignatura: string;
+  nombre_asignatura: string;
+  bloque?: string;
+  cupo?: number;
+  seccion?: string;
+  semestre?: string;
 }
 
 const persona = ref<Persona[]>([])
-const colores = ['#FFCDD2', '#F8BBD0', '#E1BEE7', '#D1C4E9', '#C5CAE9']
+const persona1 = ref<Horario[]>([])
+console.log("persona1", persona1.value)
+const colores = ['#C8E6C9', '#A5D6A7', '#81C784', '#66BB6A', '#4CAF50']
 const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 const horarios = ref([
   { modulo: '08:15 - 09:35' },
@@ -113,8 +188,8 @@ const horarios = ref([
 ])
 
 const semestreSeleccionado = ref('')
-const semestres = computed(() => [...new Set(persona.value.map(p => p.Semestre))])
-const personaFiltrada = computed(() => persona.value.filter(p => p.Semestre === semestreSeleccionado.value))
+const semestres = computed(() => [...new Set(persona1.value.map(p => p.semestre))])
+const personaFiltrada = computed(() => persona1.value.filter(p => p.semestre === semestreSeleccionado.value))
 
 const bloquesPorDia = (dia: string, modulo: number) => {
   // Mapear iniciales de días con sus nombres completos
@@ -130,10 +205,10 @@ const bloquesPorDia = (dia: string, modulo: number) => {
   // Filtrar asignaturas para el día específico y el módulo actual
   return personaFiltrada.value
     .filter((p) => {
-      if (!p.Bloque) return false;
+      if (!p.bloque) return false;
 
       // Separar bloques (por ejemplo: M2-M5-V1 se divide en ["M2", "M5", "V1"])
-      const bloques = p.Bloque.split('-');
+      const bloques = p.bloque.split('-');
 
       // Buscar un bloque que coincida con el día y el módulo
       return bloques.some((b) => {
@@ -145,9 +220,9 @@ const bloquesPorDia = (dia: string, modulo: number) => {
       });
     })
     .map((p) => ({
-      nombre: p.NombreAsignatura,
-      seccion: p.Seccion,
-      color: colores[persona.value.indexOf(p) % colores.length],
+      nombre: p.nombre_asignatura,
+      seccion: p.seccion,
+      color: colores[persona1.value.indexOf(p) % colores.length],
     }));
 };
 
@@ -155,24 +230,59 @@ const bloquesPorDia = (dia: string, modulo: number) => {
 const obtenerDatosPersona = async () => {
   try {
     const response = await $axios.get(`/pipelsoft/contratos-run/${run.value}`)
+    console.log('Datos de la persona:', response.data)
+    const response1 = await $axios.get(`/profesorDB/${run.value}`)
+    persona1.value = response1.data
+    console.log("aaaa", persona1.value)
+    console.log("aaaa", response1.data)
+    console.log("bbbb", response1.data.bloque)
     persona.value = response.data.map((item: any) => ({
-      CodigoAsignatura: item.pipelsoft_data.CodigoAsignatura,
-      Nombres: item.pipelsoft_data.Nombres,
-      NombreAsignatura: item.pipelsoft_data.NombreAsignatura,
-      PrimerApellido: item.pipelsoft_data.PrimerApellido,
-      SegundoApellido: item.pipelsoft_data.SegundoApellido,
-      CantidadHoras: item.pipelsoft_data.CantidadHoras,
-      NombreUnidadContratante: item.pipelsoft_data.NombreUnidadContratante,
-      Dia: item.profesor_data.dia,
-      Bloque: item.profesor_data.bloque,
-      Cupo: item.profesor_data.cupo,
-      Seccion: item.profesor_data.seccion,
-      Semestre: item.profesor_data.semestre,
+      CodigoPaf: item.PipelsoftData.CodigoPAF,
+      CodigoAsignatura: item.PipelsoftData.CodigoAsignatura,
+      Nombres: item.PipelsoftData.Nombres,
+      NombreAsignatura: item.PipelsoftData.NombreAsignatura,
+      PrimerApellido: item.PipelsoftData.PrimerApellido,
+      SegundoApellido: item.PipelsoftData.SegundoApellido,
+      CantidadHoras: item.PipelsoftData.CantidadHoras,
+      NombreUnidadContratante: item.PipelsoftData.NombreUnidadContratante,
+      Bloque: response1.data.bloque,
+      Cupo: response1.data.cupo,
+      Seccion: response1.data.seccion,
+      Semestre: response1.data.semestre,
+      ID: item.HistorialPafData.ID,
+      semestre: item.HistorialPafData.semestre
     }))
   } catch (error) {
     console.error('Error al obtener los datos:', error)
   }
 }
+
+const enviarSeleccion = async () => {
+  if (!fichaSeleccionadaPAF || !fichaSeleccionadaAsignatura) {
+    alert('Por favor selecciona una ficha de PAF y una de asignatura.');
+    return;
+  }
+
+  try {
+    const codigoPAF = fichaSeleccionadaPAF.value?.CodigoPaf; // Ajustar si el código es otro campo
+    const data = {
+      run: fichaSeleccionadaAsignatura?.value?.run || '', // Cambiar según lo que necesitas enviar
+      semestre: fichaSeleccionadaAsignatura?.value?.semestre || '',
+      codigo_asignatura: fichaSeleccionadaAsignatura?.value?.codigo_asignatura || '',
+      nombre_asignatura: fichaSeleccionadaAsignatura?.value?.nombre_asignatura || '',
+      seccion: fichaSeleccionadaAsignatura?.value?.seccion || '',
+      cupo: fichaSeleccionadaAsignatura?.value?.cupo || 0, 
+      bloque: fichaSeleccionadaAsignatura?.value?.bloque || '', 
+    };
+    console.log('Datos a enviar:', data);
+    await $axios.post(`/historial/post/${codigoPAF}`, data);
+    alert('Datos enviados correctamente.');
+  } catch (error) {
+    console.error('Error al enviar los datos:', error);
+    alert('Hubo un error al enviar los datos.');
+  }
+};
+
 
 const volver = () => {
   router.go(-1)
@@ -181,6 +291,8 @@ const volver = () => {
 onMounted(() => {
   obtenerDatosPersona()
 })
+const coloresPAF = ['#FFCDD2', '#F8BBD0', '#E1BEE7', '#D1C4E9', '#C5CAE9'];
+const coloresAsignaturas = ['#C8E6C9', '#A5D6A7', '#81C784', '#66BB6A', '#4CAF50'];
 </script>
 
 
@@ -201,5 +313,9 @@ button {
   top: 4rem; /* Ajusta la posición según lo necesario */
   left: 1rem; /* Ajusta la distancia desde la izquierda */
   z-index: 10; /* Asegura que el botón esté por encima de otros elementos */
+}
+
+.flex.justify-end {
+  margin-top: auto;
 }
 </style>

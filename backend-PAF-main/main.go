@@ -66,6 +66,11 @@ func main() {
 	// Ruta para obtener los horarios por Run
 	r.HandleFunc("/horarios/{run}", horarioController.ObtenerHorariosPorRun).Methods("GET")
 
+	// Instanciar el servicio y controlador de ProfesorDB
+	profesorDBService := service.NewProfesorDBService(DB.DBPersonal)
+	profesorDBController := controller.NewProfesorDBController(*profesorDBService)
+	r.HandleFunc("/profesorDB/{run}", profesorDBController.ObtenerProfesorDBPorRun).Methods("GET")
+
 	// Instanciar el servicio y controlador de Estadísticas
 	estadisticasService := service.NewEstadisticasService(DB.DBPersonal)
 	estadisticasController := controller.NewEstadisticasController(estadisticasService)

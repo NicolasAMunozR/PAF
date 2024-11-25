@@ -39,14 +39,14 @@ func (s *ProfesorDBService) ObtenerListaProfesores() ([]models.ProfesorDB, error
 }
 
 // ObtenerProfesorPorRUT obtiene un profesor por su RUT desde la DB DBPersonal
-func (s *ProfesorDBService) ObtenerProfesorPorRUT(run string) (*models.ProfesorDB, error) {
-	var profesor models.ProfesorDB
+func (s *ProfesorDBService) ObtenerProfesorPorRUT(run string) ([]models.ProfesorDB, error) {
+	var profesor []models.ProfesorDB
 
 	// Buscar profesor por RUT en DBPersonal
 	if err := s.DBPersonal.Where("run = ?", run).
-		First(&profesor).Error; err != nil {
+		Find(&profesor).Error; err != nil {
 		return nil, err
 	}
 
-	return &profesor, nil
+	return profesor, nil
 }

@@ -31,6 +31,7 @@
     NombreAsignatura: string
     NombreUnidadContratante: string
     NombreUnidadMayor: string
+    cupo: number
   }
   
   const personas = ref<Persona[]>([])

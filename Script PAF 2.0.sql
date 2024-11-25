@@ -33,14 +33,13 @@ INSERT INTO profesor_dbs (
     nombre_asignatura, 
     seccion, 
     cupo, 
-    dia, 
     bloque
 ) VALUES 
-('12345678-9', '2024-1', 'ASIGN001', 'Matemáticas Avanzadas', 'A', 30, 'Lunes', 'M2-M5-V1'),
-('23456789-0', '2024-1', 'ASIGN002', 'Física General', 'B', 25, 'Martes', 'M3-M6-V2'),
-('34567890-1', '2024-1', 'ASIGN003', 'Química Orgánica', 'C', 20, 'Miércoles', 'M1-M4-V1'),
-('45678901-2', '2024-2', 'ASIGN004', 'Biología Molecular', 'A', 15, 'Jueves', 'M2-M5-V3'),
-('56789012-3', '2024-2', 'ASIGN005', 'Ingeniería de Software', 'B', 40, 'Viernes', 'M4-M7-V2');
+('12345678-9', '2024-1', 'ASIGN001', 'Matemáticas Avanzadas', 'A', 30, 'M2-M5-V1'),
+('23456789-0', '2024-1', 'ASIGN002', 'Física General', 'B', 25, 'M3-M6-V2'),
+('34567890-1', '2024-1', 'ASIGN003', 'Química Orgánica', 'C', 20, 'M1-M4-V1'),
+('45678901-2', '2024-2', 'ASIGN004', 'Biología Molecular', 'A', 15, 'M2-M5-V3'),
+('56789012-3', '2024-2', 'ASIGN005', 'Ingeniería de Software', 'B', 40, 'M4-M7-V2');
 
 
 
