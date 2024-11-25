@@ -73,6 +73,7 @@ func main() {
 	// Ruta para obtener las estadísticas
 	r.HandleFunc("/estadisticas", estadisticasController.ObtenerEstadisticas).Methods("GET")
 	r.HandleFunc("/estadisticas/unidad/{nombreUnidadContratante}", estadisticasController.ContarRegistrosPorUnidadContratante).Methods("GET")
+	r.HandleFunc("/estadisticas/frecuencia-unidades-mayores", estadisticasController.ObtenerFrecuenciaNombreUnidadMayor).Methods("GET")
 
 	// Aplicar CORS al enrutador
 	handler := c.Handler(r)
