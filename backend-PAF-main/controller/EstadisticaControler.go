@@ -92,3 +92,20 @@ func (ctrl *HistorialPafAceptadasController) ActualizarBanderaAceptacion(w http.
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(`{"message": "BanderaAceptacion actualizada correctamente"}`))
 }
+
+// ObtenerFrecuenciaNombreUnidadMayor maneja la solicitud para obtener la frecuencia de NombreUnidadMayor
+func (c *EstadisticasController) ObtenerFrecuenciaNombreUnidadMayor(w http.ResponseWriter, r *http.Request) {
+	// Llamar al servicio para obtener los datos
+	frecuencia, err := c.Service.ObtenerFrecuenciaNombreUnidadMayor()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error al obtener la frecuencia de NombreUnidadMayor: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Responder con los datos en formato JSON
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(frecuencia); err != nil {
+		http.Error(w, fmt.Sprintf("Error al codificar la respuesta en JSON: %v", err), http.StatusInternalServerError)
+	}
+}

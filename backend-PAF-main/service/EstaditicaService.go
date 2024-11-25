@@ -77,3 +77,27 @@ func (s *EstadisticasService) ContarRegistrosPorNombreUnidadContratante(nombreUn
 
 	return count, nil
 }
+
+// ObtenerFrecuenciaNombreUnidadMayor devuelve un mapa con cada NombreUnidadMayor y la cantidad de veces que aparece
+func (s *EstadisticasService) ObtenerFrecuenciaNombreUnidadMayor() (map[string]int, error) {
+	var resultados []struct {
+		NombreUnidadMayor string
+		Conteo            int
+	}
+
+	// Realizar la consulta agrupada
+	if err := s.DB.Model(&models.Pipelsoft{}).
+		Select("nombre_unidad_mayor, COUNT(*) as conteo").
+		Group("nombre_unidad_mayor").
+		Scan(&resultados).Error; err != nil {
+		return nil, fmt.Errorf("error al obtener la frecuencia de NombreUnidadMayor: %w", err)
+	}
+
+	// Convertir los resultados en un mapa
+	frecuencia := make(map[string]int)
+	for _, resultado := range resultados {
+		frecuencia[resultado.NombreUnidadMayor] = resultado.Conteo
+	}
+
+	return frecuencia, nil
+}
