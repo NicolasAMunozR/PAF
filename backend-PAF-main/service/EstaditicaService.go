@@ -133,3 +133,33 @@ func (s *EstadisticasService) ObtenerFrecuenciaNombreUnidadMayor() (map[string]i
 
 	return frecuencia, nil
 }
+
+//mostrar paf solo las activas y contrastarlas con la cantidad de profesores totales.
+
+// ContarRegistrosExcluyendoEstados cuenta los registros en Pipelsoft donde cod_estado no sea "F1", "F9" o "A9"
+// y calcula el porcentaje dividiéndolo por el total de profesores.
+func (s *EstadisticasService) ContarRegistrosExcluyendoEstados() (int64, float64, error) {
+	var count int64
+	var totalProfesores int64
+
+	// Contar los registros en Pipelsoft donde cod_estado no sea "F1", "F9", o "A9"
+	if err := s.DB.Model(&models.Pipelsoft{}).
+		Where("cod_estado NOT IN ?", []string{"F1", "F9", "A9"}).
+		Count(&count).Error; err != nil {
+		return 0, 0, fmt.Errorf("error al contar los registros excluyendo estados: %w", err)
+	}
+
+	// Contar el total de profesores
+	if err := s.DB.Model(&models.ProfesorDB{}).
+		Count(&totalProfesores).Error; err != nil {
+		return 0, 0, fmt.Errorf("error al contar el total de profesores: %w", err)
+	}
+
+	// Calcular el porcentaje
+	var porcentaje float64
+	if totalProfesores > 0 {
+		porcentaje = float64(count) / float64(totalProfesores) * 100
+	}
+
+	return count, porcentaje, nil
+}

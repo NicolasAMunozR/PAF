@@ -81,6 +81,7 @@ func main() {
 	r.HandleFunc("/estadisticas", estadisticasController.ObtenerEstadisticas).Methods("GET")
 	r.HandleFunc("/estadisticas/unidad/{nombreUnidadContratante}", estadisticasController.ContarRegistrosPorUnidadContratante).Methods("GET")
 	r.HandleFunc("/estadisticas/frecuencia-unidades-mayores", estadisticasController.ObtenerFrecuenciaNombreUnidadMayor).Methods("GET")
+	r.HandleFunc("/estadisticas/PafActivas", estadisticasController.ContarRegistrosPorCodEstado).Methods("GET")
 
 	// Inicializar servicios y controladores
 	contratoService := &service.ContratoService{DB: DB.DBPersonal}
