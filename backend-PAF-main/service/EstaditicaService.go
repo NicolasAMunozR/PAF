@@ -76,7 +76,7 @@ func (s *EstadisticasService) ObtenerEstadisticas() (*EstadisticasResponse, erro
 
 	// Los códigos de estado definidos
 	estados := []string{
-		"A1", "A2", "A3", "B1", "B9", "C1D", "C9D", "F1", "F9", "A9",
+		"A1", "A2", "A3", "B1", "F9", "C1D", "C9D", "F1", "B9", "A9",
 	}
 
 	// Contar registros por cada estado
