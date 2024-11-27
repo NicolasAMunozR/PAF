@@ -10,11 +10,10 @@ import (
 type Pipelsoft struct {
 	gorm.Model
 	// Campos de Persona
-	Run             string `gorm:"type:text;not null"`
-	Nombres         string `gorm:"type:text;not null"`
-	PrimerApellido  string `gorm:"type:text;not null"`
-	SegundoApellido string `gorm:"type:text;not null"`
-	Correo          string `gorm:"type:text;not null;unique"`
+	RunEmpleado string `gorm:"type:text;not null"`
+	Nombres     string `gorm:"type:text;not null"`
+	PrimerApp   string `gorm:"type:text;not null"`
+	SegundoApp  string `gorm:"type:text;not null"`
 
 	// Campos de UnidadContratante
 	CodigoUnidadContratante string `gorm:"type:varchar(100);not null;unique"`
@@ -22,16 +21,19 @@ type Pipelsoft struct {
 	NombreUnidadMayor       string `gorm:"type:text"`
 
 	// Campos de Contrato
-	CodigoPAF           string `gorm:"type:text;not null"`
+	IdPaf               int    `gorm:"type:int;not null"`
 	FechaInicioContrato string `gorm:"type:date;not null"`
 	FechaFinContrato    string `gorm:"type:date;not null"`
 	CodigoAsignatura    string `gorm:"type:text;not null"`
 	NombreAsignatura    string `gorm:"type:text;not null"`
-	CantidadHoras       int    `gorm:"type:int;not null"`
+	HorasAsignatura     int    `gorm:"type:int;not null"`
+	CantidadHorasPaf    int    `gorm:"type:int;not null"`
 	Jerarquia           string `gorm:"type:text;not null"`
 	Calidad             string `gorm:"type:text;not null"`
+	Semestre            string `gorm:"type:text;not null"`
 
 	// Campos de Proceso
-	EstadoProceso                  int       `gorm:"type:int;not null"`
+	CodEstado                      string    `gorm:"type:text;not null"`
+	DesEstado                      string    `gorm:"type:text;not null"`
 	FechaUltimaModificacionProceso time.Time `gorm:"type:timestamp;not null"`
 }

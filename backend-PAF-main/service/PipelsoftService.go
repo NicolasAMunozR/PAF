@@ -18,31 +18,30 @@ func NewPipelsoftService(dbPersonal *gorm.DB) *PipelsoftService {
 	}
 }
 
-func (s *PipelsoftService) getAcceptedCodes() (map[string]struct{}, error) {
+func (s *PipelsoftService) getAcceptedCodes() (map[int]struct{}, error) {
 	var historialAceptadas []struct {
-		CodigoPaf string `gorm:"column:codigo_paf"`
+		CodigoPaf int `gorm:"column:codigo_paf"`
 	}
 
 	// Modificación: agregamos la condición BanderaAceptacion = 1
 	if err := s.DBPersonal.Table("historial_paf_aceptadas").
 		Select("codigo_paf").
-		Where("bandera_aceptacion = ?", 1). // Condición para filtrar por BanderaAceptacion = 1
+		Where("bandera_aceptacion = ?", 1).
 		Find(&historialAceptadas).Error; err != nil {
 		return nil, err
 	}
 
-	aceptadosMap := make(map[string]struct{})
+	aceptadosMap := make(map[int]struct{})
 	for _, item := range historialAceptadas {
 		aceptadosMap[item.CodigoPaf] = struct{}{}
 	}
 	return aceptadosMap, nil
 }
 
-// Filtrar registros que no están en los códigos aceptados
-func (s *PipelsoftService) filterRecords(records []models.Pipelsoft, aceptadosMap map[string]struct{}) []models.Pipelsoft {
+func (s *PipelsoftService) filterRecords(records []models.Pipelsoft, aceptadosMap map[int]struct{}) []models.Pipelsoft {
 	var filtered []models.Pipelsoft
 	for _, record := range records {
-		if _, found := aceptadosMap[record.CodigoPAF]; !found {
+		if _, found := aceptadosMap[record.IdPaf]; !found {
 			filtered = append(filtered, record)
 		}
 	}
@@ -51,25 +50,25 @@ func (s *PipelsoftService) filterRecords(records []models.Pipelsoft, aceptadosMa
 
 func (s *PipelsoftService) comprobarYCombinarDatosPorCodigoPAF(pipelsofts []models.Pipelsoft) ([]models.DatosCombinados, error) {
 	// Crear un conjunto único de los códigos PAF presentes en los registros de Pipelsoft
-	codigoPAFSet := make(map[string]struct{})
+	codigoPAFSet := make(map[int]struct{})
 	for _, pipel := range pipelsofts {
-		codigoPAFSet[pipel.CodigoPAF] = struct{}{}
+		codigoPAFSet[pipel.IdPaf] = struct{}{}
 	}
 
 	// Crear una lista para almacenar los datos de HistorialPafAceptadas
 	var historialPafAceptadas []models.HistorialPafAceptadas
-	codigosPAF := make([]string, 0, len(codigoPAFSet))
+	codigosPAF := make([]int, 0, len(codigoPAFSet))
 	for codigoPAF := range codigoPAFSet {
 		codigosPAF = append(codigosPAF, codigoPAF)
 	}
 
 	// Consultar los datos de HistorialPafAceptadas cuyo CódigoPAF esté en la lista de códigos
-	if err := s.DBPersonal.Where("codigo_paf IN ?", codigosPAF).Find(&historialPafAceptadas).Error; err != nil {
+	if err := s.DBPersonal.Where("codigo_paf = ?", codigosPAF).Find(&historialPafAceptadas).Error; err != nil {
 		return nil, err
 	}
 
 	// Crear un map para almacenar los registros de HistorialPafAceptadas por CódigoPAF
-	historialPafMap := make(map[string]models.HistorialPafAceptadas)
+	historialPafMap := make(map[int]models.HistorialPafAceptadas)
 	for _, historial := range historialPafAceptadas {
 		historialPafMap[historial.CodigoPAF] = historial
 	}
@@ -83,7 +82,7 @@ func (s *PipelsoftService) comprobarYCombinarDatosPorCodigoPAF(pipelsofts []mode
 		}
 
 		// Buscar si el CódigoPAF del registro de Pipelsoft está en HistorialPafAceptadas
-		if historial, found := historialPafMap[pipel.CodigoPAF]; found {
+		if historial, found := historialPafMap[pipel.IdPaf]; found {
 			// Si se encuentra, agregar los datos del historialPafAceptadas al objeto DatosCombinados
 			dato.HistorialPafData = historial
 		} else {
@@ -137,7 +136,7 @@ func (s *PipelsoftService) ObtenerTodosLosContratos() ([]models.DatosCombinados,
 func (s *PipelsoftService) ObtenerContratosPorRUN(run string) ([]models.DatosCombinados, error) {
 	var pipelsofts []models.Pipelsoft
 
-	if err := s.DBPersonal.Where("run = ?", run).Find(&pipelsofts).Error; err != nil {
+	if err := s.DBPersonal.Where("run_empleado = ?", run).Find(&pipelsofts).Error; err != nil {
 		return nil, err
 	}
 
@@ -154,7 +153,7 @@ func (s *PipelsoftService) ObtenerContratosPorRUN(run string) ([]models.DatosCom
 func (s *PipelsoftService) ObtenerPorCodigoPAF(codigoPAF string) ([]models.DatosCombinados, error) {
 	var pipelsofts []models.Pipelsoft
 
-	if err := s.DBPersonal.Where("codigo_paf = ?", codigoPAF).Find(&pipelsofts).Error; err != nil {
+	if err := s.DBPersonal.Where("id_paf = ?", codigoPAF).Find(&pipelsofts).Error; err != nil {
 		return nil, err
 	}
 
@@ -201,31 +200,4 @@ func (s *PipelsoftService) ObtenerPAFUltimoMes() ([]models.DatosCombinados, erro
 	contratosFiltrados := s.filterRecords(pipelsofts, aceptadosMap)
 
 	return s.comprobarYCombinarDatosPorCodigoPAF(contratosFiltrados)
-}
-
-// Crear una nueva estructura de Pipelsoft sin guardar nada en la base de datos
-func (s *PipelsoftService) crearEstructuraPipelsoft() models.Pipelsoft {
-	// Crear una nueva instancia del modelo Pipelsoft con valores vacíos o predeterminados
-	pipelsoft := models.Pipelsoft{
-		Run:                            "",          // valor vacío, puede ser ajustado
-		Nombres:                        "",          // valor vacío
-		PrimerApellido:                 "",          // valor vacío
-		SegundoApellido:                "",          // valor vacío
-		Correo:                         "",          // valor vacío
-		CodigoUnidadContratante:        "",          // valor vacío
-		NombreUnidadContratante:        "",          // valor vacío
-		NombreUnidadMayor:              "",          // valor vacío
-		CodigoPAF:                      "",          // valor vacío
-		FechaInicioContrato:            "",          // valor vacío
-		FechaFinContrato:               "",          // valor vacío
-		CodigoAsignatura:               "",          // valor vacío
-		NombreAsignatura:               "",          // valor vacío
-		CantidadHoras:                  0,           // valor predeterminado (0)
-		Jerarquia:                      "",          // valor vacío
-		Calidad:                        "",          // valor vacío
-		EstadoProceso:                  0,           // valor predeterminado (0)
-		FechaUltimaModificacionProceso: time.Time{}, // valor vacío (cero)
-	}
-
-	return pipelsoft
 }

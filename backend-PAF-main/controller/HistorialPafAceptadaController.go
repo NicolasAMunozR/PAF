@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/NicolasAMunozR/PAF/backend-PAF/models"
 	"github.com/NicolasAMunozR/PAF/backend-PAF/service"
@@ -16,13 +17,19 @@ type HistorialPafAceptadasController struct {
 	Service *service.HistorialPafAceptadasService
 }
 
-// CrearHistorialHandler maneja la creación de un nuevo historial
 func (h *HistorialPafAceptadasController) CrearHistorialHandler(w http.ResponseWriter, r *http.Request) {
 	// Obtener el código PAF desde los parámetros de la URL
 	vars := mux.Vars(r)
-	codigoPAF, ok := vars["codigoPAF"]
+	codigoPAFStr, ok := vars["codigoPAF"]
 	if !ok {
 		http.Error(w, "El parámetro 'codigoPAF' es obligatorio", http.StatusBadRequest)
+		return
+	}
+
+	// Convertir el código PAF a entero
+	codigoPAF, err := strconv.Atoi(codigoPAFStr)
+	if err != nil {
+		http.Error(w, "El parámetro 'codigoPAF' debe ser un número entero válido", http.StatusBadRequest)
 		return
 	}
 

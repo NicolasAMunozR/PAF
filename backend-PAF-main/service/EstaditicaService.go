@@ -8,15 +8,14 @@ import (
 )
 
 type EstadisticasResponse struct {
-	TotalProfesores          int64
-	TotalPipelsoft           int64
-	ProfesoresNoEnPipelsoft  int
+	TotalProfesores            int64 // Cambiar de int a int64
+	TotalPipelsoft             int64 // Cambiar de int a int64
+	TotalPipelsoftUnicos       int64 // Cambiar de int a int64
+	PorcentajeUnicos           float64
+	ProfesoresNoEnPipelsoft    int64 // Cambiar de int a int64
 	ProfesoresNoEnPipelsoftPct float64
-	EstadoProcesoCount       map[int]int // Mapa que almacena la cantidad de registros por EstadoProceso
-	EstadoProcesoPct         map[int]float64 // Porcentaje por cada EstadoProceso
-	TotalPipelsoftUnicos     int64
-	PorcentajeUnicos         float64
-	RegistrosPorNombreUnidad int64
+	EstadoProcesoCount         map[string]int     // Claves de tipo string
+	EstadoProcesoPct           map[string]float64 // Claves de tipo string
 }
 
 // EstadisticasService define los métodos para obtener estadísticas de las tablas
@@ -24,11 +23,14 @@ type EstadisticasService struct {
 	DB *gorm.DB
 }
 
-// Nueva instancia de EstadisticasService
-func NewEstadisticasService(db *gorm.DB) *EstadisticasService {
-	return &EstadisticasService{DB: db}
+// Constructor del servicio
+func NewEstadisticasService(dbPersonal *gorm.DB) *EstadisticasService {
+	return &EstadisticasService{
+		DB: dbPersonal,
+	}
 }
 
+// ObtenerEstadisticas obtiene las estadísticas generales de los profesores y Pipelsofts
 func (s *EstadisticasService) ObtenerEstadisticas() (*EstadisticasResponse, error) {
 	var resp EstadisticasResponse
 
@@ -43,37 +45,51 @@ func (s *EstadisticasService) ObtenerEstadisticas() (*EstadisticasResponse, erro
 	}
 
 	// Contar los registros únicos de Run en la tabla pipelsofts
-	if err := s.DB.Model(&models.Pipelsoft{}).Distinct("run").Count(&resp.TotalPipelsoftUnicos).Error; err != nil {
+	if err := s.DB.Model(&models.Pipelsoft{}).Distinct("run_empleado").Count(&resp.TotalPipelsoftUnicos).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los registros únicos de Run en pipelsofts: %w", err)
 	}
-	// Calcular el porcentaje de únicos
+
+	// Calcular el porcentaje de registros únicos en Pipelsoft
 	if resp.TotalPipelsoft > 0 {
 		resp.PorcentajeUnicos = float64(resp.TotalPipelsoftUnicos) / float64(resp.TotalPipelsoft) * 100
 	}
 
 	// Contar los Run de los profesores que no existen en pipelsofts
 	var profesoresNoEnPipelsoft int64
-	if err := s.DB.Table("profesor_dbs").Where("run NOT IN (SELECT run FROM pipelsofts)").Count(&profesoresNoEnPipelsoft).Error; err != nil {
+	if err := s.DB.Table("profesor_dbs").
+		Where("run NOT IN (SELECT run_empleado FROM pipelsofts)").
+		Count(&profesoresNoEnPipelsoft).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los profesores que no están en pipelsofts: %w", err)
 	}
-	resp.ProfesoresNoEnPipelsoft = int(profesoresNoEnPipelsoft)
+
+	// Asignar el valor a la estructura
+	resp.ProfesoresNoEnPipelsoft = profesoresNoEnPipelsoft
+
 	// Calcular porcentaje de profesores no en pipelsoft
 	if resp.TotalProfesores > 0 {
 		resp.ProfesoresNoEnPipelsoftPct = float64(profesoresNoEnPipelsoft) / float64(resp.TotalProfesores) * 100
 	}
 
-	// Contar los registros en pipelsofts por cada EstadoProceso (1-6)
-	resp.EstadoProcesoCount = make(map[int]int)
-	resp.EstadoProcesoPct = make(map[int]float64)
-	for i := 1; i <= 6; i++ {
+	// Contar los registros en pipelsofts por cada EstadoProceso (código de estado como string)
+	resp.EstadoProcesoCount = make(map[string]int)
+	resp.EstadoProcesoPct = make(map[string]float64)
+
+	// Los códigos de estado definidos
+	estados := []string{
+		"A1", "A2", "A3", "B1", "B9", "C1D", "C9D", "F1", "F9", "A9",
+	}
+
+	// Contar registros por cada estado
+	for _, estado := range estados {
 		var count int64
-		if err := s.DB.Model(&models.Pipelsoft{}).Where("estado_proceso = ?", i).Count(&count).Error; err != nil {
-			return nil, fmt.Errorf("error al contar los registros de pipelsofts con estado %d: %w", i, err)
+		if err := s.DB.Model(&models.Pipelsoft{}).Where("cod_estado = ?", estado).Count(&count).Error; err != nil {
+			return nil, fmt.Errorf("error al contar los registros de pipelsofts con estado %s: %w", estado, err)
 		}
-		resp.EstadoProcesoCount[i] = int(count)
-		// Calcular porcentaje para cada estado
+		resp.EstadoProcesoCount[estado] = int(count)
+
+		// Calcular el porcentaje de registros por cada estado
 		if resp.TotalPipelsoft > 0 {
-			resp.EstadoProcesoPct[i] = float64(count) / float64(resp.TotalPipelsoft) * 100
+			resp.EstadoProcesoPct[estado] = float64(count) / float64(resp.TotalPipelsoft) * 100
 		}
 	}
 
@@ -85,7 +101,9 @@ func (s *EstadisticasService) ContarRegistrosPorNombreUnidadContratante(nombreUn
 	var count int64
 
 	// Contar los registros que coinciden con el nombre de unidad contratante
-	if err := s.DB.Model(&models.Pipelsoft{}).Where("nombre_unidad_contratante = ?", nombreUnidadContratante).Count(&count).Error; err != nil {
+	if err := s.DB.Model(&models.Pipelsoft{}).
+		Where("nombre_unidad_contratante = ?", nombreUnidadContratante).
+		Count(&count).Error; err != nil {
 		return 0, fmt.Errorf("error al contar los registros por nombre de unidad contratante: %w", err)
 	}
 

@@ -80,6 +80,15 @@ func main() {
 	r.HandleFunc("/estadisticas/unidad/{nombreUnidadContratante}", estadisticasController.ContarRegistrosPorUnidadContratante).Methods("GET")
 	r.HandleFunc("/estadisticas/frecuencia-unidades-mayores", estadisticasController.ObtenerFrecuenciaNombreUnidadMayor).Methods("GET")
 
+	// Inicializar servicios y controladores
+	contratoService := &service.ContratoService{DB: DB.DBPersonal}
+	contratoController := &controller.ContratoController{Service: contratoService}
+
+	// Definir rutas
+	r.HandleFunc("/contratos", contratoController.GetAllContratosHandler).Methods("GET")
+	r.HandleFunc("/contratos/{run}", contratoController.GetContratoByRunHandler).Methods("GET")
+	r.HandleFunc("/contratos/unidad-mayor", contratoController.GetContratosByUnidadMayorHandler).Methods("GET")
+
 	// Aplicar CORS al enrutador
 	handler := c.Handler(r)
 
@@ -96,7 +105,7 @@ func iniciarCronJob() {
 	c := cron.New()
 
 	// Ejecutar cada 1 hora con 10 minutos
-	c.AddFunc("@every 1m", func() {
+	c.AddFunc("@every 30m", func() {
 		actualizarModificaciones()
 	})
 	c.Start()
@@ -127,11 +136,11 @@ func actualizarModificaciones() {
 			if err := db.Model(&h).Updates(map[string]interface{}{
 				"codigo_modificacion":      1, // Se marca como modificada (en este caso, eliminada)
 				"bandera_modificacion":     2, // 2 = Eliminada
-				"descripcion_modificacion": fmt.Sprintf("PAF con CodigoPAF: %s eliminada, no se encuentra en Pipelsoft", h.CodigoPAF),
+				"descripcion_modificacion": fmt.Sprintf("PAF con CodigoPAF: %d eliminada, no se encuentra en Pipelsoft", h.CodigoPAF),
 			}).Error; err != nil {
 				log.Println("Error al actualizar HistorialPafAceptadas como eliminada:", err)
 			} else {
-				fmt.Printf("PAF eliminada, no encontrada en Pipelsoft: CodigoPAF %s\n", h.CodigoPAF)
+				fmt.Printf("PAF eliminada, no encontrada en Pipelsoft: CodigoPAF %d\n", h.CodigoPAF)
 			}
 			continue // Si no se encuentra, seguimos con el siguiente registro
 		}
@@ -152,8 +161,8 @@ func actualizarModificaciones() {
 		if h.NombreAsignatura != pipelsoft.NombreAsignatura {
 			cambios = append(cambios, fmt.Sprintf("NombreAsignatura cambiado de %s a %s", h.NombreAsignatura, pipelsoft.NombreAsignatura))
 		}
-		if h.CantidadHoras != pipelsoft.CantidadHoras {
-			cambios = append(cambios, fmt.Sprintf("CantidadHoras cambiadas de %d a %d", h.CantidadHoras, pipelsoft.CantidadHoras))
+		if h.CantidadHoras != pipelsoft.HorasAsignatura {
+			cambios = append(cambios, fmt.Sprintf("CantidadHoras cambiadas de %d a %d", h.CantidadHoras, pipelsoft.HorasAsignatura))
 		}
 		if h.Jerarquia != pipelsoft.Jerarquia {
 			cambios = append(cambios, fmt.Sprintf("Jerarquia cambiada de %s a %s", h.Jerarquia, pipelsoft.Jerarquia))
@@ -176,7 +185,7 @@ func actualizarModificaciones() {
 			}).Error; err != nil {
 				log.Println("Error al actualizar HistorialPafAceptadas:", err)
 			} else {
-				fmt.Printf("Registro actualizado para CodigoPAF: %s\n", h.CodigoPAF)
+				fmt.Printf("Registro actualizado para CodigoPAF: %d\n", h.CodigoPAF)
 			}
 		}
 	}

@@ -10,7 +10,7 @@ type HistorialPafAceptadas struct {
 
 	// Campos de Contrato
 	Run                 string `gorm:"type:text;not null"`
-	CodigoPAF           string `gorm:"type:text;not null"`
+	CodigoPAF           int    `gorm:"type:int;not null"`
 	FechaInicioContrato string `gorm:"type:date;not null"`
 	FechaFinContrato    string `gorm:"type:date;not null"`
 	CodigoAsignatura    string `gorm:"type:text;not null"`
@@ -20,7 +20,7 @@ type HistorialPafAceptadas struct {
 	Calidad             string `gorm:"type:text;not null"`
 
 	// Campos de Proceso
-	EstadoProceso int `gorm:"type:int;not null"`
+	EstadoProceso string `gorm:"type:text;not null"`
 
 	//solo puede ser 0 o 1 e indica cuando se detecta que se modifico, si es un cero no se modifico, si es un 1 se modifico
 	CodigoModificacion int `gorm:"type:int;null" json:"codigo_modificacion"`
