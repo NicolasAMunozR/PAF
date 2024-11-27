@@ -33,15 +33,20 @@ func (h *HistorialPafAceptadasController) CrearHistorialHandler(w http.ResponseW
 		return
 	}
 
-	// Parsear el cuerpo de la solicitud para obtener los datos del profesor
-	var profesor models.ProfesorDB
-	if err := json.NewDecoder(r.Body).Decode(&profesor); err != nil {
+	// Crear un struct auxiliar para parsear el cuerpo de la solicitud
+	type CrearHistorialRequest struct {
+		Profesor models.ProfesorDB `json:"profesor"`
+		Bloque   []string          `json:"bloque"`
+	}
+
+	var request CrearHistorialRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		http.Error(w, fmt.Sprintf("Error al parsear el cuerpo de la solicitud: %v", err), http.StatusBadRequest)
 		return
 	}
 
 	// Llamar al servicio para crear el historial
-	historial, err := h.Service.CrearHistorial(codigoPAF, profesor)
+	historial, err := h.Service.CrearHistorial(codigoPAF, request.Profesor, request.Bloque)
 	if err != nil {
 		log.Printf("Error al crear el historial: %v\n", err)
 		http.Error(w, fmt.Sprintf("Error al crear el historial: %v", err), http.StatusInternalServerError)
