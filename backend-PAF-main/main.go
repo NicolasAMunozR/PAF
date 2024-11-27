@@ -55,6 +55,8 @@ func main() {
 	//obtener todos los contratos
 	r.HandleFunc("/pipelsoft/contratos", pipelsoftController.ObtenerTodosLosContratos).Methods("GET")
 	r.HandleFunc("/pipelsoft/contratos-run/{run}", pipelsoftController.ObtenerContratosPorRUN).Methods("GET")
+	r.HandleFunc("/pipelsoft/contratos-nombreUnidadContratante/{nombreUnidadContratante}", pipelsoftController.ObtenerContratosPorNombreUnidadContratante).Methods("GET")
+	r.HandleFunc("/pipelsoft/contratos-nombreUnidadMayor/{nombreUnidadMayor}", pipelsoftController.ObtenerContratosPorNombreUnidadMayor).Methods("GET")
 	r.HandleFunc("/contratos/codigo_paf/{codigo_paf}", pipelsoftController.ObtenerPorCodigoPAF).Methods("GET")
 	r.HandleFunc("/contratos/ultimos_7_dias", pipelsoftController.ObtenerPAFUltimos7Dias).Methods("GET")
 	r.HandleFunc("/contratos/ultimo_mes", pipelsoftController.ObtenerPAFUltimoMes).Methods("GET")
@@ -131,16 +133,16 @@ func actualizarModificaciones() {
 		var pipelsoft models.Pipelsoft // Inicializa la variable limpia para evitar conflictos.
 
 		// Buscar el registro correspondiente en Pipelsoft
-		if err := db.Where("codigo_paf = ?", h.CodigoPAF).Take(&pipelsoft).Error; err != nil {
+		if err := db.Where("codigo_paf = ?", h.IdPAF).Take(&pipelsoft).Error; err != nil {
 			// Si no se encuentra en Pipelsoft, marcamos como eliminada
 			if err := db.Model(&h).Updates(map[string]interface{}{
 				"codigo_modificacion":      1, // Se marca como modificada (en este caso, eliminada)
 				"bandera_modificacion":     2, // 2 = Eliminada
-				"descripcion_modificacion": fmt.Sprintf("PAF con CodigoPAF: %d eliminada, no se encuentra en Pipelsoft", h.CodigoPAF),
+				"descripcion_modificacion": fmt.Sprintf("PAF con CodigoPAF: %d eliminada, no se encuentra en Pipelsoft", h.IdPAF),
 			}).Error; err != nil {
 				log.Println("Error al actualizar HistorialPafAceptadas como eliminada:", err)
 			} else {
-				fmt.Printf("PAF eliminada, no encontrada en Pipelsoft: CodigoPAF %d\n", h.CodigoPAF)
+				fmt.Printf("PAF eliminada, no encontrada en Pipelsoft: CodigoPAF %d\n", h.IdPAF)
 			}
 			continue // Si no se encuentra, seguimos con el siguiente registro
 		}
@@ -185,7 +187,7 @@ func actualizarModificaciones() {
 			}).Error; err != nil {
 				log.Println("Error al actualizar HistorialPafAceptadas:", err)
 			} else {
-				fmt.Printf("Registro actualizado para CodigoPAF: %d\n", h.CodigoPAF)
+				fmt.Printf("Registro actualizado para CodigoPAF: %d\n", h.IdPAF)
 			}
 		}
 	}

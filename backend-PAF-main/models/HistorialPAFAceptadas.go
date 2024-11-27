@@ -10,7 +10,7 @@ type HistorialPafAceptadas struct {
 
 	// Campos de Contrato
 	Run                 string `gorm:"type:text;not null"`
-	CodigoPAF           int    `gorm:"type:int;not null"`
+	IdPAF           	int    `gorm:"type:int;not null"`
 	FechaInicioContrato string `gorm:"type:date;not null"`
 	FechaFinContrato    string `gorm:"type:date;not null"`
 	CodigoAsignatura    string `gorm:"type:text;not null"`

@@ -1,9 +1,12 @@
 <template>
   <div class="container">
+    <!-- Filtros -->
     <Filtros @filter="filterData" @sort="sortData" />
-    <!-- Pasa filteredPersonas como prop al componente Tabla -->
+    
+    <!-- Tabla -->
     <Tabla :data="filteredPersonas" :showButtons="false" />
-    <!-- Advertencia -->
+    
+    <!-- Advertencias -->
     <div v-if="warnings.length" class="warnings">
       <h3>Advertencias:</h3>
       <ul>
@@ -14,120 +17,103 @@
 </template>
 
 <script setup lang="ts">
-import Filtros from '../../components/Filtros.vue'
-import Tabla from '../../components/Tabla.vue'
-import { ref, computed, onMounted } from 'vue'
+import Filtros from '../../components/Filtros.vue';
+import Tabla from '../../components/Tabla.vue';
+import { ref, computed, onMounted } from 'vue';
 
-const { $axios } = useNuxtApp() as unknown as { $axios: typeof import('axios').default }
+const { $axios } = useNuxtApp() as unknown as { $axios: typeof import('axios').default };
 
 interface Persona {
-  ID: number
-  CodigoPAF: string
-  CodigoAsignatura: string
-  Run: string
-  PrimerApellido: string
-  SegundoApellido: string
-  Correo: string
-  EstadoProceso: string
-  Calidad: string
-  Jerarquia: string
-  CantidadHoras: number
-  FechaInicioContrato: string
-  FechaFinContrato: string
-  FechaUltimaModificacionProceso: string
-  NombreAsignatura: string
-  NombreUnidadContratante: string
-  NombreUnidadMayor: string
-  cupo: number
-  codigo_modificacion: number
-  bandera_modificacion: number
-  descripcion_modificacion: string
+  ID: number;
+  IdPAF: number;
+  codigo_asignatura: string;
+  Run: string;
+  EstadoProceso: string;
+  Calidad: string;
+  Jerarquia: string;
+  CantidadHoras: number;
+  FechaInicioContrato: string;
+  FechaFinContrato: string;
+  nombre_asignatura: string;
+  cupo: number;
+  codigo_modificacion: number;
+  bandera_modificacion: number;
+  descripcion_modificacion: string;
 }
 
-const personas = ref<Persona[]>([])
+const personas = ref<Persona[]>([]);
 const filtros = ref({
   codigoPAF: '',
   run: '',
   codigoAsignatura: '',
   estadoProceso: '',
   calidad: '',
-  jerarquia: ''
-})
-const sortBy = ref('nombres')
-const sortOrder = ref('asc')
-const warnings = ref<string[]>([])
+  jerarquia: '',
+});
+const sortBy = ref('nombres');
+const sortOrder = ref('asc');
+const warnings = ref<string[]>([]);
 
-// Computed para datos filtrados y ordenados
 const filteredPersonas = computed(() => {
-  warnings.value = [] // Resetear advertencias
-
+  warnings.value = [];
   let filtered = personas.value.filter(persona => {
-    // Filtrado según criterios de búsqueda
+    console.log('persona:', persona);
+    console.log('filtros:', filtros.value);
     return (
-      (persona.CodigoAsignatura?.toLowerCase().includes(filtros.value.codigoAsignatura.toLowerCase()) ?? false) &&
+      persona.codigo_asignatura.toLowerCase().includes(filtros.value.codigoAsignatura.toLowerCase()) &&
       (filtros.value.estadoProceso ? persona.EstadoProceso.toString() === filtros.value.estadoProceso : true) &&
       (filtros.value.calidad ? persona.Calidad === filtros.value.calidad : true) &&
-      (persona.CodigoPAF?.toLowerCase().includes(filtros.value.codigoPAF.toLowerCase()) ?? false) &&
-      (persona.Run?.toLowerCase().includes(filtros.value.run.toLowerCase()) ?? false) &&
+      persona.IdPAF.toString().toLowerCase().includes(filtros.value.codigoPAF.toLowerCase()) &&
+      persona.Run.toLowerCase().includes(filtros.value.run.toLowerCase()) &&
       (filtros.value.jerarquia ? persona.Jerarquia === filtros.value.jerarquia : true)
-    )
-  })
+    );
+  });
 
-  // Revisar banderas de modificación y generar advertencias
   filtered = filtered.map(persona => {
     if (persona.bandera_modificacion === 1) {
-      warnings.value.push(
-        `Advertencia: La PAF ${persona.CodigoPAF} ha sido modificado.`
-      )
+      warnings.value.push(`Advertencia: La PAF ${persona.IdPAF} ha sido modificada.`);
     } else if (persona.bandera_modificacion === 2) {
-      warnings.value.push(
-        `Advertencia: La PAF ${persona.CodigoPAF} ha sido eliminado.`
-      )
+      warnings.value.push(`Advertencia: La PAF ${persona.IdPAF} ha sido eliminada.`);
     }
 
     if (persona.codigo_modificacion === 1) {
-      warnings.value.push(
-        `${persona.descripcion_modificacion}.`
-      )
+      warnings.value.push(`${persona.descripcion_modificacion}.`);
     }
+    return persona;
+  });
 
-    return persona
-  })
-
-  // Ordenamiento
   filtered = filtered.sort((a, b) => {
-    const compareA = a[sortBy.value as keyof Persona]
-    const compareB = b[sortBy.value as keyof Persona]
+    const compareA = a[sortBy.value as keyof Persona];
+    const compareB = b[sortBy.value as keyof Persona];
 
     if (compareA !== undefined && compareB !== undefined) {
-      if (compareA < compareB) return sortOrder.value === 'asc' ? -1 : 1
-      if (compareA > compareB) return sortOrder.value === 'asc' ? 1 : -1
+      if (compareA < compareB) return sortOrder.value === 'asc' ? -1 : 1;
+      if (compareA > compareB) return sortOrder.value === 'asc' ? 1 : -1;
     }
-    return 0
-  })
+    return 0;
+  });
 
-  return filtered
-})
+  return filtered;
+});
 
-// onMounted no se modifica
 onMounted(async () => {
   try {
-    const response = await $axios.get('/historial')
-    personas.value = response.data
-    console.log('Personas transformadas:', personas.value)
+    const response = await $axios.get('/historial');
+    personas.value = response.data;
+    console.log('personas:', personas.value);
   } catch (error) {
-    console.error('Error al obtener personas:', error)
+    console.error('Error al obtener personas:', error);
   }
-})
+});
 
 const filterData = (newFilters: any) => {
-  filtros.value = newFilters
-}
+  filtros.value = newFilters;
+};
 
 const sortData = (newSortBy: string, newSortOrder: string) => {
-  sortBy.value = newSortBy
-  sortOrder.value = newSortOrder
-}
+  sortBy.value = newSortBy;
+  sortOrder.value = newSortOrder;
+};
 </script>
 
 <style scoped>
@@ -135,20 +121,30 @@ const sortData = (newSortBy: string, newSortOrder: string) => {
   display: grid;
   grid-template-columns: 1fr 3fr;
   gap: 1rem;
+  font-family: "Helvetica Neue LT", sans-serif;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border: 1px solid #394049;
+  border-radius: 8px;
+  max-width: 100%;
 }
 
+/* Advertencias */
 .warnings {
   grid-column: 1 / -1;
-  background-color: #fff3cd;
-  border: 1px solid #ffeeba;
+  background-color: #FFF3CD; /* Fondo amarillo pálido */
+  border: 1px solid #FFEBAA; /* Borde amarillo */
   border-radius: 5px;
   padding: 1rem;
   margin-top: 1rem;
+  font-family: "Helvetica Neue LT", sans-serif;
+  color: #856404; /* Texto amarillo oscuro */
 }
 
 .warnings h3 {
   margin: 0 0 0.5rem;
-  color: #856404;
+  font-family: "Bebas Neue Pro", sans-serif;
+  color: #EA7600; /* Color institucional */
 }
 
 .warnings ul {

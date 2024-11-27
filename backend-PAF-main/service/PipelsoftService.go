@@ -25,7 +25,7 @@ func (s *PipelsoftService) getAcceptedCodes() (map[int]struct{}, error) {
 
 	// Modificación: agregamos la condición BanderaAceptacion = 1
 	if err := s.DBPersonal.Table("historial_paf_aceptadas").
-		Select("codigo_paf").
+		Select("id_paf").
 		Where("bandera_aceptacion = ?", 1).
 		Find(&historialAceptadas).Error; err != nil {
 		return nil, err
@@ -63,14 +63,14 @@ func (s *PipelsoftService) comprobarYCombinarDatosPorCodigoPAF(pipelsofts []mode
 	}
 
 	// Consultar los datos de HistorialPafAceptadas cuyo CódigoPAF esté en la lista de códigos
-	if err := s.DBPersonal.Where("codigo_paf = ?", codigosPAF).Find(&historialPafAceptadas).Error; err != nil {
+	if err := s.DBPersonal.Where("id_paf IN ?", codigosPAF).Find(&historialPafAceptadas).Error; err != nil {
 		return nil, err
 	}
 
 	// Crear un map para almacenar los registros de HistorialPafAceptadas por CódigoPAF
 	historialPafMap := make(map[int]models.HistorialPafAceptadas)
 	for _, historial := range historialPafAceptadas {
-		historialPafMap[historial.CodigoPAF] = historial
+		historialPafMap[historial.IdPAF] = historial
 	}
 
 	// Crear una lista para almacenar los datos combinados
@@ -190,6 +190,40 @@ func (s *PipelsoftService) ObtenerPAFUltimoMes() ([]models.DatosCombinados, erro
 	haceUnMes := time.Now().AddDate(0, -1, 0)
 
 	if err := s.DBPersonal.Where("fecha_inicio_contrato >= ?", haceUnMes).Find(&pipelsofts).Error; err != nil {
+		return nil, err
+	}
+
+	aceptadosMap, err := s.getAcceptedCodes()
+	if err != nil {
+		return nil, err
+	}
+	contratosFiltrados := s.filterRecords(pipelsofts, aceptadosMap)
+
+	return s.comprobarYCombinarDatosPorCodigoPAF(contratosFiltrados)
+}
+
+// Obtener contratos por nombre de unidad mayor
+func (s *PipelsoftService) ObtenerContratosPorNombreUnidadMayor(nombreUnidadMayor string) ([]models.DatosCombinados, error) {
+	var pipelsofts []models.Pipelsoft
+
+	if err := s.DBPersonal.Where("nombre_unidad_mayor = ?", nombreUnidadMayor).Find(&pipelsofts).Error; err != nil {
+		return nil, err
+	}
+
+	aceptadosMap, err := s.getAcceptedCodes()
+	if err != nil {
+		return nil, err
+	}
+	contratosFiltrados := s.filterRecords(pipelsofts, aceptadosMap)
+
+	return s.comprobarYCombinarDatosPorCodigoPAF(contratosFiltrados)
+}
+
+// Obtener contratos por nombre de unidad contratante
+func (s *PipelsoftService) ObtenerContratosPorNombreUnidadContratante(nombreUnidadContratante string) ([]models.DatosCombinados, error) {
+	var pipelsofts []models.Pipelsoft
+
+	if err := s.DBPersonal.Where("nombre_unidad_contratante = ?", nombreUnidadContratante).Find(&pipelsofts).Error; err != nil {
 		return nil, err
 	}
 

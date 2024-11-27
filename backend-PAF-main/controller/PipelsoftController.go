@@ -91,3 +91,33 @@ func (c *PipelsoftController) ObtenerPAFUltimoMes(w http.ResponseWriter, r *http
 	}
 	json.NewEncoder(w).Encode(datos)
 }
+
+// Obtener contratos por nombre de unidad mayor
+func (c *PipelsoftController) ObtenerContratosPorNombreUnidadMayor(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	nombreUnidadMayor := vars["nombreUnidadMayor"]
+
+	contratos, err := c.Service.ObtenerContratosPorNombreUnidadMayor(nombreUnidadMayor)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(contratos)
+}
+
+// Obtener contratos por nombre de unidad contratante
+func (c *PipelsoftController) ObtenerContratosPorNombreUnidadContratante(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	nombreUnidadContratante := vars["nombreUnidadContratante"]
+
+	contratos, err := c.Service.ObtenerContratosPorNombreUnidadContratante(nombreUnidadContratante)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(contratos)
+}

@@ -57,7 +57,7 @@
       <select id="calidad" v-model="filtros.calidad" class="select">
         <option value="">Todas</option>
         <option value="Baja">Calidad Baja</option>
-        <option value="Media">calidad Media</option>
+        <option value="Media">Calidad Media</option>
         <option value="Alta">Calidad Alta</option>
       </select>
     </div>
@@ -67,7 +67,7 @@
         <option value="NombreAsignatura">Nombre de Asignatura</option>
         <option value="CodigoAsignatura">Código de Asignatura</option>
         <option value="Run">Run</option>  
-        <option value="FechaUltimaModificacionProceso">Ultima Actualización del Proceso</option>
+        <option value="FechaUltimaModificacionProceso">Última Actualización del Proceso</option>
       </select>
       <button @click="toggleSortOrder" class="btn sort-btn">
         Ordenar {{ sortOrder === 'asc' ? 'Ascendente' : 'Descendente' }}
@@ -81,7 +81,6 @@
 
 <script setup lang="ts">
 import { ref, watch, defineEmits } from 'vue'
-import { jsx, jsxDEV } from 'vue/jsx-runtime';
 
 const emit = defineEmits<{
   (event: 'filter', filters: any): void
@@ -121,16 +120,28 @@ watch([sortBy, sortOrder], ([newSortBy, newSortOrder]) => {
 </script>
 
 <style scoped>
+/* Colores institucionales */
+:root {
+  --primary-color: #EA7600; /* Color principal USACH */
+  --secondary-color: #394049; /* Color secundario USACH */
+  --accent-color: #C8102E; /* Complementario */
+  --background-color: #f9fafb; /* Fondo neutro */
+  --button-background-color: #4CAF50; /* Color de fondo de los botones */
+  --button-hover-color: #388E3C; /* Color de hover en los botones */
+}
+
+/* Contenedor de filtros */
 .filters {
   display: flex;
   flex-direction: column;
   gap: 1rem;
   padding: 1.5rem;
-  background-color: #f9fafb;
+  background-color: var(--background-color);
   border-radius: 8px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Estilos de los elementos de filtro */
 .filter-item, .sort-item {
   display: flex;
   flex-direction: column;
@@ -139,7 +150,7 @@ watch([sortBy, sortOrder], ([newSortBy, newSortOrder]) => {
 .label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #4b5563;
+  color: var(--secondary-color);
 }
 
 .input, .select, .btn {
@@ -152,8 +163,8 @@ watch([sortBy, sortOrder], ([newSortBy, newSortOrder]) => {
 
 .input:focus, .select:focus {
   outline: none;
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 1px #4f46e5;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 1px var(--primary-color);
 }
 
 .select {
@@ -168,15 +179,17 @@ watch([sortBy, sortOrder], ([newSortBy, newSortOrder]) => {
   align-items: center;
 }
 
+/* Botón de reset */
 .reset-btn {
-  background-color: #4b5563;
-  color: #ffffff;
+  background-color: var(--secondary-color);
+  color: #1a0909;
 }
 
 .reset-btn:hover {
   background-color: #374151;
 }
 
+/* Botón de ordenar */
 .sort-btn {
   background-color: #e5e7eb;
   color: #1f2937;

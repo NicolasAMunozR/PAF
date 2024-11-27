@@ -2,35 +2,37 @@
   <div class="flex">
     <!-- Botón para volver -->
     <div class="absolute top-4 left-4">
-      <button @click="volver" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+      <button @click="volver" class="volver-button">
         Volver
       </button>
     </div>
 
     <!-- Tabla de horarios -->
     <div class="w-2/3 mt-12">
-      <h1>Horario para: {{ persona[0]?.Nombres }} {{ persona[0]?.PrimerApellido }} {{ persona[0]?.SegundoApellido }}</h1>
+      <h1 class="section-title">
+        Horario para: {{ persona[0]?.Nombres }} {{ persona[0]?.PrimerApellido }} {{ persona[0]?.SegundoApellido }}
+      </h1>
 
       <div v-if="persona.length > 0">
         <div class="mb-4">
           <label for="semestre">Seleccionar Semestre:</label>
-          <select id="semestre" v-model="semestreSeleccionado" class="ml-2">
+          <select id="semestre" v-model="semestreSeleccionado" class="select-input">
             <option v-for="sem in semestres" :key="sem" :value="sem">{{ sem }}</option>
           </select>
         </div>
 
-        <table class="w-full text-sm bg-white divide-y divide-gray-300 border">
+        <table class="tabla-horarios">
           <thead>
-            <tr class="bg-gray-200">
-              <th class="px-4 py-2 font-medium text-gray-900 border-r">Módulo</th>
-              <th v-for="dia in dias" :key="dia" class="px-4 py-2 font-medium text-gray-900 border-r">{{ dia }}</th>
+            <tr>
+              <th>Módulo</th>
+              <th v-for="dia in dias" :key="dia">{{ dia }}</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(horario, index) in horarios" :key="index" :class="index % 2 === 0 ? 'bg-gray-100' : 'bg-white'">
-              <td class="px-4 py-2 text-gray-700 border-r">{{ horario.modulo }}</td>
-              <td v-for="dia in dias" :key="dia" class="px-4 py-2 text-gray-700 border-r">
-                <div v-for="bloque in bloquesPorDia(dia, index + 1)" :key="bloque.nombre" :style="{ backgroundColor: bloque.color }" class="rounded p-1 text-black">
+            <tr v-for="(horario, index) in horarios" :key="index" :class="{ alternado: index % 2 === 0 }">
+              <td>{{ horario.modulo }}</td>
+              <td v-for="dia in dias" :key="dia">
+                <div v-for="bloque in bloquesPorDia(dia, index + 1)" :key="bloque.nombre" class="bloque" :style="{ backgroundColor: bloque.color }">
                   {{ bloque.nombre }}
                 </div>
               </td>
@@ -39,16 +41,16 @@
         </table>
       </div>
       <div v-else>
-        <p>Cargando datos o no se encontraron registros para el RUN.</p>
+        <p class="info-text">Cargando datos o no se encontraron registros para el RUN.</p>
       </div>
     </div>
 
     <!-- Fichas de historial, PAF y asignaturas -->
     <div class="w-1/3 pl-4 mt-12">
       <!-- Ficha del historial -->
-      <div v-if="historialSeleccionado">
-        <h2 class="font-semibold text-lg">PAF macheada</h2>
-        <div class="p-4 mb-4 rounded shadow bg-yellow-200">
+      <div v-if="historialSeleccionado" class="historial-card">
+        <h2 class="sub-title">PAF macheada</h2>
+        <div class="card">
           <p><strong>Código PAF:</strong> {{ historialSeleccionado?.CodigoPaf }}</p>
           <p><strong>Código Asignatura:</strong> {{ historialSeleccionado?.CodigoAsignatura }}</p>
           <p><strong>Nombre Asignatura:</strong> {{ historialSeleccionado?.NombreAsignatura }}</p>
@@ -57,17 +59,13 @@
       </div>
 
       <!-- Fichas de PAF -->
-      <h2 class="font-semibold text-lg mt-8">PAF</h2>
+      <h2 class="sub-title">PAF</h2>
       <div v-if="fichasPAF.length > 0">
         <div
           v-for="(p, index) in fichasPAF"
           :key="index"
-          :style="{ 
-            backgroundColor: fichaSeleccionadaPAF === p 
-              ? 'lightblue' 
-              : coloresPAF[index % coloresPAF.length] 
-          }"
-          class="p-4 mb-4 rounded shadow cursor-pointer"
+          class="card"
+          :style="{ backgroundColor: fichaSeleccionadaPAF === p ? '#B3E5FC' : coloresPAF[index % coloresPAF.length] }"
           @click="fichaSeleccionadaPAF = p"
         >
           <p><strong>Nombres:</strong> {{ p.Nombres }}</p>
@@ -77,21 +75,17 @@
         </div>
       </div>
       <div v-else>
-        <p>No se encontraron registros de PAF.</p>
+        <p class="info-text">No se encontraron registros de PAF.</p>
       </div>
 
       <!-- Fichas de asignaturas -->
-      <h2 class="font-semibold text-lg mt-8">Horario Asignatura</h2>
+      <h2 class="sub-title">Horario Asignatura</h2>
       <div v-if="fichasAsignaturas.length > 0">
         <div
           v-for="(p, index) in fichasAsignaturas"
           :key="index"
-          :style="{ 
-            backgroundColor: fichaSeleccionadaAsignatura === p 
-              ? 'lightblue' 
-              : coloresAsignaturas[index % coloresAsignaturas.length] 
-          }"
-          class="p-4 mb-4 rounded shadow cursor-pointer"
+          class="card"
+          :style="{ backgroundColor: fichaSeleccionadaAsignatura === p ? '#B3E5FC' : coloresAsignaturas[index % coloresAsignaturas.length] }"
           @click="fichaSeleccionadaAsignatura = p"
         >
           <p><strong>Código de Asignatura:</strong> {{ p.codigo_asignatura }}</p>
@@ -103,15 +97,19 @@
         </div>
       </div>
       <div v-else>
-        <p>No se encontraron asignaturas filtradas.</p>
+        <p class="info-text">No se encontraron asignaturas filtradas.</p>
       </div>
-            <!-- Botón ubicado en la parte inferior -->
-            <div class="flex justify-end mt-4">
-            <button v-if="fichaSeleccionadaPAF && fichaSeleccionadaAsignatura"
-            @click="enviarSeleccion" class="bg-blue-500 text-white py-2 px-4 rounded">
-            Enviar Selección
-            </button>
-          </div>
+
+      <!-- Botón para enviar selección -->
+      <div class="flex justify-end mt-4">
+        <button
+          v-if="fichaSeleccionadaPAF && fichaSeleccionadaAsignatura"
+          @click="enviarSeleccion"
+          class="procesar-button"
+        >
+          Enviar Selección
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -148,7 +146,7 @@ const { $axios } = useNuxtApp() as unknown as { $axios: typeof import('axios').d
 const run = ref(route.query.run || '')
 
 interface Persona {
-  CodigoPaf: string;
+  CodigoPaf: number;
   CodigoAsignatura: string;
   NombreAsignatura: string;
   CantidadHoras: number;
@@ -229,33 +227,44 @@ const bloquesPorDia = (dia: string, modulo: number) => {
 
 const obtenerDatosPersona = async () => {
   try {
-    const response = await $axios.get(`/pipelsoft/contratos-run/${run.value}`)
-    console.log('Datos de la persona:', response.data)
-    const response1 = await $axios.get(`/profesorDB/${run.value}`)
-    persona1.value = response1.data
-    console.log("aaaa", persona1.value)
-    console.log("aaaa", response1.data)
-    console.log("bbbb", response1.data.bloque)
+    const response = await $axios.get(`/pipelsoft/contratos-run/${run.value}`);
+    const response1 = await $axios.get(`/profesorDB/${run.value}`);
+    persona1.value = response1.data;
+
     persona.value = response.data.map((item: any) => ({
-      CodigoPaf: item.PipelsoftData.CodigoPAF,
+      CodigoPaf: item.PipelsoftData.IdPaf,
       CodigoAsignatura: item.PipelsoftData.CodigoAsignatura,
       Nombres: item.PipelsoftData.Nombres,
       NombreAsignatura: item.PipelsoftData.NombreAsignatura,
-      PrimerApellido: item.PipelsoftData.PrimerApellido,
-      SegundoApellido: item.PipelsoftData.SegundoApellido,
-      CantidadHoras: item.PipelsoftData.CantidadHoras,
+      PrimerApellido: item.PipelsoftData.PrimerApp,
+      SegundoApellido: item.PipelsoftData.SegundoApp,
+      CantidadHoras: item.PipelsoftData.CantidadHorasPaf,
       NombreUnidadContratante: item.PipelsoftData.NombreUnidadContratante,
       Bloque: response1.data.bloque,
       Cupo: response1.data.cupo,
       Seccion: response1.data.seccion,
       Semestre: response1.data.semestre,
       ID: item.HistorialPafData.ID,
-      semestre: item.HistorialPafData.semestre
-    }))
+      semestre: item.HistorialPafData.semestre,
+    }));
+
+    // Identificar el semestre más reciente
+    const semestresDisponibles = persona1.value.map(p => p.semestre).filter(Boolean);
+    const semestreReciente = semestresDisponibles.sort((a, b) => {
+      if (a && b) {
+        return a > b ? -1 : 1;
+      }
+      return 0;
+    })[0];
+    
+    // Establecer el semestre más reciente como seleccionado
+    if (semestreReciente) {
+      semestreSeleccionado.value = semestreReciente;
+    }
   } catch (error) {
-    console.error('Error al obtener los datos:', error)
+    console.error('Error al obtener los datos:', error);
   }
-}
+};
 
 const enviarSeleccion = async () => {
   if (!fichaSeleccionadaPAF || !fichaSeleccionadaAsignatura) {
@@ -265,6 +274,7 @@ const enviarSeleccion = async () => {
 
   try {
     const codigoPAF = fichaSeleccionadaPAF.value?.CodigoPaf; // Ajustar si el código es otro campo
+    console.log('Código PAF:', codigoPAF);
     const data = {
       run: fichaSeleccionadaAsignatura?.value?.run || '', // Cambiar según lo que necesitas enviar
       semestre: fichaSeleccionadaAsignatura?.value?.semestre || '',
@@ -295,27 +305,72 @@ const coloresPAF = ['#FFCDD2', '#F8BBD0', '#E1BEE7', '#D1C4E9', '#C5CAE9'];
 const coloresAsignaturas = ['#C8E6C9', '#A5D6A7', '#81C784', '#66BB6A', '#4CAF50'];
 </script>
 
-
 <style scoped>
-table {
+/* Estilo general */
+.tabla-horarios {
   width: 100%;
-  table-layout: auto;
   border-collapse: collapse;
 }
 
-th,
-td {
-  border: 1px solid #d1d5db; /* Borde para diferenciar módulos */
+.tabla-horarios th,
+.tabla-horarios td {
+  padding: 8px;
+  border: 1px solid #ccc;
 }
 
-button {
-  position: absolute;
-  top: 4rem; /* Ajusta la posición según lo necesario */
-  left: 1rem; /* Ajusta la distancia desde la izquierda */
-  z-index: 10; /* Asegura que el botón esté por encima de otros elementos */
+.tabla-horarios th {
+  background-color: #394049;
+  color: white;
 }
 
-.flex.justify-end {
-  margin-top: auto;
+.bloque {
+  padding: 4px;
+  border-radius: 4px;
+  color: black;
+}
+
+.card {
+  padding: 10px;
+  border: 1px solid #394049;
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.volver-button {
+  background-color: #EA7600;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-family: "Bebas Neue Pro", sans-serif;
+  cursor: pointer;
+}
+
+.volver-button:hover {
+  background-color: #C8102E;
+}
+
+.procesar-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-family: "Bebas Neue Pro", sans-serif;
+}
+
+.procesar-button:hover {
+  background-color: #388E3C;
+}
+
+.sub-title {
+  color: #EA7600;
+  font-family: "Bebas Neue Pro", sans-serif;
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.info-text {
+  color: #394049;
+  font-family: "Helvetica Neue LT", sans-serif;
 }
 </style>

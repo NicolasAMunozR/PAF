@@ -1,28 +1,30 @@
 INSERT INTO pipelsofts(
-    run, 
+    run_empleado, 
     nombres, 
-    primer_apellido, 
-    segundo_apellido, 
-    correo, 
+    primer_app, 
+    segundo_app, 
     codigo_unidad_contratante, 
     nombre_unidad_contratante, 
     nombre_unidad_mayor, 
-    codigo_paf, 
+    id_paf, 
     fecha_inicio_contrato, 
     fecha_fin_contrato, 
     codigo_asignatura, 
     nombre_asignatura, 
-    cantidad_horas, 
+    cantidad_horas_paf, 
     jerarquia, 
     calidad, 
-    estado_proceso, 
-    fecha_ultima_modificacion_proceso
+    cod_estado, 
+    fecha_ultima_modificacion_proceso,
+	horas_asignatura,
+	semestre,
+	des_estado
 ) VALUES 
-('12345678-9', 'Juan', 'Pérez', 'González', 'juan.perez@example.com', 'U001', 'Unidad de Desarrollo', 'Dirección de Proyectos', 'PAF12345', '2024-01-01', '2024-12-31', 'ASIGN001', 'Matemáticas Avanzadas', 120, 'Profesor Titular', 'Alta', 1, NOW()),
-('23456789-0', 'María', 'López', 'Martínez', 'maria.lopez@example.com', 'U002', 'Unidad Administrativa', 'Dirección General', 'PAF12346', '2024-02-01', '2024-11-30', 'ASIGN002', 'Física General', 100, 'Profesor Asistente', 'Media', 2, NOW()),
-('34567890-1', 'Carlos', 'García', 'Rodríguez', 'carlos.garcia@example.com', 'U003', 'Unidad de Investigación', 'Unidad de Investigación Avanzada', 'PAF12347', '2024-03-01', '2024-12-31', 'ASIGN003', 'Química Orgánica', 80, 'Profesor Asociado', 'Alta', 1, NOW()),
-('45678901-2', 'Laura', 'Martín', 'Hernández', 'laura.martin@example.com', 'U004', 'Unidad de Capacitación', 'Secretaría Académica', 'PAF12348', '2024-04-01', '2024-09-30', 'ASIGN004', 'Biología Molecular', 60, 'Profesor Titular', 'Baja', 3, NOW()),
-('56789012-3', 'Pedro', 'Sánchez', 'Fernández', 'pedro.sanchez@example.com', 'U005', 'Unidad de Innovación', 'Consejería Académica', 'PAF12349', '2024-05-01', '2024-12-31', 'ASIGN005', 'Ingeniería de Software', 150, 'Profesor Asistente', 'Media', 2, NOW());
+('12345678-9', 'Juan', 'Pérez', 'González', 'U001', 'Unidad de Desarrollo', 'Dirección de Proyectos', '12345', '2024-01-01', '2024-12-31', 'ASIGN001', 'Matemáticas Avanzadas', 120, 'Profesor Titular', 'Alta', 1, NOW(), 10, 2024-2, 2),
+('23456789-0', 'María', 'López', 'Martínez', 'U002', 'Unidad Administrativa', 'Dirección General', '12346', '2024-02-01', '2024-11-30', 'ASIGN002', 'Física General', 100, 'Profesor Asistente', 'Media', 2, NOW(), 10, 2024-2, 2),
+('34567890-1', 'Carlos', 'García', 'Rodríguez',  'U003', 'Unidad de Investigación', 'Unidad de Investigación Avanzada', '12347', '2024-03-01', '2024-12-31', 'ASIGN003', 'Química Orgánica', 80, 'Profesor Asociado', 'Alta', 1, NOW(), 10, 2024-2, 2),
+('45678901-2', 'Laura', 'Martín', 'Hernández',  'U004', 'Unidad de Capacitación', 'Secretaría Académica', '12348', '2024-04-01', '2024-09-30', 'ASIGN004', 'Biología Molecular', 60, 'Profesor Titular', 'Baja', 3, NOW(), 10, 2024-2, 2),
+('56789012-3', 'Pedro', 'Sánchez', 'Fernández',  'U005', 'Unidad de Innovación', 'Consejería Académica', '12349', '2024-05-01', '2024-12-31', 'ASIGN005', 'Ingeniería de Software', 150, 'Profesor Asistente', 'Media', 2, NOW(), 10, 2024-2, 2);
 
 
 

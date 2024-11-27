@@ -1,12 +1,12 @@
 <template>
   <div class="table-container">
     <table class="w-full text-sm bg-white shadow-lg rounded-lg overflow-hidden">
-      <thead class="bg-gray-800 text-white">
+      <thead class="bg-primary-color text-white">
         <tr>
-          <th class="px-4 py-3 text-left font-semibold">Codigo de la PAF</th>
-          <th class="px-4 py-3 text-left font-semibold">Codigo de la Asignatura</th>
+          <th class="px-4 py-3 text-left font-semibold">Código de la PAF</th>
+          <th class="px-4 py-3 text-left font-semibold">Código de la Asignatura</th>
           <th class="px-4 py-3 text-left font-semibold">Run</th>
-          <th class="px-4 py-3 text-left font-semibold">Nombre de asignatura</th>
+          <th class="px-4 py-3 text-left font-semibold">Nombre de Asignatura</th>
           <th class="px-4 py-3 text-left font-semibold">Grupo</th>
           <th class="px-4 py-3 text-left font-semibold">Cupos</th>
           <th v-if="showButtons" class="px-4 py-3 text-left font-semibold">Opciones</th>
@@ -14,14 +14,16 @@
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
         <tr v-for="persona in data" :key="persona.CodigoPAF" class="hover:bg-gray-50 transition-colors">
-          <td class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoPAF }}</td>
-          <td class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoAsignatura }}</td>
+          <td class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoPAF }} {{ persona.IdPAF }}</td>
+          <td class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoAsignatura }} {{ persona.codigo_asignatura }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.Run }}</td>
-          <td class="px-4 py-3 text-gray-700">{{ persona.NombreAsignatura }}</td>
-          <td class="px-4 py-3 text-gray-700"> </td>
-          <td class="px-4 py-3 text-gray-700">{{ persona.Cupo }} {{ persona.cupo }} </td>
+          <td class="px-4 py-3 text-gray-700">{{ persona.NombreAsignatura }} {{ persona.nombre_asignatura }}</td>
+          <td class="px-4 py-3 text-gray-700"></td>
+          <td class="px-4 py-3 text-gray-700">{{ persona.Cupo }} {{ persona.cupo }}</td>
           <td v-if="showButtons" class="px-4 py-3">
             <a :href="`/paf?codigoPaf=${persona.CodigoPAF}`" class="button">Ver PAF</a>
+            <br>
+            <br>
             <a :href="`/horario?run=${persona.Run}`" class="button">Ver Horarios</a>
           </td>
         </tr>
@@ -45,16 +47,26 @@ export default {
 }
 </script>
 
-
-
 <style scoped>
+/* Colores institucionales */
+:root {
+  --primary-color: #EA7600; /* Color principal USACH */
+  --secondary-color: #394049; /* Color secundario USACH */
+  --accent-color: #C8102E; /* Complementario */
+  --background-color: #1d558d; /* Fondo neutro */
+  --button-background-color: #4CAF50; /* Color de fondo de los botones */
+  --button-hover-color: #388E3C; /* Color de hover en los botones */
+}
+
+/* Contenedor de la tabla */
 .table-container {
   width: 100%;
   padding: 20px;
   overflow-x: auto;
-  background-color: #f9fafb;
+  background-color: var(--background-color);
 }
 
+/* Estilos para la tabla */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -64,16 +76,17 @@ thead th {
   font-size: 0.9rem;
   font-weight: 600;
   text-transform: uppercase;
-  color: #ffffff;
-  background-color: #4a5568;
+  color: #030101;
+  background-color: var(--primary-color);
 }
 
 tbody td {
   padding: 12px;
   font-size: 0.875rem;
-  color: #4a5568;
+  color: var(--secondary-color);
 }
 
+/* Estilos para los botones */
 .button {
   display: inline-block;
   padding: 8px 12px;
@@ -81,14 +94,14 @@ tbody td {
   font-weight: 500;
   text-align: center;
   text-decoration: none;
-  color: #ffffff;
-  background-color: #4f46e5;
+  color: #090000;
+  background-color: #4CAF50;
   border-radius: 6px;
   transition: background-color 0.2s ease;
 }
 
 .button:hover {
-  background-color: #4338ca;
+  background-color: var(--button-hover-color);
 }
 
 .hover\:bg-gray-50:hover {
