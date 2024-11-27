@@ -15,6 +15,7 @@
     "@nuxtjs/proxy": "^2.1.0",
     "axios": "^1.7.7",
     "chart.js": "^4.4.6",
+    "chartjs-plugin-datalabels": "^2.2.0",
     "cors": "^2.8.5",
     "nuxt": "^3.13.2",
     "nuxt-app": "file:",

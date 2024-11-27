@@ -123,7 +123,3 @@ const sortData = (newSortBy: string, newSortOrder: string) => {
   max-width: 100%;
 }
 </style>
-
-
-  
-  

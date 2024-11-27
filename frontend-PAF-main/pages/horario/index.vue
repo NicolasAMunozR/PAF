@@ -1,7 +1,7 @@
 <template>
   <div class="flex">
     <!-- Botón para volver -->
-    <div class="absolute top-4 left-4">
+    <div class="mt-4 ml-4">
       <button @click="volver" class="volver-button">
         Volver
       </button>

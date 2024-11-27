@@ -22,22 +22,28 @@
     <div v-if="estadoSeleccionado !== null" class="detalles-container">
       <h4 class="subtitulo">Detalles del Estado {{ estadoSeleccionado }}</h4>
       <p class="detalle-text">Cantidad de PAF en este estado: <strong>{{ cantidadPafPorEstado[estadoSeleccionado] }}</strong></p>
-      <p class="detalle-text">Promedio de tiempo en estado: <strong>{{ promedioTiempoPorEstado[estadoSeleccionado].toFixed(2) }}</strong> días</p>
+      <p class="detalle-text">Promedio de tiempo en estado:<strong>
+        {{
+          promedioTiempoPorEstado[estadoSeleccionado]
+            ? promedioTiempoPorEstado[estadoSeleccionado].toFixed(2)
+            : 'N/A'
+        }}
+      </strong>días</p>
     </div>
 
     <!-- Gráficos -->
-    <div v-if="profesoresChartData && pafPorEstadoChartData" class="grafico-container">
+    <div v-if="profesoresChartData && pafPorEstadoChartData && pafPorUnidadMayorChartData" class="grafico-container">
       <div class="pie-chart">
         <h4 class="subtitulo">Profesores con y sin PAF</h4>
         <Pie :data="profesoresChartData" />
       </div>
       <div class="pie-chart">
-        <h4 class="subtitulo">PAF por estado</h4>
+        <h4 class="subtitulo">Porcentaje de PAF por estado</h4>
         <Pie :data="pafPorEstadoChartData" />
       </div>
-      <div class="pie-chart">
+      <div class="bar-chart">
         <h4 class="subtitulo">PAF por Unidad Mayor</h4>
-        <Pie :data="pafPorUnidadMayorChartData" />
+        <Bar :data="pafPorUnidadMayorChartData" />
       </div>
     </div>
   </div>
@@ -46,11 +52,14 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { Pie } from 'vue-chartjs';
-import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale } from 'chart.js';
+import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale,  BarElement} from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { Bar } from 'vue-chartjs'; // Importar gráfico de barras
+
 
 const { $axios } = useNuxtApp();
 
-ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale);
+ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale, ChartDataLabels, BarElement);
 
 const cantidadPersonasSai = ref(0);
 const cantidadPafUnicas = ref(0);
@@ -61,6 +70,7 @@ const pafPorEstadoChartData = ref(null);
 const estadoSeleccionado = ref(null);
 const totalPaf = ref(0);
 const pafPorUnidadMayorChartData = ref(null);
+const totalPorcPaf = ref([]);
 
 const fetchCantidadPersonasSai = async () => {
   try {
@@ -85,6 +95,7 @@ const fetchCantidadPafPorEstado = async () => {
     const response = await $axios.get('/estadisticas');
     cantidadPafPorEstado.value = response.data.EstadoProcesoCount;
     totalPaf.value = Object.values(response.data.EstadoProcesoCount).reduce((a, b) => a + b, 0);
+    totalPorcPaf.value = Object.values(response.data.EstadoProcesoCount).map((value) => ((value / totalPaf.value) * 100).toFixed(2));
   } catch (error) {
     console.error('Error al obtener la cantidad de PAF por estado:', error);
   }
@@ -93,9 +104,9 @@ const fetchCantidadPafPorEstado = async () => {
 const fetchPromedioTiempoPorEstado = async () => {
   try {
     promedioTiempoPorEstado.value = {
-      1: 10.5,
-      2: 8.3,
-      3: 12.1,
+      "A1": 10.5,
+      "A3": 8.3,
+      "F1": 12.1,
     };
   } catch (error) {
     console.error('Error al obtener el promedio de tiempo por estado:', error);
@@ -113,7 +124,7 @@ const fetchPafPorUnidadMayor = async () => {
         {
           label: 'Cantidad de PAF por Unidad Mayor',
           data: Object.values(unidadesData),
-          backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#AB47BC', '#EF5350'],
+          backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#AB47BC', '#EF5350'], // Colores de las barras
         },
       ],
     };
@@ -123,28 +134,50 @@ const fetchPafPorUnidadMayor = async () => {
 };
 
 const configurarGraficos = () => {
+  const commonDatalabelsOptions = {
+    formatter: (value) => (parseFloat(value) > 0 ? `${value}%` : ''), // Mostrar solo si el porcentaje es mayor que 0
+    color: '#ffffff', // Color del texto
+    font: {
+      weight: 'bold',
+    },
+    align: 'center', // Alinear al centro del sector
+    anchor: 'center',
+  };
+
+  // Gráfico de Profesores con y sin PAF
   profesoresChartData.value = {
     labels: ['Profesores con PAF', 'Profesores sin PAF'],
     datasets: [
       {
         label: 'Cantidad',
-        data: [cantidadPafUnicas.value, cantidadPersonasSai.value - cantidadPafUnicas.value],
+        data: [
+          ((cantidadPafUnicas.value / cantidadPersonasSai.value) * 100).toFixed(2),
+          ((cantidadPersonasSai.value - cantidadPafUnicas.value) / cantidadPersonasSai.value * 100).toFixed(2),
+        ],
         backgroundColor: ['#42A5F5', '#EF5350'],
       },
     ],
+    plugins: {
+      datalabels: commonDatalabelsOptions,
+    },
   };
 
+  // Gráfico de PAF por Estado
   pafPorEstadoChartData.value = {
-    labels: Object.keys(cantidadPafPorEstado.value),
+    labels: Object.keys(cantidadPafPorEstado.value), // Estados
     datasets: [
       {
-        label: 'Cantidad de PAF por estado',
-        data: Object.values(cantidadPafPorEstado.value),
-        backgroundColor: ['#66BB6A', '#FFA726', '#AB47BC', '#394049', '#EA7600', '#C8102E'],
+        label: 'Porcentaje de PAF por estado',
+        data: totalPorcPaf.value, // Porcentajes calculados
+        backgroundColor: ['#66BB6A', '#FFA726', '#AB47BC', '#394049', '#EA7600', '#C8102E', '#42A5F5', '#0db58b', '#f0f0f0', '#76095b'],
       },
     ],
+    plugins: {
+      datalabels: commonDatalabelsOptions,
+    },
   };
 };
+
 
 const mostrarDetalles = (estado) => {
   estadoSeleccionado.value = estado;
@@ -202,24 +235,26 @@ onMounted(async () => {
   height: auto;
 }
 
+.bar-chart {
+  margin: 2rem;
+  max-width: 600px;  /* Aumenté el ancho para las barras */
+  height: auto;
+}
+
+
 /* Estados */
 .estado-linea {
   display: flex;
-  margin: 1rem 0;
-  align-items: center;
-  width: 100%;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .estado-rectangulo {
-  height: 40px;
-  text-align: center;
-  color: white;
-  font-weight: bold;
   cursor: pointer;
-  line-height: 40px;
-  margin: 0 5px;
-  flex-grow: 1;
-  border-radius: 5px;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  background-color: #394049;
 }
 
 .estado-seleccionado {
@@ -227,27 +262,51 @@ onMounted(async () => {
   background-color: #333333;
 }
 
-.estado-1 {
+.estado-A1 {
   background-color: #66BB6A;
 }
 
-.estado-2 {
+.estado-A2 {
   background-color: #FFA726;
 }
 
-.estado-3 {
+.estado-A3 {
   background-color: #AB47BC;
 }
 
-.estado-4 {
+.estado-A9 {
   background-color: #394049;
 }
 
-.estado-5 {
+.estado-B1 {
   background-color: #EA7600;
 }
 
-.estado-6 {
+.estado-B9 {
   background-color: #C8102E;
+}
+
+.estado-C1D {
+  background-color: #42A5F5;
+}
+
+.estado-C9D {
+  background-color: #0db58b;
+}
+
+.estado-F1 {
+  background-color: #f0f0f0;
+}
+
+.estado-F9 {
+  background-color: #76095b;
+}
+
+.detalles-container {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 </style>

@@ -16,6 +16,7 @@
             <th>Jefatura</th>
             <th>Nombre de Asignatura</th>
             <th>Estado del Proceso</th>
+            <th>Descripción del Proceso</th>
             <th>Fecha de la Última Actualización de Estado</th>
             <th>Historial de Estados</th>
           </tr>
@@ -25,7 +26,8 @@
             <td>{{ contrato.PipelsoftData.IdPaf }}</td>
             <td>{{ contrato.PipelsoftData.Jerarquia }}</td>
             <td>{{ contrato.PipelsoftData.NombreAsignatura }}</td>
-            <td>{{ estadoProceso(contrato.PipelsoftData.CodEstado) }}</td>
+            <td>{{ contrato.PipelsoftData.CodEstado }}</td>
+            <td>{{ contrato.PipelsoftData.DesEstado }}</td>
             <td>
               {{ new Date(contrato.PipelsoftData.FechaUltimaModificacionProceso).toLocaleTimeString() }} 
               {{ new Date(contrato.PipelsoftData.FechaUltimaModificacionProceso).toLocaleDateString() }}
