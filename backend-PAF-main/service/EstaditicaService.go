@@ -7,15 +7,20 @@ import (
 	"gorm.io/gorm"
 )
 
+type EstadoDetalle struct {
+	CodigoEstado string  `json:"codigoEstado"`
+	Conteo       int     `json:"conteo"`
+	Porcentaje   float64 `json:"porcentaje"`
+}
+
 type EstadisticasResponse struct {
-	TotalProfesores            int64 // Cambiar de int a int64
-	TotalPipelsoft             int64 // Cambiar de int a int64
-	TotalPipelsoftUnicos       int64 // Cambiar de int a int64
-	PorcentajeUnicos           float64
-	ProfesoresNoEnPipelsoft    int64 // Cambiar de int a int64
-	ProfesoresNoEnPipelsoftPct float64
-	EstadoProcesoCount         map[string]int     // Claves de tipo string
-	EstadoProcesoPct           map[string]float64 // Claves de tipo string
+	TotalProfesores            int64           `json:"totalProfesores"`
+	TotalPipelsoft             int64           `json:"totalPipelsoft"`
+	TotalPipelsoftUnicos       int64           `json:"totalPipelsoftUnicos"`
+	PorcentajeUnicos           float64         `json:"porcentajeUnicos"`
+	ProfesoresNoEnPipelsoft    int64           `json:"profesoresNoEnPipelsoft"`
+	ProfesoresNoEnPipelsoftPct float64         `json:"profesoresNoEnPipelsoftPct"`
+	EstadosOrdenados           []EstadoDetalle `json:"estadosOrdenados"`
 }
 
 // EstadisticasService define los métodos para obtener estadísticas de las tablas
@@ -30,7 +35,6 @@ func NewEstadisticasService(dbPersonal *gorm.DB) *EstadisticasService {
 	}
 }
 
-// ObtenerEstadisticas obtiene las estadísticas generales de los profesores y Pipelsofts
 func (s *EstadisticasService) ObtenerEstadisticas() (*EstadisticasResponse, error) {
 	var resp EstadisticasResponse
 
@@ -70,27 +74,31 @@ func (s *EstadisticasService) ObtenerEstadisticas() (*EstadisticasResponse, erro
 		resp.ProfesoresNoEnPipelsoftPct = float64(profesoresNoEnPipelsoft) / float64(resp.TotalProfesores) * 100
 	}
 
-	// Contar los registros en pipelsofts por cada EstadoProceso (código de estado como string)
-	resp.EstadoProcesoCount = make(map[string]int)
-	resp.EstadoProcesoPct = make(map[string]float64)
+	// Estructura para preservar el orden de los estados
+	resp.EstadosOrdenados = make([]EstadoDetalle, 0)
 
 	// Los códigos de estado definidos
 	estados := []string{
-		"A1", "A2", "A3", "B1", "F9", "C1D", "C9D", "F1", "B9", "A9",
+		"A1", "A2", "A3", "B1", "B9", "C1D", "C9D", "F1", "F9", "A9",
 	}
 
-	// Contar registros por cada estado
+	// Contar registros por cada estado y preservarlos en orden
 	for _, estado := range estados {
 		var count int64
 		if err := s.DB.Model(&models.Pipelsoft{}).Where("cod_estado = ?", estado).Count(&count).Error; err != nil {
 			return nil, fmt.Errorf("error al contar los registros de pipelsofts con estado %s: %w", estado, err)
 		}
-		resp.EstadoProcesoCount[estado] = int(count)
 
-		// Calcular el porcentaje de registros por cada estado
+		porcentaje := 0.0
 		if resp.TotalPipelsoft > 0 {
-			resp.EstadoProcesoPct[estado] = float64(count) / float64(resp.TotalPipelsoft) * 100
+			porcentaje = float64(count) / float64(resp.TotalPipelsoft) * 100
 		}
+
+		resp.EstadosOrdenados = append(resp.EstadosOrdenados, EstadoDetalle{
+			CodigoEstado: estado,
+			Conteo:       int(count),
+			Porcentaje:   porcentaje,
+		})
 	}
 
 	return &resp, nil
