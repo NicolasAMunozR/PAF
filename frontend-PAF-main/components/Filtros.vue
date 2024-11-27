@@ -44,12 +44,16 @@
       <label for="estadoProceso" class="label">Estado de Proceso</label>
       <select id="estadoProceso" v-model="filtros.estadoProceso" class="select">
         <option value="">Todos</option>
-        <option value=1>Estado 1</option>
-        <option value=2>Estado 2</option>
-        <option value=3>Estado 3</option>
-        <option value=4>Estado 4</option>
-        <option value=5>Estado 5</option>
-        <option value=6>Estado 6</option>
+        <option value="A1">Estado A1</option>
+        <option value="A2">Estado A2</option>
+        <option value="A3">Estado A3</option>
+        <option value="B1">Estado B1</option>
+        <option value="B9">Estado B9</option>
+        <option value="C1D">Estado C1D</option>
+        <option value="C9D">Estado C9D</option>
+        <option value="F1">Estado F1</option>
+        <option value="F9">Estado F9</option>
+        <option value="A9">Estado A9</option>
       </select>
     </div>
     <div class="filter-item">

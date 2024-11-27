@@ -32,10 +32,14 @@
     </div>
 
     <!-- Gráficos -->
-    <div v-if="profesoresChartData && pafPorEstadoChartData && pafPorUnidadMayorChartData" class="grafico-container">
+    <div v-if="profesoresChartData && pafChartData && pafPorEstadoChartData && pafPorUnidadMayorChartData" class="grafico-container">
       <div class="pie-chart">
         <h4 class="subtitulo">Profesores con y sin PAF</h4>
         <Pie :data="profesoresChartData" />
+      </div>
+      <div class="pie-chart">
+        <h4 class="subtitulo">Profesores con PAF y Profesores con PAF activas</h4>
+        <Pie :data="pafChartData" />
       </div>
       <div class="pie-chart">
         <h4 class="subtitulo">Porcentaje de PAF por estado</h4>
@@ -62,11 +66,13 @@ const { $axios } = useNuxtApp();
 ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale, ChartDataLabels, BarElement);
 
 const cantidadPersonasSai = ref(0);
+const cantidadPafActivas = ref(0);
 const cantidadPafUnicas = ref(0);
 const cantidadPafPorEstado = ref({});
 const promedioTiempoPorEstado = ref({});
 const profesoresChartData = ref(null);
 const pafPorEstadoChartData = ref(null);
+const pafChartData = ref(null);
 const estadoSeleccionado = ref(null);
 const totalPaf = ref(0);
 const pafPorUnidadMayorChartData = ref(null);
@@ -76,24 +82,29 @@ const fetchCantidadPersonasSai = async () => {
   try {
     const response = await $axios.get('/estadisticas');
     cantidadPersonasSai.value = response.data.TotalProfesores;
+    cantidadPafUnicas.value = response.data.TotalPipelsoftUnicos;
   } catch (error) {
     console.error('Error al obtener la cantidad de personas del SAI:', error);
   }
 };
 
-const fetchCantidadPafUnicas = async () => {
+const fetchCantidadPafSai = async () => {
   try {
-    const response = await $axios.get('/estadisticas');
-    cantidadPafUnicas.value = response.data.TotalPipelsoftUnicos;
+    const response = await $axios.get('/estadisticas/PafActivas');
+    console.log('response:', response);
+    cantidadPafActivas.value = response.data.conteo;
   } catch (error) {
-    console.error('Error al obtener la cantidad de PAF únicas:', error);
+    console.error('Error al obtener la cantidad de personas del SAI:', error);
   }
 };
+
 
 const fetchCantidadPafPorEstado = async () => {
   try {
     const response = await $axios.get('/estadisticas');
+    console.log('response:', response);
     cantidadPafPorEstado.value = response.data.EstadoProcesoCount;
+    console.log('cantidadPafPorEstado:', cantidadPafPorEstado.value);
     totalPaf.value = Object.values(response.data.EstadoProcesoCount).reduce((a, b) => a + b, 0);
     totalPorcPaf.value = Object.values(response.data.EstadoProcesoCount).map((value) => ((value / totalPaf.value) * 100).toFixed(2));
   } catch (error) {
@@ -176,6 +187,23 @@ const configurarGraficos = () => {
       datalabels: commonDatalabelsOptions,
     },
   };
+
+  pafChartData.value = {
+    labels: ['Profesores con PAF activa', 'Profesores sin PAF'],
+    datasets: [
+      {
+        label: 'Cantidad',
+        data: [
+          ((cantidadPafActivas.value / cantidadPersonasSai.value) * 100).toFixed(2),
+          ((cantidadPersonasSai.value - cantidadPafActivas.value) / cantidadPersonasSai.value * 100).toFixed(2),
+        ],
+        backgroundColor: ['#42A5F5', '#EF5350'],
+      },
+    ],
+    plugins: {
+      datalabels: commonDatalabelsOptions,
+    },
+  };
 };
 
 
@@ -186,10 +214,10 @@ const mostrarDetalles = (estado) => {
 onMounted(async () => {
   await Promise.all([
     fetchCantidadPersonasSai(),
-    fetchCantidadPafUnicas(),
     fetchCantidadPafPorEstado(),
     fetchPromedioTiempoPorEstado(),
     fetchPafPorUnidadMayor(),
+    fetchCantidadPafSai(),
   ]);
   configurarGraficos();
 });
@@ -231,8 +259,8 @@ onMounted(async () => {
 
 .pie-chart {
   margin: 2rem;
-  max-width: 400px;
-  height: auto;
+  max-width: 500px;
+  height: 300px;
 }
 
 .bar-chart {
