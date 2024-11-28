@@ -1,13 +1,12 @@
+// controllers/horario_controller.go
 package controller
 
 import (
-	"encoding/json"
-	"net/http"
-
 	"github.com/NicolasAMunozR/PAF/backend-PAF/service"
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 )
 
+// HorarioController gestiona las solicitudes relacionadas con los horarios
 type HorarioController struct {
 	HorarioService *service.HorarioService
 }
@@ -18,26 +17,23 @@ func NewHorarioController(horarioService *service.HorarioService) *HorarioContro
 }
 
 // ObtenerHorariosPorRun maneja la solicitud para obtener todos los horarios por Run
-func (h *HorarioController) ObtenerHorariosPorRun(w http.ResponseWriter, r *http.Request) {
-	run := mux.Vars(r)["run"] // Obtener el parámetro "run" de la URL
+func (h *HorarioController) ObtenerHorariosPorRun(c *gin.Context) {
+	// Obtener el parámetro "run" de la URL
+	run := c.Param("run")
 
 	// Llamar al servicio para obtener los horarios
 	horarios, err := h.HorarioService.ObtenerHorariosPorRun(run)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		c.JSON(500, gin.H{"error": "Error al obtener los horarios: " + err.Error()})
 		return
 	}
 
 	// Si no se encuentran horarios
 	if len(horarios) == 0 {
-		http.Error(w, "No se encontraron horarios para este Run", http.StatusNotFound)
+		c.JSON(404, gin.H{"error": "No se encontraron horarios para el Run especificado"})
 		return
 	}
 
 	// Retornar los horarios encontrados como JSON
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(horarios); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	c.JSON(200, horarios)
 }

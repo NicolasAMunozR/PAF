@@ -1,13 +1,12 @@
+// controllers/pipelsoft_controller.go
 package controller
 
 import (
-	"encoding/json"
-	"net/http"
-
 	"github.com/NicolasAMunozR/PAF/backend-PAF/service"
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 )
 
+// PipelsoftController gestiona las solicitudes relacionadas con los contratos
 type PipelsoftController struct {
 	Service *service.PipelsoftService
 }
@@ -18,106 +17,96 @@ func NewPipelsoftController(service *service.PipelsoftService) *PipelsoftControl
 }
 
 // Obtener contratos por código de curso
-func (c *PipelsoftController) ObtenerContratosPorCodigoCurso(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	codigoCurso := vars["codigo_curso"]
+func (c *PipelsoftController) ObtenerContratosPorCodigoCurso(ctx *gin.Context) {
+	codigoCurso := ctx.Param("codigo_curso")
 
 	contratos, err := c.Service.ObtenerContratosPorCodigoCurso(codigoCurso)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(contratos)
+	ctx.JSON(200, contratos)
 }
 
 // Obtener todos los contratos
-func (c *PipelsoftController) ObtenerTodosLosContratos(w http.ResponseWriter, r *http.Request) {
+func (c *PipelsoftController) ObtenerTodosLosContratos(ctx *gin.Context) {
 	contratos, err := c.Service.ObtenerTodosLosContratos()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(contratos)
+	ctx.JSON(200, contratos)
 }
 
 // Obtener contratos por RUN
-func (c *PipelsoftController) ObtenerContratosPorRUN(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	run := vars["run"]
+func (c *PipelsoftController) ObtenerContratosPorRUN(ctx *gin.Context) {
+	run := ctx.Param("run")
 
 	contratos, err := c.Service.ObtenerContratosPorRUN(run)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(contratos)
+	ctx.JSON(200, contratos)
 }
 
 // Obtener contratos por Código PAF
-func (c *PipelsoftController) ObtenerPorCodigoPAF(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	codigoPAF := vars["codigo_paf"]
+func (c *PipelsoftController) ObtenerPorCodigoPAF(ctx *gin.Context) {
+	codigoPAF := ctx.Param("codigo_paf")
 
 	datos, err := c.Service.ObtenerPorCodigoPAF(codigoPAF)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	json.NewEncoder(w).Encode(datos)
+	ctx.JSON(200, datos)
 }
 
 // Obtener PAF de los últimos 7 días
-func (c *PipelsoftController) ObtenerPAFUltimos7Dias(w http.ResponseWriter, r *http.Request) {
+func (c *PipelsoftController) ObtenerPAFUltimos7Dias(ctx *gin.Context) {
 	datos, err := c.Service.ObtenerPAFUltimos7Dias()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	json.NewEncoder(w).Encode(datos)
+	ctx.JSON(200, datos)
 }
 
 // Obtener PAF del último mes
-func (c *PipelsoftController) ObtenerPAFUltimoMes(w http.ResponseWriter, r *http.Request) {
+func (c *PipelsoftController) ObtenerPAFUltimoMes(ctx *gin.Context) {
 	datos, err := c.Service.ObtenerPAFUltimoMes()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	json.NewEncoder(w).Encode(datos)
+	ctx.JSON(200, datos)
 }
 
 // Obtener contratos por nombre de unidad mayor
-func (c *PipelsoftController) ObtenerContratosPorNombreUnidadMayor(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	nombreUnidadMayor := vars["nombreUnidadMayor"]
+func (c *PipelsoftController) ObtenerContratosPorNombreUnidadMayor(ctx *gin.Context) {
+	nombreUnidadMayor := ctx.Param("nombreUnidadMayor")
 
 	contratos, err := c.Service.ObtenerContratosPorNombreUnidadMayor(nombreUnidadMayor)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(contratos)
+	ctx.JSON(200, contratos)
 }
 
 // Obtener contratos por nombre de unidad contratante
-func (c *PipelsoftController) ObtenerContratosPorNombreUnidadContratante(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	nombreUnidadContratante := vars["nombreUnidadContratante"]
+func (c *PipelsoftController) ObtenerContratosPorNombreUnidadContratante(ctx *gin.Context) {
+	nombreUnidadContratante := ctx.Param("nombreUnidadContratante")
 
 	contratos, err := c.Service.ObtenerContratosPorNombreUnidadContratante(nombreUnidadContratante)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(contratos)
+	ctx.JSON(200, contratos)
 }

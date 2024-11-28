@@ -2,7 +2,6 @@
 package controller
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,38 +9,38 @@ import (
 
 	"github.com/NicolasAMunozR/PAF/backend-PAF/models"
 	"github.com/NicolasAMunozR/PAF/backend-PAF/service"
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 )
 
+// HistorialPafAceptadasController gestiona las solicitudes relacionadas con los historiales de PAF aceptados
 type HistorialPafAceptadasController struct {
 	Service *service.HistorialPafAceptadasService
 }
 
-func (h *HistorialPafAceptadasController) CrearHistorialHandler(w http.ResponseWriter, r *http.Request) {
+// CrearHistorialHandler maneja la creación de un nuevo historial
+func (h *HistorialPafAceptadasController) CrearHistorialHandler(c *gin.Context) {
 	// Obtener el código PAF desde los parámetros de la URL
-	vars := mux.Vars(r)
-	codigoPAFStr, ok := vars["codigoPAF"]
-	if !ok {
-		http.Error(w, "El parámetro 'codigoPAF' es obligatorio", http.StatusBadRequest)
+	codigoPAFStr := c.Param("codigoPAF")
+	if codigoPAFStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'codigoPAF' es obligatorio"})
 		return
 	}
 
 	// Convertir el código PAF a entero
 	codigoPAF, err := strconv.Atoi(codigoPAFStr)
 	if err != nil {
-		http.Error(w, "El parámetro 'codigoPAF' debe ser un número entero válido", http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'codigoPAF' debe ser un número entero válido"})
 		return
 	}
 
 	// Crear un struct auxiliar para parsear el cuerpo de la solicitud
-	type CrearHistorialRequest struct {
+	var request struct {
 		Profesor models.ProfesorDB `json:"profesor"`
 		Bloque   []string          `json:"bloque"`
 	}
 
-	var request CrearHistorialRequest
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, fmt.Sprintf("Error al parsear el cuerpo de la solicitud: %v", err), http.StatusBadRequest)
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Error al parsear el cuerpo de la solicitud: %v", err)})
 		return
 	}
 
@@ -49,41 +48,40 @@ func (h *HistorialPafAceptadasController) CrearHistorialHandler(w http.ResponseW
 	historial, err := h.Service.CrearHistorial(codigoPAF, request.Profesor, request.Bloque)
 	if err != nil {
 		log.Printf("Error al crear el historial: %v\n", err)
-		http.Error(w, fmt.Sprintf("Error al crear el historial: %v", err), http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error al crear el historial: %v", err)})
 		return
 	}
 
 	// Responder con el historial creado
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(historial); err != nil {
-		log.Printf("Error al codificar la respuesta: %v\n", err)
-		http.Error(w, "Error al generar la respuesta", http.StatusInternalServerError)
-	}
+	c.JSON(http.StatusCreated, historial)
 }
 
 // ObtenerTodosLosHistorialesHandler maneja la solicitud para obtener todos los historiales
-func (c *HistorialPafAceptadasController) ObtenerTodosLosHistorialesHandler(w http.ResponseWriter, r *http.Request) {
-	historiales, err := c.Service.ObtenerTodosLosHistoriales()
+func (h *HistorialPafAceptadasController) ObtenerTodosLosHistorialesHandler(c *gin.Context) {
+	historiales, err := h.Service.ObtenerTodosLosHistoriales()
 	if err != nil {
-		http.Error(w, "Error al obtener los historiales", http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener los historiales"})
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(historiales)
+	c.JSON(http.StatusOK, historiales)
 }
 
 // EliminarHistorialHandler maneja la solicitud para eliminar un historial por CodigoPAF
-func (c *HistorialPafAceptadasController) EliminarHistorialHandler(w http.ResponseWriter, r *http.Request) {
+func (h *HistorialPafAceptadasController) EliminarHistorialHandler(c *gin.Context) {
 	// Obtener el CodigoPAF desde los parámetros de la URL
-	codigoPAF := mux.Vars(r)["codigo_paf"]
-
-	// Llamar al servicio para eliminar el historial por CodigoPAF
-	if err := c.Service.EliminarHistorial(codigoPAF); err != nil {
-		http.Error(w, "Error al eliminar el historial", http.StatusInternalServerError)
+	codigoPAF := c.Param("codigo_paf")
+	if codigoPAF == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'codigo_paf' es obligatorio"})
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent) // Responder con 204 No Content si la eliminación fue exitosa
+	// Llamar al servicio para eliminar el historial por CodigoPAF
+	if err := h.Service.EliminarHistorial(codigoPAF); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al eliminar el historial"})
+		return
+	}
+
+	// Responder con 204 No Content si la eliminación fue exitosa
+	c.Status(http.StatusNoContent)
 }

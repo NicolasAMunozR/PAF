@@ -1,29 +1,29 @@
+// controllers/profesor_db_controller.go
 package controller
 
 import (
-	"encoding/json"
-	"net/http"
-
 	"github.com/NicolasAMunozR/PAF/backend-PAF/service"
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 )
 
 type ProfesorDBController struct {
 	Service service.ProfesorDBService
 }
 
+// Constructor del controlador
 func NewProfesorDBController(service service.ProfesorDBService) *ProfesorDBController {
 	return &ProfesorDBController{Service: service}
 }
 
-func (P *ProfesorDBController) ObtenerProfesorDBPorRun(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	run := vars["run"]
+// Obtener Profesor por RUN
+func (P *ProfesorDBController) ObtenerProfesorDBPorRun(ctx *gin.Context) {
+	run := ctx.Param("run")
 
 	profesor, err := P.Service.ObtenerProfesorPorRUT(run)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	json.NewEncoder(w).Encode(profesor)
+
+	ctx.JSON(200, profesor)
 }
