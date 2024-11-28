@@ -20,7 +20,7 @@ func NewPipelsoftService(dbPersonal *gorm.DB) *PipelsoftService {
 
 func (s *PipelsoftService) getAcceptedCodes() (map[int]struct{}, error) {
 	var historialAceptadas []struct {
-		CodigoPaf int `gorm:"column:codigo_paf"`
+		CodigoPaf int `gorm:"column:id_paf"`
 	}
 
 	// Modificación: agregamos la condición BanderaAceptacion = 1

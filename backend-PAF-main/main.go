@@ -3,13 +3,12 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 
 	"github.com/NicolasAMunozR/PAF/backend-PAF/DB"
 	"github.com/NicolasAMunozR/PAF/backend-PAF/controller"
 	"github.com/NicolasAMunozR/PAF/backend-PAF/models"
 	"github.com/NicolasAMunozR/PAF/backend-PAF/service"
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	"github.com/robfig/cron/v3" // Añadido para el cron job
 	"github.com/rs/cors"
 )
@@ -17,7 +16,7 @@ import (
 // Función principal
 func main() {
 	// Configuración de CORS
-	c := cors.New(cors.Options{
+	corsHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3001"},                   // Tu frontend
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}, // Agregar OPTIONS si lo necesitas
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},           // Agregar Authorization si es necesario
@@ -26,8 +25,14 @@ func main() {
 		Debug:            true, // Agregar para más información sobre los errores de CORS
 	})
 
-	// Crear el enrutador
-	r := mux.NewRouter()
+	// Crear el enrutador Gin
+	r := gin.Default()
+
+	// Aplicar el middleware CORS
+	r.Use(func(c *gin.Context) {
+		corsHandler := c.Handler()
+		corsHandler(c)
+	})
 
 	// Conectar a la base de datos
 	DB.InitDBConnections()
@@ -39,75 +44,73 @@ func main() {
 	}
 
 	// Rutas para el controlador HistorialPafAceptadas
-	// Definir rutas para el controlador
-	r.HandleFunc("/historial/post/{codigoPAF}", historialPafAceptadasController.CrearHistorialHandler).Methods("POST")
-	r.HandleFunc("/historial", historialPafAceptadasController.ObtenerTodosLosHistorialesHandler).Methods("GET")
-	r.HandleFunc("/historial/{codigo_paf}", historialPafAceptadasController.EliminarHistorialHandler).Methods("DELETE")
-	// Ruta para actualizar la BanderaAceptacion por codigoPAF
-	r.HandleFunc("/historial/{codigoPAF}/actualizarBanderaAceptacion", historialPafAceptadasController.ActualizarBanderaAceptacion).Methods("PUT")
+	r.POST("/historial/post/:codigoPAF", historialPafAceptadasController.CrearHistorialHandler)
+	r.GET("/historial", historialPafAceptadasController.ObtenerTodosLosHistorialesHandler)
+	r.DELETE("/historial/:codigo_paf", historialPafAceptadasController.EliminarHistorialHandler)
+	r.PUT("/historial/:codigoPAF/actualizarBanderaAceptacion", historialPafAceptadasController.ActualizarBanderaAceptacion)
 
 	// Servicios y controladores adicionales
 	pipelsoftService := service.NewPipelsoftService(DB.DBPersonal)
 	pipelsoftController := controller.NewPipelsoftController(pipelsoftService)
 
 	// Rutas para el controlador de Pipelsoft (actualizadas)
-	r.HandleFunc("/pipelsoft/contratos-curso/{codigo_curso}", pipelsoftController.ObtenerContratosPorCodigoCurso).Methods("GET")
-	//obtener todos los contratos
-	r.HandleFunc("/pipelsoft/contratos", pipelsoftController.ObtenerTodosLosContratos).Methods("GET")
-	r.HandleFunc("/pipelsoft/contratos-run/{run}", pipelsoftController.ObtenerContratosPorRUN).Methods("GET")
-	r.HandleFunc("/pipelsoft/contratos-nombreUnidadContratante/{nombreUnidadContratante}", pipelsoftController.ObtenerContratosPorNombreUnidadContratante).Methods("GET")
-	r.HandleFunc("/pipelsoft/contratos-nombreUnidadMayor/{nombreUnidadMayor}", pipelsoftController.ObtenerContratosPorNombreUnidadMayor).Methods("GET")
-	r.HandleFunc("/contratos/codigo_paf/{codigo_paf}", pipelsoftController.ObtenerPorCodigoPAF).Methods("GET")
-	r.HandleFunc("/contratos/ultimos_7_dias", pipelsoftController.ObtenerPAFUltimos7Dias).Methods("GET")
-	r.HandleFunc("/contratos/ultimo_mes", pipelsoftController.ObtenerPAFUltimoMes).Methods("GET")
+	r.GET("/pipelsoft/contratos-curso/:codigo_curso", pipelsoftController.ObtenerContratosPorCodigoCurso)
+	r.GET("/pipelsoft/contratos", pipelsoftController.ObtenerTodosLosContratos)
+	r.GET("/pipelsoft/contratos-run/:run", pipelsoftController.ObtenerContratosPorRUN)
+	r.GET("/pipelsoft/contratos-nombreUnidadContratante/:nombreUnidadContratante", pipelsoftController.ObtenerContratosPorNombreUnidadContratante)
+	r.GET("/pipelsoft/contratos-nombreUnidadMayor/:nombreUnidadMayor", pipelsoftController.ObtenerContratosPorNombreUnidadMayor)
+	r.GET("/contratos/codigo_paf/:codigo_paf", pipelsoftController.ObtenerPorCodigoPAF)
+	r.GET("/contratos/ultimos_7_dias", pipelsoftController.ObtenerPAFUltimos7Dias)
+	r.GET("/contratos/ultimo_mes", pipelsoftController.ObtenerPAFUltimoMes)
 
 	// Instanciar el servicio y controlador de Horarios
 	horarioService := service.NewHorarioService(DB.DBPersonal)
 	horarioController := controller.NewHorarioController(horarioService)
 
 	// Ruta para obtener los horarios por Run
-	r.HandleFunc("/horarios/{run}", horarioController.ObtenerHorariosPorRun).Methods("GET")
+	r.GET("/horarios/:run", horarioController.ObtenerHorariosPorRun)
 
 	// Instanciar el servicio y controlador de ProfesorDB
 	profesorDBService := service.NewProfesorDBService(DB.DBPersonal)
 	profesorDBController := controller.NewProfesorDBController(*profesorDBService)
-	r.HandleFunc("/profesorDB/{run}", profesorDBController.ObtenerProfesorDBPorRun).Methods("GET")
+	r.GET("/profesorDB/:run", profesorDBController.ObtenerProfesorDBPorRun)
 
 	// Instanciar el servicio y controlador de Estadísticas
 	estadisticasService := service.NewEstadisticasService(DB.DBPersonal)
 	estadisticasController := controller.NewEstadisticasController(estadisticasService)
 
 	// Ruta para obtener las estadísticas
-	r.HandleFunc("/estadisticas", estadisticasController.ObtenerEstadisticas).Methods("GET")
-	r.HandleFunc("/estadisticas/unidad/{nombreUnidadContratante}", estadisticasController.ContarRegistrosPorUnidadContratante).Methods("GET")
-	r.HandleFunc("/estadisticas/frecuencia-unidades-mayores", estadisticasController.ObtenerFrecuenciaNombreUnidadMayor).Methods("GET")
-	r.HandleFunc("/estadisticas/PafActivas", estadisticasController.ContarRegistrosPorCodEstado).Methods("GET")
+	r.GET("/estadisticas", estadisticasController.ObtenerEstadisticas)
+	r.GET("/estadisticas/unidad/:nombreUnidadContratante", estadisticasController.ContarRegistrosPorUnidadContratante)
+	r.GET("/estadisticas/frecuencia-unidades-mayores", estadisticasController.ObtenerFrecuenciaNombreUnidadMayor)
+	r.GET("/estadisticas/PafActivas", estadisticasController.ContarRegistrosPorCodEstado)
 
 	// Inicializar servicios y controladores
 	contratoService := &service.ContratoService{DB: DB.DBPersonal}
 	contratoController := &controller.ContratoController{Service: contratoService}
 
 	// Definir rutas
-	r.HandleFunc("/contratos", contratoController.GetAllContratosHandler).Methods("GET")
-	r.HandleFunc("/contratos/{run}", contratoController.GetContratoByRunHandler).Methods("GET")
-	r.HandleFunc("/contratos/unidad-mayor", contratoController.GetContratosByUnidadMayorHandler).Methods("GET")
-
-	// Aplicar CORS al enrutador
-	handler := c.Handler(r)
+	r.GET("/contratos", contratoController.GetAllContratosHandler)
+	r.GET("/contratos/:run", contratoController.GetContratoByRunHandler)
+	r.GET("/contratos/unidad-mayor", contratoController.GetContratosByUnidadMayorHandler)
+	// Aplicar CORS al enrutador (Gin ya maneja middleware)
+	corsHandler.Handler(r)
 
 	// Iniciar el cron job para actualización periódica
 	go iniciarCronJob()
 
-	// Iniciar el servidor
+	// Iniciar el servidor Gin
 	log.Println("Servidor escuchando en el puerto 3000...")
-	log.Fatal(http.ListenAndServe(":3000", handler))
+	if err := r.Run(":3000"); err != nil {
+		log.Fatal("Error al iniciar el servidor:", err)
+	}
 }
 
 // Función para iniciar el cron job de actualización
 func iniciarCronJob() {
 	c := cron.New()
 
-	// Ejecutar cada 1 hora con 10 minutos
+	// Ejecutar cada 30 minutos
 	c.AddFunc("@every 30m", func() {
 		actualizarModificaciones()
 	})
@@ -169,9 +172,6 @@ func actualizarModificaciones() {
 		}
 		if h.Jerarquia != pipelsoft.Jerarquia {
 			cambios = append(cambios, fmt.Sprintf("Jerarquia cambiada de %s a %s", h.Jerarquia, pipelsoft.Jerarquia))
-		}
-		if h.Calidad != pipelsoft.Calidad {
-			cambios = append(cambios, fmt.Sprintf("Calidad cambiada de %s a %s", h.Calidad, pipelsoft.Calidad))
 		}
 
 		// Si hay cambios detectados, se marca como modificado

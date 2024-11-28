@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -19,6 +20,12 @@ func NewHistorialPafAceptadasService(db *gorm.DB) *HistorialPafAceptadasService 
 }
 
 func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor models.ProfesorDB, bloque []string) (*models.HistorialPafAceptadas, error) {
+	// Serializar el campo Bloque a JSON
+	bloqueJSON, err := json.Marshal(bloque)
+	if err != nil {
+		return nil, fmt.Errorf("error al serializar el campo Bloque: %w", err)
+	}
+
 	// Definir el orden de los estados
 	estadoSiguiente := map[string]string{
 		"A1":  "A2",
@@ -73,22 +80,21 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 		IdPaf:                    codigoPAF,
 		FechaInicioContrato:      pipelsoft.FechaInicioContrato,
 		FechaFinContrato:         pipelsoft.FechaFinContrato,
-		CodigoAsignatura:         profesor.CodigoAsignatura,
-		NombreAsignatura:         profesor.NombreAsignatura,
+		CodigoAsignatura:         pipelsoft.CodigoAsignatura,
+		NombreAsignatura:         pipelsoft.NombreAsignatura,
 		CantidadHoras:            profesor.Cupo,
 		Jerarquia:                pipelsoft.Jerarquia, // Obtenido desde Pipelsoft
-		Calidad:                  pipelsoft.Calidad,   // Obtenido desde Pipelsoft
 		EstadoProceso:            nuevoEstado,         // Nuevo estado calculado
 		CodigoModificacion:       0,
 		BanderaModificacion:      0,
 		DescripcionModificacion:  nil,
 		ProfesorRun:              profesor.RUN,
 		Semestre:                 profesor.Semestre,
-		ProfesorCodigoAsignatura: profesor.CodigoAsignatura,
+		Tipo:                     profesor.Tipo,
 		ProfesorNombreAsignatura: profesor.NombreAsignatura,
 		Seccion:                  profesor.Seccion,
 		Cupo:                     profesor.Cupo,
-		Bloque:                   bloque, // Bloque recibido como parámetro
+		Bloque:                   string(bloqueJSON), // Asignar el JSON serializado como string
 		BanderaAceptacion:        0,
 	}
 
@@ -120,7 +126,7 @@ func (s *HistorialPafAceptadasService) ObtenerHistorialPorID(id uint) (*models.H
 // EliminarHistorial elimina un registro de HistorialPafAceptadas por su CodigoPAF en DBPersonal
 func (s *HistorialPafAceptadasService) EliminarHistorial(codigoPAF string) error {
 	// Eliminar directamente usando la condición
-	return s.DB.Where("codigo_paf = ?", codigoPAF).Delete(&models.HistorialPafAceptadas{}).Error
+	return s.DB.Where("id_paf = ?", codigoPAF).Delete(&models.HistorialPafAceptadas{}).Error
 }
 
 // ObtenerTodosLosHistoriales devuelve todos los registros de HistorialPafAceptadas desde DBPersonal
@@ -143,7 +149,7 @@ func (s *HistorialPafAceptadasService) ActualizarBanderaAceptacion(codigoPAF str
 
 	// Buscar el historial correspondiente al codigoPAF
 	var historial models.HistorialPafAceptadas
-	err := tx.Where("codigo_paf = ?", codigoPAF).First(&historial).Error
+	err := tx.Where("id_paf = ?", codigoPAF).First(&historial).Error
 	if err != nil {
 		tx.Rollback() // Rollback si ocurre un error al buscar el historial
 		if err == gorm.ErrRecordNotFound {
