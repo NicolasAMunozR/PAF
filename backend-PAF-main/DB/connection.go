@@ -14,14 +14,14 @@ var (
 	DBProfesor  *gorm.DB
 	DBPersonal  *gorm.DB
 )
-var DSN = "host=localhost user=postgres password=alonsoreyes104 dbname=PAF port=5432 sslmode=disable"
+var DSN = "host=localhost user=postgres password=conan2084 dbname=PAF port=5432 sslmode=disable"
 var DB *gorm.DB
 
 // Conexiones para múltiples bases de datos
 var (
-	DSNProfesor  = "host=localhost user=postgres password=alonsoreyes104 dbname=Profesor port=5432 sslmode=disable"
-	DSNPipelsoft = "host=localhost user=postgres password=alonsoreyes104 dbname=Pipelsoft port=5432 sslmode=disable"
-	DSNTPersonal = "host=localhost user=postgres password=alonsoreyes104 dbname=personal port=5432 sslmode=disable"
+	DSNProfesor  = "host=localhost user=postgres password=conan2084 dbname=Profesor port=5432 sslmode=disable"
+	DSNPipelsoft = "host=localhost user=postgres password=conan2084 dbname=Pipelsoft port=5432 sslmode=disable"
+	DSNTPersonal = "host=localhost user=postgres password=conan2084 dbname=personal port=5432 sslmode=disable"
 )
 
 // InitDBConnections inicializa las conexiones a todas las bases de datos.

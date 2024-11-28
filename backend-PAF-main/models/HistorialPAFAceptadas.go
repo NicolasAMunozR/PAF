@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 )
 
@@ -9,15 +11,15 @@ type HistorialPafAceptadas struct {
 	gorm.Model
 
 	// Campos de Contrato
-	Run                 string `gorm:"type:text;not null"`
-	IdPaf               int    `gorm:"type:int;not null"`
-	FechaInicioContrato string `gorm:"type:date;not null"`
-	FechaFinContrato    string `gorm:"type:date;not null"`
-	CodigoAsignatura    string `gorm:"type:text;not null"`
-	NombreAsignatura    string `gorm:"type:text;not null"`
-	CantidadHoras       int    `gorm:"type:int;not null"`
-	Jerarquia           string `gorm:"type:text;not null"`
-	Calidad             string `gorm:"type:text;not null"`
+	Run                 string    `gorm:"type:text;not null"`
+	IdPaf               int       `gorm:"type:int;not null"`
+	FechaInicioContrato time.Time `gorm:"type:timestamp;not null"`
+	FechaFinContrato    time.Time `gorm:"type:timestamp;not null"`
+	CodigoAsignatura    string    `gorm:"type:text;not null"`
+	NombreAsignatura    string    `gorm:"type:text;not null"`
+	CantidadHoras       int       `gorm:"type:int;not null"`
+	Jerarquia           string    `gorm:"type:text;not null"`
+	Calidad             string    `gorm:"type:text;not null"`
 
 	// Campos de Proceso
 	EstadoProceso string `gorm:"type:text;not null"`
@@ -34,7 +36,7 @@ type HistorialPafAceptadas struct {
 
 	ProfesorRun              string   `json:"run"`                       // RUN (identificador único)
 	Semestre                 string   `json:"semestre"`                  // Semestre de la asignatura
-	ProfesorCodigoAsignatura string   `json:"codigo_asignatura"`         // Código de la asignatura
+	Tipo                     string   `json:"codigo_asignatura"`         // Código de la asignatura
 	ProfesorNombreAsignatura string   `json:"nombre_asignatura"`         // Nombre de la asignatura
 	Seccion                  string   `json:"seccion"`                   // Sección o grupo
 	Cupo                     int      `json:"cupo"`                      // Capacidad del grupo

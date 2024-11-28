@@ -170,9 +170,6 @@ func actualizarModificaciones() {
 		if h.Jerarquia != pipelsoft.Jerarquia {
 			cambios = append(cambios, fmt.Sprintf("Jerarquia cambiada de %s a %s", h.Jerarquia, pipelsoft.Jerarquia))
 		}
-		if h.Calidad != pipelsoft.Calidad {
-			cambios = append(cambios, fmt.Sprintf("Calidad cambiada de %s a %s", h.Calidad, pipelsoft.Calidad))
-		}
 
 		// Si hay cambios detectados, se marca como modificado
 		if len(cambios) > 0 {

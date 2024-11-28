@@ -10,30 +10,29 @@ import (
 type Pipelsoft struct {
 	gorm.Model
 	// Campos de Persona
-	RunEmpleado string `gorm:"type:text;not null"`
-	Nombres     string `gorm:"type:text;not null"`
-	PrimerApp   string `gorm:"type:text;not null"`
-	SegundoApp  string `gorm:"type:text;not null"`
+	RunEmpleado string `gorm:"type:text"`
+	Nombres     string `gorm:"type:text"`
+	PrimerApp   string `gorm:"type:text"`
+	SegundoApp  string `gorm:"type:text"`
 
 	// Campos de UnidadContratante
-	CodigoUnidadContratante string `gorm:"type:varchar(100);not null;unique"`
-	NombreUnidadContratante string `gorm:"type:text;not null"`
-	NombreUnidadMayor       string `gorm:"type:text"`
+	NombreUnidadMayor string `gorm:"type:text"`
+	NombreUnidadMenor string `gorm:"type:text"`
 
 	// Campos de Contrato
-	IdPaf               int    `gorm:"type:int;not null"`
-	FechaInicioContrato string `gorm:"type:date;not null"`
-	FechaFinContrato    string `gorm:"type:date;not null"`
-	CodigoAsignatura    string `gorm:"type:text;not null"`
-	NombreAsignatura    string `gorm:"type:text;not null"`
-	HorasAsignatura     int    `gorm:"type:int;not null"`
-	CantidadHorasPaf    int    `gorm:"type:int;not null"`
-	Jerarquia           string `gorm:"type:text;not null"`
-	Calidad             string `gorm:"type:text;not null"`
-	Semestre            string `gorm:"type:text;not null"`
+	IdPaf               int       `gorm:"type:int"`
+	FechaInicioContrato time.Time `gorm:"type:timestamp"`
+	FechaFinContrato    time.Time `gorm:"type:timestamp"`
+	CodigoAsignatura    string    `gorm:"type:text"`
+	NombreAsignatura    string    `gorm:"type:text"`
+	HorasAsignatura     int       `gorm:"type:int"`
+	CantidadHorasPaf    int       `gorm:"type:int"`
+	Jerarquia           string    `gorm:"type:text"`
+	Semestre            string    `gorm:"type:text"`
+
+	Categoria string `gorm:"type:text"`
 
 	// Campos de Proceso
-	CodEstado                      string    `gorm:"type:text;not null"`
-	DesEstado                      string    `gorm:"type:text;not null"`
-	FechaUltimaModificacionProceso time.Time `gorm:"type:timestamp;not null"`
+	CodEstado string `gorm:"type:text"`
+	DesEstado string `gorm:"type:text"`
 }
