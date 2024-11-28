@@ -12,7 +12,7 @@ type HistorialPafAceptadas struct {
 
 	// Campos de Contrato
 	Run                 string    `gorm:"type:text;not null"`
-	IdPaf               int       `gorm:"type:int;not null"`
+	IdPaf               int       `gorm:"type:numeric;not null"`
 	FechaInicioContrato time.Time `gorm:"type:timestamp;not null"`
 	FechaFinContrato    time.Time `gorm:"type:timestamp;not null"`
 	CodigoAsignatura    string    `gorm:"type:text;not null"`
@@ -34,13 +34,13 @@ type HistorialPafAceptadas struct {
 	// Descripción detallada de la modificación (puede ser nulo)
 	DescripcionModificacion *string `gorm:"type:text;null" json:"descripcion_modificacion"`
 
-	ProfesorRun              string   `json:"run"`                       // RUN (identificador único)
-	Semestre                 string   `json:"semestre"`                  // Semestre de la asignatura
-	Tipo                     string   `json:"codigo_asignatura"`         // Código de la asignatura
-	ProfesorNombreAsignatura string   `json:"nombre_asignatura"`         // Nombre de la asignatura
-	Seccion                  string   `json:"seccion"`                   // Sección o grupo
-	Cupo                     int      `json:"cupo"`                      // Capacidad del grupo
-	Bloque                   []string `json:"bloque" gorm:"type:text[]"` // Bloque horario
+	ProfesorRun              string `json:"run"`                      // RUN (identificador único)
+	Semestre                 string `json:"semestre"`                 // Semestre de la asignatura
+	Tipo                     string `json:"codigo_asignatura"`        // Código de la asignatura
+	ProfesorNombreAsignatura string `json:"nombre_asignatura"`        // Nombre de la asignatura
+	Seccion                  string `json:"seccion"`                  // Sección o grupo
+	Cupo                     int    `json:"cupo"`                     // Capacidad del grupo
+	Bloque                   string `json:"bloque" gorm:"type:jsonb"` // Bloque horario
 
 	BanderaAceptacion int `gorm:"type:int;null"`
 }
