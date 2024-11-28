@@ -2,9 +2,7 @@
   <div class="flex">
     <!-- Botón para volver -->
     <div class="mt-4 ml-4">
-      <button @click="volver" class="volver-button">
-        Volver
-      </button>
+      <button @click="volver" class="volver-button">Volver</button>
     </div>
 
     <!-- Tabla de horarios -->
@@ -33,7 +31,14 @@
               <td>{{ horario.modulo }}</td>
               <td v-for="dia in dias" :key="dia">
                 <div v-for="bloque in bloquesPorDia(dia, index + 1)" :key="bloque.nombre" class="bloque" :style="{ backgroundColor: bloque.color }">
-                  {{ bloque.nombre }}
+                  <label>
+                    <input
+                      type="checkbox"
+                      :value="`${dia}-${index + 1}`"
+                      v-model="bloquesSeleccionados"
+                    />
+                    {{ bloque.nombre }}
+                  </label>
                 </div>
               </td>
             </tr>
@@ -45,18 +50,10 @@
       </div>
     </div>
 
-    <!-- Fichas de historial, PAF y asignaturas -->
+    <!-- Fichas y botón de envío -->
     <div class="w-1/3 pl-4 mt-12">
-      <!-- Ficha del historial -->
-      <div v-if="historialSeleccionado" class="historial-card">
-        <h2 class="sub-title">PAF macheada</h2>
-        <div class="card">
-          <p><strong>Código PAF:</strong> {{ historialSeleccionado?.CodigoPaf }}</p>
-          <p><strong>Código Asignatura:</strong> {{ historialSeleccionado?.CodigoAsignatura }}</p>
-          <p><strong>Nombre Asignatura:</strong> {{ historialSeleccionado?.NombreAsignatura }}</p>
-          <p><strong>Semestre:</strong> {{ historialSeleccionado?.semestre }}</p>
-        </div>
-      </div>
+      <!-- Fichas de historial, PAF y asignaturas -->
+      <h2 class="sub-title">Selecciona PAF y Asignatura</h2>
 
       <!-- Fichas de PAF -->
       <h2 class="sub-title">PAF</h2>
@@ -68,14 +65,10 @@
           :style="{ backgroundColor: fichaSeleccionadaPAF === p ? '#B3E5FC' : coloresPAF[index % coloresPAF.length] }"
           @click="fichaSeleccionadaPAF = p"
         >
-          <p><strong>Nombres:</strong> {{ p.Nombres }}</p>
-          <p><strong>Apellidos:</strong> {{ p.PrimerApellido }} {{ p.SegundoApellido }}</p>
+          <p><strong>Código PAF:</strong> {{ p.CodigoPaf }}</p>
           <p><strong>Jefatura:</strong> {{ p.NombreUnidadContratante }}</p>
           <p><strong>Cantidad de Horas:</strong> {{ p.CantidadHoras }}</p>
         </div>
-      </div>
-      <div v-else>
-        <p class="info-text">No se encontraron registros de PAF.</p>
       </div>
 
       <!-- Fichas de asignaturas -->
@@ -90,20 +83,15 @@
         >
           <p><strong>Código de Asignatura:</strong> {{ p.codigo_asignatura }}</p>
           <p><strong>Nombre de Asignatura:</strong> {{ p.nombre_asignatura }}</p>
-          <p><strong>Bloque:</strong> {{ p.bloque }}</p>
-          <p><strong>Cupo:</strong> {{ p.cupo }}</p>
           <p><strong>Sección:</strong> {{ p.seccion }}</p>
-          <p><strong>Semestre:</strong> {{ p.semestre }}</p>
+          <p><strong>Bloque:</strong> {{ p.bloque }}</p>
         </div>
-      </div>
-      <div v-else>
-        <p class="info-text">No se encontraron asignaturas filtradas.</p>
       </div>
 
       <!-- Botón para enviar selección -->
       <div class="flex justify-end mt-4">
         <button
-          v-if="fichaSeleccionadaPAF && fichaSeleccionadaAsignatura"
+          v-if="fichaSeleccionadaPAF && fichaSeleccionadaAsignatura && bloquesSeleccionados.length > 0"
           @click="enviarSeleccion"
           class="procesar-button"
         >
@@ -113,6 +101,7 @@
     </div>
   </div>
 </template>
+
 
 
 <script setup lang="ts">
@@ -137,7 +126,7 @@ const fichasAsignaturas = computed(() =>
 
 const fichaSeleccionadaPAF = ref<Persona | null>(null);
 const fichaSeleccionadaAsignatura = ref<Horario | null>(null);
-
+const bloquesSeleccionados = ref<string[]>([]);
 const route = useRoute()
 const router = useRouter()
 
@@ -170,7 +159,6 @@ interface Horario {
 
 const persona = ref<Persona[]>([])
 const persona1 = ref<Horario[]>([])
-console.log("persona1", persona1.value)
 const colores = ['#C8E6C9', '#A5D6A7', '#81C784', '#66BB6A', '#4CAF50']
 const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 const horarios = ref([
@@ -188,7 +176,6 @@ const horarios = ref([
 const semestreSeleccionado = ref('')
 const semestres = computed(() => [...new Set(persona1.value.map(p => p.semestre))])
 const personaFiltrada = computed(() => persona1.value.filter(p => p.semestre === semestreSeleccionado.value))
-
 const bloquesPorDia = (dia: string, modulo: number) => {
   // Mapear iniciales de días con sus nombres completos
   const inicialDia: { [key: string]: string } = {
@@ -205,10 +192,10 @@ const bloquesPorDia = (dia: string, modulo: number) => {
     .filter((p) => {
       if (!p.bloque) return false;
 
-      // Separar bloques (por ejemplo: M2-M5-V1 se divide en ["M2", "M5", "V1"])
+      // Separar bloques (por ejemplo: M2-M5-V1 se divide en ["M2", "M5", "V1"]).
       const bloques = p.bloque.split('-');
 
-      // Buscar un bloque que coincida con el día y el módulo
+      // Buscar un bloque que coincida con el día y el módulo actual
       return bloques.some((b) => {
         const diaBloque = b.charAt(0); // Primera letra es el día (M, V, etc.)
         const moduloBloque = b.slice(1); // Resto es el número de módulo
@@ -221,6 +208,10 @@ const bloquesPorDia = (dia: string, modulo: number) => {
       nombre: p.nombre_asignatura,
       seccion: p.seccion,
       color: colores[persona1.value.indexOf(p) % colores.length],
+      // Crear el formato "V3-M2" con la inicial del día y el número de módulo
+      bloque: (p.bloque ?? '').split('-')
+        .map(b => `${b.charAt(0)}${b.slice(1)}`) // Mapear para obtener "V3", "M2", etc.
+        .join('-')
     }));
 };
 
@@ -230,7 +221,7 @@ const obtenerDatosPersona = async () => {
     const response = await $axios.get(`/pipelsoft/contratos-run/${run.value}`);
     const response1 = await $axios.get(`/profesorDB/${run.value}`);
     persona1.value = response1.data;
-
+    console.log("persona1", persona1.value)
     persona.value = response.data.map((item: any) => ({
       CodigoPaf: item.PipelsoftData.IdPaf,
       CodigoAsignatura: item.PipelsoftData.CodigoAsignatura,
@@ -246,7 +237,8 @@ const obtenerDatosPersona = async () => {
       Semestre: response1.data.semestre,
       ID: item.HistorialPafData.ID,
       semestre: item.HistorialPafData.semestre,
-    }));
+    }))
+    console.log("persona", persona.value);
 
     // Identificar el semestre más reciente
     const semestresDisponibles = persona1.value.map(p => p.semestre).filter(Boolean);
@@ -275,6 +267,10 @@ const enviarSeleccion = async () => {
   try {
     const codigoPAF = fichaSeleccionadaPAF.value?.CodigoPaf; // Ajustar si el código es otro campo
     console.log('Código PAF:', codigoPAF);
+    const bloquesSeleccionadosString = computed(() => bloquesSeleccionados.value.join(','))
+    console.log(bloquesSeleccionadosString.value)
+    // si bloqueseleccionadosString tiene un elemento Miercoles Trasformarlo en W y los demas tipo Lunes o Matrtes dejarlos como L o M
+    
     const data = {
       run: fichaSeleccionadaAsignatura?.value?.run || '', // Cambiar según lo que necesitas enviar
       semestre: fichaSeleccionadaAsignatura?.value?.semestre || '',
@@ -282,7 +278,7 @@ const enviarSeleccion = async () => {
       nombre_asignatura: fichaSeleccionadaAsignatura?.value?.nombre_asignatura || '',
       seccion: fichaSeleccionadaAsignatura?.value?.seccion || '',
       cupo: fichaSeleccionadaAsignatura?.value?.cupo || 0, 
-      bloque: fichaSeleccionadaAsignatura?.value?.bloque || '', 
+      bloque: bloquesSeleccionados.value, 
     };
     console.log('Datos a enviar:', data);
     await $axios.post(`/historial/post/${codigoPAF}`, data);

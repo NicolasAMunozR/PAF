@@ -70,7 +70,7 @@ func (s *PipelsoftService) comprobarYCombinarDatosPorCodigoPAF(pipelsofts []mode
 	// Crear un map para almacenar los registros de HistorialPafAceptadas por CódigoPAF
 	historialPafMap := make(map[int]models.HistorialPafAceptadas)
 	for _, historial := range historialPafAceptadas {
-		historialPafMap[historial.IdPAF] = historial
+		historialPafMap[historial.IdPaf] = historial
 	}
 
 	// Crear una lista para almacenar los datos combinados

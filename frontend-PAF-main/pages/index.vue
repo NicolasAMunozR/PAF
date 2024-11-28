@@ -65,7 +65,7 @@ export default {
       errorMessage: "",
       roleOptions: [
         { value: "profesor", label: "Profesor" },
-        { value: "personal-dei", label: "Personal del DEI" },
+        { value: "personal-dei", label: "Personal del Dir" },
         { value: "encargado", label: "Encargado" },
       ],
     };

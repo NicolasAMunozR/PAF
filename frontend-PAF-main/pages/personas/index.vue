@@ -21,7 +21,7 @@ interface Persona {
   PrimerApellido: string;
   SegundoApellido: string;
   Correo: string;
-  EstadoProceso: number;
+  EstadoProceso: string;
   Calidad: string;
   Jerarquia: string;
   CantidadHoras: number;

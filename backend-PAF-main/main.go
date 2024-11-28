@@ -81,6 +81,7 @@ func main() {
 	r.HandleFunc("/estadisticas", estadisticasController.ObtenerEstadisticas).Methods("GET")
 	r.HandleFunc("/estadisticas/unidad/{nombreUnidadContratante}", estadisticasController.ContarRegistrosPorUnidadContratante).Methods("GET")
 	r.HandleFunc("/estadisticas/frecuencia-unidades-mayores", estadisticasController.ObtenerFrecuenciaNombreUnidadMayor).Methods("GET")
+	r.HandleFunc("/estadisticas/PafActivas", estadisticasController.ContarRegistrosPorCodEstado).Methods("GET")
 
 	// Inicializar servicios y controladores
 	contratoService := &service.ContratoService{DB: DB.DBPersonal}
@@ -133,16 +134,16 @@ func actualizarModificaciones() {
 		var pipelsoft models.Pipelsoft // Inicializa la variable limpia para evitar conflictos.
 
 		// Buscar el registro correspondiente en Pipelsoft
-		if err := db.Where("codigo_paf = ?", h.IdPAF).Take(&pipelsoft).Error; err != nil {
+		if err := db.Where("codigo_paf = ?", h.IdPaf).Take(&pipelsoft).Error; err != nil {
 			// Si no se encuentra en Pipelsoft, marcamos como eliminada
 			if err := db.Model(&h).Updates(map[string]interface{}{
 				"codigo_modificacion":      1, // Se marca como modificada (en este caso, eliminada)
 				"bandera_modificacion":     2, // 2 = Eliminada
-				"descripcion_modificacion": fmt.Sprintf("PAF con CodigoPAF: %d eliminada, no se encuentra en Pipelsoft", h.IdPAF),
+				"descripcion_modificacion": fmt.Sprintf("PAF con CodigoPAF: %d eliminada, no se encuentra en Pipelsoft", h.IdPaf),
 			}).Error; err != nil {
 				log.Println("Error al actualizar HistorialPafAceptadas como eliminada:", err)
 			} else {
-				fmt.Printf("PAF eliminada, no encontrada en Pipelsoft: CodigoPAF %d\n", h.IdPAF)
+				fmt.Printf("PAF eliminada, no encontrada en Pipelsoft: CodigoPAF %d\n", h.IdPaf)
 			}
 			continue // Si no se encuentra, seguimos con el siguiente registro
 		}
@@ -187,7 +188,7 @@ func actualizarModificaciones() {
 			}).Error; err != nil {
 				log.Println("Error al actualizar HistorialPafAceptadas:", err)
 			} else {
-				fmt.Printf("Registro actualizado para CodigoPAF: %d\n", h.IdPAF)
+				fmt.Printf("Registro actualizado para CodigoPAF: %d\n", h.IdPaf)
 			}
 		}
 	}

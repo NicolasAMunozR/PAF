@@ -60,6 +60,27 @@ func (c *EstadisticasController) ContarRegistrosPorUnidadContratante(w http.Resp
 	}
 }
 
+// ContarRegistrosPorCodEstado maneja la solicitud para contar registros de Pipelsoft donde el `cod_estado` no sea "F1", "F9" ni "A9"
+func (c *EstadisticasController) ContarRegistrosPorCodEstado(w http.ResponseWriter, r *http.Request) {
+	// Llamar al servicio para obtener el conteo y el porcentaje
+	count, porcentaje, err := c.Service.ContarRegistrosExcluyendoEstados()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error al contar registros excluyendo estados: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Responder con el conteo y porcentaje en formato JSON
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	response := map[string]interface{}{
+		"conteo":     count,
+		"porcentaje": porcentaje,
+	}
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, fmt.Sprintf("Error al codificar la respuesta en JSON: %v", err), http.StatusInternalServerError)
+	}
+}
+
 //esto NO DEBERIA IR AQUI MOVER
 
 // Nuevo controlador para actualizar la BanderaAceptacion
