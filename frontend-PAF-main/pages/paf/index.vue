@@ -23,7 +23,8 @@
           <p><strong>Nombre:</strong> {{ persona.Nombres }} {{ persona.PrimerApellido }} {{ persona.SegundoApellido }}</p>
           <p><strong>Asignatura:</strong> {{ persona.NombreAsignatura }}</p>
           <p><strong>Bloque:</strong> {{ persona.Bloque }}</p>
-          <p><strong>Unidad Contratante:</strong> {{ persona.NombreUnidadContratante }}</p>
+          <p><strong>Unidad Menor:</strong> {{ persona.NombreUnidadMenor }}</p>
+          <p><strong>Unidad Mayor:</strong> {{ persona.NombreUnidadMayor }}</p>
 
           <!-- Botón ubicado en la parte inferior -->
           <div class="flex justify-end mt-4">
@@ -67,7 +68,8 @@ const obtenerDatosPaf = async () => {
         PrimerApellido: item.PipelsoftData.PrimerApellido,
         SegundoApellido: item.PipelsoftData.SegundoApellido,
         CantidadHoras: item.PipelsoftData.CantidadHoras,
-        NombreUnidadContratante: item.PipelsoftData.NombreUnidadContratante,
+        NombreUnidadMenor: item.PipelsoftData.NombreUnidadMenor,
+        NombreUnidadMayor: item.PipelsoftData.NombreUnidadMayor,
         Bloque: item.HistorialPafData.bloque,
       }));
     }

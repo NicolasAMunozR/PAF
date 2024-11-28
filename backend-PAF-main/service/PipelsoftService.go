@@ -219,11 +219,11 @@ func (s *PipelsoftService) ObtenerContratosPorNombreUnidadMayor(nombreUnidadMayo
 	return s.comprobarYCombinarDatosPorCodigoPAF(contratosFiltrados)
 }
 
-// Obtener contratos por nombre de unidad contratante
-func (s *PipelsoftService) ObtenerContratosPorNombreUnidadContratante(nombreUnidadContratante string) ([]models.DatosCombinados, error) {
+// Obtener contratos por nombre de unidad menor
+func (s *PipelsoftService) ObtenerContratosPorNombreUnidadMenor(nombreUnidadMenor string) ([]models.DatosCombinados, error) {
 	var pipelsofts []models.Pipelsoft
 
-	if err := s.DBPersonal.Where("nombre_unidad_contratante = ?", nombreUnidadContratante).Find(&pipelsofts).Error; err != nil {
+	if err := s.DBPersonal.Where("nombre_unidad_menor = ?", nombreUnidadMenor).Find(&pipelsofts).Error; err != nil {
 		return nil, err
 	}
 

@@ -36,6 +36,7 @@ interface Persona {
   Seccion?: string;
   Semestre?: string;
   Cupo?: number;
+  Id: number;
 }
 
 const personas = ref<Persona[]>([]);
@@ -48,15 +49,14 @@ const filtros = ref({
   calidad: '',
   jerarquia: '',
   nombreAsignatura: '',
-  fechaUltimaModificacionProceso: ''
+  fechaUltimaModificacionProceso: '',
+  id: '',
 });
 const sortBy = ref('nombres');
 const sortOrder = ref('asc');
 
 const filteredPersonas = computed(() => {
   let filtered = personas.value.filter(persona => {
-    console.log('persona:', persona);
-    console.log('filtros:', filtros.value);
     return (
       persona.NombreAsignatura?.toLowerCase().includes(filtros.value.nombreAsignatura.toLowerCase() || '') &&
       persona.CodigoAsignatura?.toLowerCase().includes(filtros.value.codigoAsignatura.toLowerCase() || '') &&
@@ -92,13 +92,14 @@ onMounted(async () => {
       PrimerApellido: item.PipelsoftData.PrimerApp,
       SegundoApellido: item.PipelsoftData.SegundoApp,
       CodigoPAF: item.PipelsoftData.IdPaf,
-      Calidad: item.PipelsoftData.Calidad,
+      Calidad: item.PipelsoftData.Categoria,
       Jerarquia: item.PipelsoftData.Jerarquia,
       EstadoProceso: item.PipelsoftData.CodEstado,
       Run: item.PipelsoftData.RunEmpleado,
       Cupo: item.HistorialPafData.cupo,
       NombreAsignatura: item.PipelsoftData.NombreAsignatura,
-      FechaUltimaModificacionProceso: item.PipelsoftData.FechaUltimaModificacionProceso,
+      FechaUltimaModificacionProceso: item.PipelsoftData.UpdatedAt,
+      Id: item.PipelsoftData.Id,
     }));
   } catch (error) {
     console.error('Error al obtener personas:', error);

@@ -32,7 +32,7 @@
     </div>
 
     <!-- Gráficos -->
-    <div v-if="profesoresChartData && pafChartData && pafPorEstadoChartData && pafPorUnidadMayorChartData" class="grafico-container">
+    <div v-if="profesoresChartData && pafChartData && pafPorEstadoChartData" class="grafico-container">
       <div class="pie-chart">
         <h4 class="subtitulo">Profesores con y sin PAF</h4>
         <Pie :data="profesoresChartData" />
@@ -45,10 +45,12 @@
         <h4 class="subtitulo">Porcentaje de PAF por estado</h4>
         <Pie :data="pafPorEstadoChartData" />
       </div>
-      <div class="bar-chart">
-        <h4 class="subtitulo">PAF por Unidad Mayor</h4>
-        <Bar :data="pafPorUnidadMayorChartData" />
-      </div>
+    </div>
+    <br>
+    <br>
+    <div v-if="pafPorUnidadMayorChartData" class="bar-chart">
+      <h4 class="subtitulo">Cantidad de PAF por Unidad Mayor</h4>
+      <Bar :data="pafPorUnidadMayorChartData" />
     </div>
   </div>
 </template>
@@ -236,6 +238,7 @@ onMounted(async () => {
   margin-top: 1.5rem;
   color: #394049;
   font-family: "Bebas Neue Pro", sans-serif;
+  text-align: center;
 }
 
 .cantidad-text {
@@ -265,8 +268,8 @@ onMounted(async () => {
 
 .bar-chart {
   margin: 2rem;
-  max-width: 600px;  /* Aumenté el ancho para las barras */
-  height: auto;
+  max-width: 100%;  /* Aumenté el ancho para las barras */
+  height: 1000px;
 }
 
 

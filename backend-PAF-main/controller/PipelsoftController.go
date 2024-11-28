@@ -98,11 +98,11 @@ func (c *PipelsoftController) ObtenerContratosPorNombreUnidadMayor(ctx *gin.Cont
 	ctx.JSON(200, contratos)
 }
 
-// Obtener contratos por nombre de unidad contratante
-func (c *PipelsoftController) ObtenerContratosPorNombreUnidadContratante(ctx *gin.Context) {
-	nombreUnidadContratante := ctx.Param("nombreUnidadContratante")
+// Obtener contratos por nombre de unidad menor
+func (c *PipelsoftController) ObtenerContratosPorNombreUnidadMenor(ctx *gin.Context) {
+	nombreUnidadMenor := ctx.Param("nombreUnidadMenor")
 
-	contratos, err := c.Service.ObtenerContratosPorNombreUnidadContratante(nombreUnidadContratante)
+	contratos, err := c.Service.ObtenerContratosPorNombreUnidadMenor(nombreUnidadMenor)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return

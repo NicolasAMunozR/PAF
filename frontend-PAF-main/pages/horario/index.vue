@@ -66,7 +66,7 @@
           @click="fichaSeleccionadaPAF = p"
         >
           <p><strong>Código PAF:</strong> {{ p.CodigoPaf }}</p>
-          <p><strong>Jefatura:</strong> {{ p.NombreUnidadContratante }}</p>
+          <p><strong>Unidad Menor:</strong> {{ p.NombreUnidadMenor }}</p>
           <p><strong>Cantidad de Horas:</strong> {{ p.CantidadHoras }}</p>
         </div>
       </div>
@@ -139,7 +139,7 @@ interface Persona {
   CodigoAsignatura: string;
   NombreAsignatura: string;
   CantidadHoras: number;
-  NombreUnidadContratante: string;
+  NombreUnidadMenor: string;
   Nombres: string;
   PrimerApellido: string;
   SegundoApellido: string;
@@ -230,7 +230,7 @@ const obtenerDatosPersona = async () => {
       PrimerApellido: item.PipelsoftData.PrimerApp,
       SegundoApellido: item.PipelsoftData.SegundoApp,
       CantidadHoras: item.PipelsoftData.CantidadHorasPaf,
-      NombreUnidadContratante: item.PipelsoftData.NombreUnidadContratante,
+      NombreUnidadMenor: item.PipelsoftData.NombreUnidadMenor,
       Bloque: response1.data.bloque,
       Cupo: response1.data.cupo,
       Seccion: response1.data.seccion,

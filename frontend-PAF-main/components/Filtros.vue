@@ -3,7 +3,7 @@
     <div class="filter-item">
       <label for="nombreAsignatura" class="label">Nombre Asignatura</label>
       <input
-        id="nombreAsignatura"
+
         v-model="filtros.nombreAsignatura"
         type="text"
         class="input"
@@ -13,7 +13,7 @@
     <div class="filter-item">
       <label for="run" class="label">Run</label>
       <input
-        id="run"
+
         v-model="filtros.run"
         type="text"
         class="input"
@@ -23,7 +23,7 @@
     <div class="filter-item">
       <label for="codigoPAF" class="label">Código de PAF</label>
       <input
-        id="codigoPAF"
+
         v-model="filtros.codigoPAF"
         type="text"
         class="input"
@@ -33,7 +33,7 @@
     <div class="filter-item">
       <label for="codigoAsignatura" class="label">Código de Asignatura</label>
       <input
-        id="codigoAsignatura"
+  
         v-model="filtros.codigoAsignatura"
         type="text"
         class="input"
@@ -57,12 +57,10 @@
       </select>
     </div>
     <div class="filter-item">
-      <label for="calidad" class="label">Calidad</label>
+      <label for="calidad" class="label">Categoria</label>
       <select id="calidad" v-model="filtros.calidad" class="select">
         <option value="">Todas</option>
-        <option value="Baja">Calidad Baja</option>
-        <option value="Media">Calidad Media</option>
-        <option value="Alta">Calidad Alta</option>
+        <option value="PROFESOR HORAS CLASES">Profesor por hora</option>
       </select>
     </div>
     <div class="sort-item">

@@ -10,29 +10,21 @@ import (
 	"github.com/NicolasAMunozR/PAF/backend-PAF/service"
 	"github.com/gin-gonic/gin"
 	"github.com/robfig/cron/v3" // Añadido para el cron job
-	"github.com/rs/cors"
+	"github.com/gin-contrib/cors"
 )
 
 // Función principal
 func main() {
-	// Configuración de CORS
-	corsHandler := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3001"},                   // Tu frontend
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}, // Agregar OPTIONS si lo necesitas
-		AllowedHeaders:   []string{"Content-Type", "Authorization"},           // Agregar Authorization si es necesario
-		ExposedHeaders:   []string{"X-Total-Count"},
-		AllowCredentials: true,
-		Debug:            true, // Agregar para más información sobre los errores de CORS
-	})
-
 	// Crear el enrutador Gin
 	r := gin.Default()
 
-	// Aplicar el middleware CORS
-	r.Use(func(c *gin.Context) {
-		corsHandler := c.Handler()
-		corsHandler(c)
-	})
+	// Configurar CORS
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3001"},
+		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		AllowCredentials: true, // Si necesitas enviar cookies
+	}))
 
 	// Conectar a la base de datos
 	DB.InitDBConnections()
@@ -57,7 +49,7 @@ func main() {
 	r.GET("/pipelsoft/contratos-curso/:codigo_curso", pipelsoftController.ObtenerContratosPorCodigoCurso)
 	r.GET("/pipelsoft/contratos", pipelsoftController.ObtenerTodosLosContratos)
 	r.GET("/pipelsoft/contratos-run/:run", pipelsoftController.ObtenerContratosPorRUN)
-	r.GET("/pipelsoft/contratos-nombreUnidadContratante/:nombreUnidadContratante", pipelsoftController.ObtenerContratosPorNombreUnidadContratante)
+	r.GET("/pipelsoft/contratos-nombreUnidadMenor/:nombreUnidadMenor", pipelsoftController.ObtenerContratosPorNombreUnidadMenor)
 	r.GET("/pipelsoft/contratos-nombreUnidadMayor/:nombreUnidadMayor", pipelsoftController.ObtenerContratosPorNombreUnidadMayor)
 	r.GET("/contratos/codigo_paf/:codigo_paf", pipelsoftController.ObtenerPorCodigoPAF)
 	r.GET("/contratos/ultimos_7_dias", pipelsoftController.ObtenerPAFUltimos7Dias)
@@ -94,7 +86,12 @@ func main() {
 	r.GET("/contratos/:run", contratoController.GetContratoByRunHandler)
 	r.GET("/contratos/unidad-mayor", contratoController.GetContratosByUnidadMayorHandler)
 	// Aplicar CORS al enrutador (Gin ya maneja middleware)
-	corsHandler.Handler(r)
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3001"},
+		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
+	}))
 
 	// Iniciar el cron job para actualización periódica
 	go iniciarCronJob()

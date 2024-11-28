@@ -13,7 +13,7 @@
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
-        <tr v-for="persona in data" :key="persona.CodigoPAF" class="hover:bg-gray-50 transition-colors">
+        <tr v-for="persona in data" :key="persona.Id" class="hover:bg-gray-50 transition-colors">
           <td class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoPAF }} {{ persona.IdPAF }}</td>
           <td class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoAsignatura }} {{ persona.codigo_asignatura }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.Run }}</td>

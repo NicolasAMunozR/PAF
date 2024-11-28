@@ -6,9 +6,9 @@
       <input v-model="run" id="run" type="text" placeholder="Ej. 12345678-9" required />
       <button type="submit">Buscar</button>
     </form>
-    <h1>Buscar Contratos por Unidad Contratante</h1>
-    <form @submit.prevent="fetchContratosUnidadContratante">
-      <label for="unidad">Ingrese la Unidad Contratante:</label>
+    <h1>Buscar Contratos por Unidad Menor</h1>
+    <form @submit.prevent="fetchContratosUnidadMenor">
+      <label for="unidad">Ingrese la Unidad Menor:</label>
       <input v-model="Unidad" id="unidad" type="text" placeholder="" required />
       <button type="submit">Buscar</button>
     </form>
@@ -19,11 +19,12 @@
       <button type="submit">Buscar</button>
     </form>
     <div v-if="contratos.length > 0" class="contratos">
-      <h2>Contratos Relacionados a: {{ contratos[0].PipelsoftData.Nombres }} {{ contratos[0].PipelsoftData.PrimerApp }} {{ contratos[0].PipelsoftData.SegundoApp }}</h2>
+      <h2>Contratos Relacionados</h2>
       <table>
         <thead>
           <tr>
             <th>Código PAF</th>
+            <th>Run</th>
             <th>Jefatura</th>
             <th>Nombre de Asignatura</th>
             <th>Estado del Proceso</th>
@@ -35,6 +36,7 @@
         <tbody>
           <tr v-for="(contrato, index) in contratos" :key="index">
             <td>{{ contrato.PipelsoftData.IdPaf }}</td>
+            <td>{{ contrato.PipelsoftData.RunEmpleado }}</td>
             <td>{{ contrato.PipelsoftData.Jerarquia }}</td>
             <td>{{ contrato.PipelsoftData.NombreAsignatura }}</td>
             <td>{{ contrato.PipelsoftData.CodEstado }}</td>
@@ -112,18 +114,18 @@ const fetchContratos = async () => {
   }
 };
 
-const fetchContratosUnidadContratante = async () => {
+const fetchContratosUnidadMenor = async () => {
   if (!Unidad.value) {
-    errorMessage.value = 'Por favor, ingrese una unidad contratante válida.';
+    errorMessage.value = 'Por favor, ingrese una unidad Menor válida.';
     return;
   }
 
   try {
-    const response = await $axios.get(`/pipelsoft/contratos-nombreUnidadContratante/${Unidad.value}`);
+    const response = await $axios.get(`/pipelsoft/contratos-nombreUnidadMenor/${Unidad.value}`);
     if (response.data && Array.isArray(response.data)) {
       contratos.value = response.data;
     } else {
-      errorMessage.value = 'No se encontraron contratos para la unidad contratante ingresada.';
+      errorMessage.value = 'No se encontraron contratos para la unidad Menor ingresada.';
     }
   } catch (error) {
     errorMessage.value = 'Hubo un error al obtener los datos.';
