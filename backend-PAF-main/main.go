@@ -8,9 +8,9 @@ import (
 	"github.com/NicolasAMunozR/PAF/backend-PAF/controller"
 	"github.com/NicolasAMunozR/PAF/backend-PAF/models"
 	"github.com/NicolasAMunozR/PAF/backend-PAF/service"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/robfig/cron/v3" // Añadido para el cron job
-	"github.com/gin-contrib/cors"
 )
 
 // Función principal
@@ -18,12 +18,11 @@ func main() {
 	// Crear el enrutador Gin
 	r := gin.Default()
 
-	// Configurar CORS
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3001"},
-		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
-		AllowHeaders:     []string{"Content-Type", "Authorization"},
-		AllowCredentials: true, // Si necesitas enviar cookies
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		AllowCredentials: true,
 	}))
 
 	// Conectar a la base de datos
