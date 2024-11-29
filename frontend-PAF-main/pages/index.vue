@@ -85,7 +85,7 @@ export default {
         } else if (this.selectedRole === "coordinador") {
           this.$router.push("/seguimientoPAF");
         } else if (this.selectedRole === "encargado") {
-          this.$router.push("/unidadMayorPAF");
+          this.$router.push(`/unidadMayorPAF?run=${this.run}`);
         }
       } else {
         this.errorMessage = "Por favor, completa todos los campos.";

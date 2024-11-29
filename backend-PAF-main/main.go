@@ -78,20 +78,13 @@ func main() {
 	r.GET("/estadisticas/PafActivas", estadisticasController.ContarRegistrosPorCodEstado)
 
 	// Inicializar servicios y controladores
-	contratoService := &service.ContratoService{DB: DB.DBPersonal}
-	contratoController := &controller.ContratoController{Service: contratoService}
+	contratoService := service.NewContratoService(DB.DBPersonal)
+	contratoController := controller.NewContratoController(contratoService)
 
 	// Definir rutas
 	r.GET("/contratos", contratoController.GetAllContratosHandler)
 	r.GET("/contratos/:run", contratoController.GetContratoByRunHandler)
 	r.GET("/contratos/unidad-mayor", contratoController.GetContratosByUnidadMayorHandler)
-	// Aplicar CORS al enrutador (Gin ya maneja middleware)
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3001"},
-		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
-		AllowHeaders:     []string{"Content-Type", "Authorization"},
-		AllowCredentials: true,
-	}))
 
 	// Iniciar el cron job para actualización periódica
 	go iniciarCronJob()

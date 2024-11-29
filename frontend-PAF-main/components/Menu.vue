@@ -73,8 +73,8 @@ export default {
         { path: "/historyPAF", label: "Historial de PAF", pages: ["/personas", "/historyPAF", "/horario", "/paf"] },
         { path: "/seguimientoPAF", label: "Seguimiento de la PAF", pages: ["/seguimientoPAF", "/estadisticaPAF"] },
         { path: "/estadisticaPAF", label: "Estadísticas de PAF", pages: ["/seguimientoPAF", "/estadisticaPAF"] },
-        { path: "/unidadMayorPAF", label: "Gestión de Unidad Mayor", pages: ["/unidadMayorPAF", "/estadisticaUnidadMayorPAF"] },
-        { path: "/estadisticaUnidadMayorPAF", label: "Estadísticas de Unidad Mayor", pages: ["/unidadMAyorPAF", "/estadisticaUnidadMayorPAF"] },
+        { path: "/unidadMayorPAF", label: "Gestión de Unidad Mayor", pages: ["/unidadMayorPAF", "/estadisticaUnidadPAF"] },
+        { path: "/estadisticaUnidadPAF", label: "Estadísticas de Unidad", pages: ["/unidadMayorPAF", "/estadisticaUnidadPAF"] },
       ],
     };
   },

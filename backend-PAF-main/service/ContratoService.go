@@ -11,6 +11,13 @@ type ContratoService struct {
 	DB *gorm.DB
 }
 
+// NewContratoService crea un nuevo servicio de contrato.
+func NewContratoService(db *gorm.DB) *ContratoService {
+	return &ContratoService{
+		DB: db,
+	}
+}
+
 // GetAllContratos devuelve todos los contratos registrados en la base de datos.
 func (s *ContratoService) GetAllContratos() ([]models.Contrato, error) {
 	var contratos []models.Contrato

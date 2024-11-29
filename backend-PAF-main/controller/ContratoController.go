@@ -11,6 +11,13 @@ type ContratoController struct {
 	Service *service.ContratoService
 }
 
+// NewContratoController crea un nuevo controlador de contrato.
+func NewContratoController(service *service.ContratoService) *ContratoController {
+	return &ContratoController{
+		Service: service,
+	}
+}
+
 // GetAllContratosHandler maneja las solicitudes para obtener todos los contratos.
 func (c *ContratoController) GetAllContratosHandler(ctx *gin.Context) {
 	contratos, err := c.Service.GetAllContratos()

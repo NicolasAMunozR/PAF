@@ -59,6 +59,7 @@
   import Filtros from '../../components/Filtros.vue';
   const { $axios } = useNuxtApp() as unknown as { $axios: typeof import('axios').default };
   
+  const run = ref<string>("");
   const contratos = ref<any[]>([]);
   const errorMessage = ref('');
   const filtros = ref({
@@ -81,8 +82,7 @@
   // Computed para filtrar y ordenar
   const filteredPersonas = computed(() => {
     let filtered = contratos.value.filter(contrato => {
-      console.log('contrato:', contrato);
-      console.log('filtros:', filtros.value);
+
       return (
         contrato.PipelsoftData.NombreUnidadMayor?.toLowerCase().includes(filtros.value.nombreUnidadMayor.toLowerCase() || '') &&
         contrato.PipelsoftData.NombreUnidadMenor?.toLowerCase().includes(filtros.value.nombreUnidadMenor.toLowerCase() || '') &&
@@ -106,7 +106,8 @@
   // Fetch inicial de datos
   const fetchContratos = async () => {
     try {
-      const response = await $axios.get(`/pipelsoft/contratos`);
+      const response = await $axios.get(`/contratos/${run.value}`);
+      console.log(response.data);
       if (response.data && Array.isArray(response.data)) {
         contratos.value = response.data;
       } else {
