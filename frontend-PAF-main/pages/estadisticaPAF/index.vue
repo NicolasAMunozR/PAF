@@ -5,17 +5,22 @@
     <!-- Cantidades -->
     <p class="cantidad-text">Cantidad de personas en el SAI: <strong>{{ cantidadPersonasSai }}</strong></p>
     <p class="cantidad-text">Cantidad de PAF únicas: <strong>{{ cantidadPafUnicas }}</strong></p>
+    <br />
+    <br />
+    <br /> 
 
     <!-- Estado de avance -->
     <div class="estado-linea">
-      <div
-        v-for="(cantidad, estado, index) in cantidadPafPorEstado"
-        :key="'estado-' + estado"
-        :class="['estado-rectangulo', `estado-${estado}`, { 'estado-seleccionado': estado === estadoSeleccionado }]"
-        @click="mostrarDetalles(estado)"
-      >
-        Estado {{ estado }}
-      </div>
+      <template v-for="(cantidad, estado, index) in cantidadPafPorEstado" :key="'estado-' + estado">
+        <div
+          :class="['estado-rectangulo', `estado-${estado}`, { 'estado-seleccionado': estado === estadoSeleccionado }]"
+          @click="mostrarDetalles(estado)"
+        >
+          Estado {{ estado }}
+        </div>
+        <!-- Agregar flecha, excepto después del último estado -->
+        <span v-if="index < Object.keys(cantidadPafPorEstado).length - 1" class="estado-flecha">➔</span>
+      </template>
     </div>
 
     <!-- Detalles desplegables por estado -->
@@ -46,8 +51,8 @@
         <Pie :data="pafPorEstadoChartData" />
       </div>
     </div>
-    <br>
-    <br>
+    <br />
+    <br />
     <div v-if="pafPorUnidadMayorChartData" class="bar-chart">
       <h4 class="subtitulo">Cantidad de PAF por Unidad Mayor</h4>
       <Bar :data="pafPorUnidadMayorChartData" />
@@ -93,22 +98,25 @@ const fetchCantidadPersonasSai = async () => {
 const fetchCantidadPafSai = async () => {
   try {
     const response = await $axios.get('/estadisticas/PafActivas');
-    console.log('response:', response);
     cantidadPafActivas.value = response.data.conteo;
   } catch (error) {
     console.error('Error al obtener la cantidad de personas del SAI:', error);
   }
 };
 
-
 const fetchCantidadPafPorEstado = async () => {
   try {
     const response = await $axios.get('/estadisticas');
-    console.log('response:', response);
-    cantidadPafPorEstado.value = response.data.EstadoProcesoCount;
-    console.log('cantidadPafPorEstado:', cantidadPafPorEstado.value);
-    totalPaf.value = Object.values(response.data.EstadoProcesoCount).reduce((a, b) => a + b, 0);
-    totalPorcPaf.value = Object.values(response.data.EstadoProcesoCount).map((value) => ((value / totalPaf.value) * 100).toFixed(2));
+
+    // Ordenar el objeto EstadoProcesoCount para que A9 sea el último
+    const estadoProcesoCount = response.data.EstadoProcesoCount;
+    const { A9, ...otrosEstados } = estadoProcesoCount; // Extraer A9 y el resto
+    cantidadPafPorEstado.value = { ...otrosEstados, A9 }; // Reorganizar con A9 al final
+
+    totalPaf.value = Object.values(cantidadPafPorEstado.value).reduce((a, b) => a + b, 0);
+    totalPorcPaf.value = Object.values(cantidadPafPorEstado.value).map((value) =>
+      ((value / totalPaf.value) * 100).toFixed(2)
+    );
   } catch (error) {
     console.error('Error al obtener la cantidad de PAF por estado:', error);
   }
@@ -182,7 +190,7 @@ const configurarGraficos = () => {
       {
         label: 'Porcentaje de PAF por estado',
         data: totalPorcPaf.value, // Porcentajes calculados
-        backgroundColor: ['#66BB6A', '#FFA726', '#AB47BC', '#394049', '#EA7600', '#C8102E', '#42A5F5', '#0db58b', '#f0f0f0', '#76095b'],
+        backgroundColor: ['#66BB6A', '#FFA726', '#AB47BC', '#EA7600', '#C8102E', '#42A5F5', '#0db58b', '#6d8a0c', '#76095b', '#394049'],
       },
     ],
     plugins: {
@@ -191,7 +199,7 @@ const configurarGraficos = () => {
   };
 
   pafChartData.value = {
-    labels: ['Profesores con PAF activa', 'Profesores sin PAF'],
+    labels: ['Profesores con PAF activas', 'Profesores sin PAF activas'],
     datasets: [
       {
         label: 'Cantidad',
@@ -250,6 +258,7 @@ onMounted(async () => {
 .detalle-text {
   font-size: 1rem;
   color: #394049;
+  text-align: center;
 }
 
 /* Contenedor de gráficos */
@@ -269,15 +278,16 @@ onMounted(async () => {
 .bar-chart {
   margin: 2rem;
   max-width: 100%;  /* Aumenté el ancho para las barras */
-  height: 1000px;
 }
 
 
 /* Estados */
 .estado-linea {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: 0.2rem;
+  margin-bottom: 2.5rem;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .estado-rectangulo {
@@ -326,7 +336,7 @@ onMounted(async () => {
 }
 
 .estado-F1 {
-  background-color: #f0f0f0;
+  background-color: #6d8a0c;
 }
 
 .estado-F9 {
@@ -339,5 +349,12 @@ onMounted(async () => {
   background-color: #f9f9f9;
   border-radius: 0.5rem;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.estado-flecha {
+  margin: 0 1rem;
+  font-size: 1.5rem;
+  color: #394049;
+  align-self: center;
 }
 </style>

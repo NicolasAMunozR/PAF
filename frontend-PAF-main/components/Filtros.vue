@@ -1,46 +1,51 @@
 <template>
   <div class="filters">
-    <div class="filter-item">
+    <!-- Filtro Nombre Asignatura -->
+    <div class="filter-item" v-if="!isSeguimientoPAF">
       <label for="nombreAsignatura" class="label">Nombre Asignatura</label>
       <input
-
         v-model="filtros.nombreAsignatura"
         type="text"
         class="input"
         placeholder="Filtrar por nombre de asignatura"
       />
     </div>
+    
+    <!-- Filtro Run -->
     <div class="filter-item">
       <label for="run" class="label">Run</label>
       <input
-
         v-model="filtros.run"
         type="text"
         class="input"
         placeholder="Filtrar por Run"
       />
     </div>
-    <div class="filter-item">
+    
+    <!-- Filtro Código de PAF -->
+    <div class="filter-item" v-if="!isSeguimientoPAF">
       <label for="codigoPAF" class="label">Código de PAF</label>
       <input
-
         v-model="filtros.codigoPAF"
         type="text"
         class="input"
         placeholder="Filtrar por código de PAF"
       />
     </div>
-    <div class="filter-item">
+    
+    <!-- Filtro Código de Asignatura -->
+    <div class="filter-item" v-if="!isSeguimientoPAF">
       <label for="codigoAsignatura" class="label">Código de Asignatura</label>
       <input
-  
         v-model="filtros.codigoAsignatura"
         type="text"
         class="input"
         placeholder="Filtrar por código de asignatura"
       />
     </div>
-    <div class="filter-item">
+    
+    <!-- Filtro Estado de Proceso -->
+    <div class="filter-item" v-if="!isSeguimientoPAF">
       <label for="estadoProceso" class="label">Estado de Proceso</label>
       <select id="estadoProceso" v-model="filtros.estadoProceso" class="select">
         <option value="">Todos</option>
@@ -56,25 +61,53 @@
         <option value="A9">Estado A9</option>
       </select>
     </div>
-    <div class="filter-item">
+    
+    <!-- Filtro Categoría -->
+    <div class="filter-item" v-if="!isSeguimientoPAF">
       <label for="calidad" class="label">Categoria</label>
       <select id="calidad" v-model="filtros.calidad" class="select">
         <option value="">Todas</option>
         <option value="PROFESOR HORAS CLASES">Profesor por hora</option>
       </select>
     </div>
-    <div class="sort-item">
+
+    <!-- Filtro Nombre Unidad Mayor (solo visible si es seguimientoPAF) -->
+    <div class="filter-item" v-if="isSeguimientoPAF">
+      <label for="nombreUnidadMayor" class="label">Nombre Unidad Mayor</label>
+      <input
+        v-model="filtros.nombreUnidadMayor"
+        type="text"
+        class="input"
+        placeholder="Filtrar por nombre de unidad mayor"
+      />
+    </div>
+    
+    <!-- Filtro Nombre Unidad Menor (solo visible si es seguimientoPAF) -->
+    <div class="filter-item" v-if="isSeguimientoPAF">
+      <label for="nombreUnidadMenor" class="label">Nombre Unidad Menor</label>
+      <input
+        v-model="filtros.nombreUnidadMenor"
+        type="text"
+        class="input"
+        placeholder="Filtrar por nombre de unidad menor"
+      />
+    </div>
+    
+    <!-- Ordenar por (solo visible si es seguimientoPAF) -->
+    <div class="sort-item" v-if="!isSeguimientoPAF">
       <label for="sort" class="label">Ordenar por</label>
       <select v-model="sortBy" class="select">
         <option value="NombreAsignatura">Nombre de Asignatura</option>
         <option value="CodigoAsignatura">Código de Asignatura</option>
-        <option value="Run">Run</option>  
+        <option value="Run">Run</option>
         <option value="FechaUltimaModificacionProceso">Última Actualización del Proceso</option>
       </select>
       <button @click="toggleSortOrder" class="btn sort-btn">
         Ordenar {{ sortOrder === 'asc' ? 'Ascendente' : 'Descendente' }}
       </button>
     </div>
+    
+    <!-- Botón de reset -->
     <div class="filter-item">
       <button @click="resetFilters" class="btn reset-btn">Resetear</button>
     </div>
@@ -82,7 +115,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, defineEmits } from 'vue'
+import { ref, watch, defineEmits, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 
 const emit = defineEmits<{
   (event: 'filter', filters: any): void
@@ -96,18 +130,44 @@ const filtros = ref({
   estadoProceso: '',
   calidad: '',
   nombreAsignatura: '',
-  fechaUltimaModificacionProceso: ''
+  fechaUltimaModificacionProceso: '',
+  nombreUnidadMayor: '',
+  nombreUnidadMenor: ''
 })
 
 const sortBy = ref('nombres')
 const sortOrder = ref('asc')
 
+// Detecta si estamos en seguimientoPAF.vue
+const route = useRoute()
+const isSeguimientoPAF = ref(false)
+
+onMounted(() => {
+  isSeguimientoPAF.value = route.name === 'seguimientoPAF'
+})
+
 watch(filtros, (newFilters) => {
-  emit('filter', newFilters)
+  // Si no es seguimientoPAF, excluye los filtros adicionales
+  const filtersToEmit = isSeguimientoPAF.value
+    ? newFilters
+    : Object.fromEntries(
+        Object.entries(newFilters).filter(([key]) => key !== 'nombreUnidadMayor' && key !== 'nombreUnidadMenor')
+      )
+  emit('filter', filtersToEmit)
 }, { deep: true })
 
 const resetFilters = () => {
-  filtros.value = { nombreAsignatura: '', codigoPAF: '', codigoAsignatura: '', run: '', estadoProceso: '', calidad: '', fechaUltimaModificacionProceso: '' }
+  filtros.value = {
+    codigoPAF: '',
+    run: '',
+    codigoAsignatura: '',
+    estadoProceso: '',
+    calidad: '',
+    nombreAsignatura: '',
+    fechaUltimaModificacionProceso: '',
+    nombreUnidadMayor: '',
+    nombreUnidadMenor: ''
+  }
   emit('filter', filtros.value)
 }
 
@@ -121,7 +181,9 @@ watch([sortBy, sortOrder], ([newSortBy, newSortOrder]) => {
 })
 </script>
 
+
 <style scoped>
+
 /* Colores institucionales */
 :root {
   --primary-color: #EA7600; /* Color principal USACH */

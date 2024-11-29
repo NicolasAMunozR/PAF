@@ -29,8 +29,8 @@
             <td>{{ contrato.PipelsoftData.CodEstado }}</td>
             <td>{{ contrato.PipelsoftData.DesEstado }}</td>
             <td>
-              {{ new Date(contrato.PipelsoftData.FechaUltimaModificacionProceso).toLocaleTimeString() }} 
-              {{ new Date(contrato.PipelsoftData.FechaUltimaModificacionProceso).toLocaleDateString() }}
+              {{ new Date(contrato.PipelsoftData.UpdatedAt).toLocaleDateString() }}
+              {{ new Date(contrato.PipelsoftData.UpdatedAt).toLocaleTimeString() }} 
             </td>
             <td>
               <div v-for="(estado, idx) in contrato.PipelsoftData.historialEstados" :key="idx">
@@ -91,7 +91,6 @@ const fetchProfesorYContratos = async () => {
     if (contratosResponse.data && Array.isArray(contratosResponse.data)) {
       contratos.value = contratosResponse.data;
       errorMessage.value = "";
-      console.log(contratosResponse.data);
     } else {
       errorMessage.value = "No se encontraron contratos para el RUN proporcionado.";
       contratos.value = [];
@@ -113,7 +112,7 @@ onMounted(() => {
 
 <style scoped>
 .container {
-  max-width: 600px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 20px;
   font-family: "Bebas Neue Pro", sans-serif;
