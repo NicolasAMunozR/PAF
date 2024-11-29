@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/NicolasAMunozR/PAF/backend-PAF/DB"
 	"github.com/NicolasAMunozR/PAF/backend-PAF/controller"
@@ -18,11 +19,14 @@ func main() {
 	// Crear el enrutador Gin
 	r := gin.Default()
 
+	// Configurar CORS
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3001"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
 	}))
 
 	// Conectar a la base de datos
