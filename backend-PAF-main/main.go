@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/NicolasAMunozR/PAF/backend-PAF/DB"
 	"github.com/NicolasAMunozR/PAF/backend-PAF/controller"
@@ -22,11 +21,9 @@ func main() {
 	// Configurar CORS
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3001"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
+		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		AllowCredentials: true, // Si necesitas enviar cookies
 	}))
 
 	// Conectar a la base de datos
@@ -84,10 +81,13 @@ func main() {
 	contratoService := service.NewContratoService(DB.DBPersonal)
 	contratoController := controller.NewContratoController(contratoService)
 
-	// Definir rutas
-	r.GET("/contratos", contratoController.GetAllContratosHandler)
-	r.GET("/contratos/:run", contratoController.GetContratoByRunHandler)
-	r.GET("/contratos/unidad-mayor", contratoController.GetContratosByUnidadMayorHandler)
+	contrato := r.Group("/contratos")
+	{
+		contrato.Use(cors.Default())
+		contrato.GET("/", contratoController.GetAllContratosHandler)
+		contrato.GET("/:run", contratoController.GetContratoByRunHandler)
+		contrato.GET("/unidad-mayor", contratoController.GetContratosByUnidadMayorHandler)
+	}
 
 	// Iniciar el cron job para actualización periódica
 	go iniciarCronJob()
