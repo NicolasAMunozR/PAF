@@ -59,6 +59,7 @@
   import Filtros from '../../components/Filtros.vue';
   const { $axios } = useNuxtApp() as unknown as { $axios: typeof import('axios').default };
   
+  const route = useRoute();
   const run = ref<string>("");
   const contratos = ref<any[]>([]);
   const errorMessage = ref('');
@@ -106,6 +107,7 @@
   // Fetch inicial de datos
   const fetchContratos = async () => {
     try {
+      console.log(run.value);
       const response = await $axios.get(`/contratos/${run.value}`);
       console.log(response.data);
       if (response.data && Array.isArray(response.data)) {
@@ -120,7 +122,11 @@
   };
   
   onMounted(() => {
+    const runFromQuery = route.query.run as string;
+  if (runFromQuery) {
+    run.value = runFromQuery;
     fetchContratos();
+  }
   });
   
   // Función para mapear estados
