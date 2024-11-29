@@ -67,6 +67,7 @@ export default {
         { value: "profesor", label: "Profesor" },
         { value: "personal-dei", label: "Personal del Dir" },
         { value: "encargado", label: "Encargado" },
+        { value: "coordinador", label: "Coordinador" },
       ],
     };
   },
@@ -81,8 +82,10 @@ export default {
           this.$router.push(`/profesorPAF?run=${this.run}`);
         } else if (this.selectedRole === "personal-dei") {
           this.$router.push("/personas");
-        } else if (this.selectedRole === "encargado") {
+        } else if (this.selectedRole === "coordinador") {
           this.$router.push("/seguimientoPAF");
+        } else if (this.selectedRole === "encargado") {
+          this.$router.push("/unidadMayorPAF");
         }
       } else {
         this.errorMessage = "Por favor, completa todos los campos.";
@@ -95,7 +98,7 @@ export default {
 <style scoped>
 /* Página principal */
 .login-page {
-  max-width: 400px;
+  max-width: 500px;
   margin: 20px auto;
   border: 1px solid #394049;
   border-radius: 8px;
