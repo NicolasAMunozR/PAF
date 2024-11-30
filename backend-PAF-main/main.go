@@ -54,7 +54,8 @@ func main() {
 	r.GET("/contratos/codigo_paf/:codigo_paf", pipelsoftController.ObtenerPorCodigoPAF)
 	r.GET("/contratos/ultimos_7_dias", pipelsoftController.ObtenerPAFUltimos7Dias)
 	r.GET("/contratos/ultimo_mes", pipelsoftController.ObtenerPAFUltimoMes)
-
+	// Ruta para obtener unidades menores por unidad mayor
+	r.GET("/pipelsoft/unidades-menores", pipelsoftController.ObtenerUnidadesMenores)
 	// Instanciar el servicio y controlador de Horarios
 	horarioService := service.NewHorarioService(DB.DBPersonal)
 	horarioController := controller.NewHorarioController(horarioService)

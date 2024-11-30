@@ -235,3 +235,21 @@ func (s *PipelsoftService) ObtenerContratosPorNombreUnidadMenor(nombreUnidadMeno
 
 	return s.comprobarYCombinarDatosPorCodigoPAF(contratosFiltrados)
 }
+
+// ObtenerNombreUnidadMenorPorMayor obtiene todas las unidades menores asociadas a un NombreUnidadMayor
+func (s *PipelsoftService) ObtenerNombreUnidadMenorPorMayor(nombreUnidadMayor string) ([]string, error) {
+	var unidadesMenores []string
+
+	// Consultar la base de datos para obtener los valores únicos de NombreUnidadMenor
+	err := s.DBPersonal.Model(&models.Pipelsoft{}).
+		Where("nombre_unidad_mayor = ?", nombreUnidadMayor).
+		Distinct("nombre_unidad_menor").
+		Pluck("nombre_unidad_menor", &unidadesMenores).
+		Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return unidadesMenores, nil
+}
