@@ -55,6 +55,7 @@
 </template>
 
 <script>
+
 export default {
   layout: false,
   data() {
@@ -77,6 +78,7 @@ export default {
     },
     handleLogin() {
       if (this.run && this.email && this.selectedRole) {
+        sessionStorage.setItem('rut', this.run); // Guardar en sesión
         if (this.selectedRole === "profesor") {
           this.$router.push(`/profesorPAF?run=${this.run}`);
         } else if (this.selectedRole === "personal-dei") {

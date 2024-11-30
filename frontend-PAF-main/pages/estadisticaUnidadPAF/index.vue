@@ -66,7 +66,10 @@
   import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale,  BarElement} from 'chart.js';
   import ChartDataLabels from 'chartjs-plugin-datalabels';
   import { Bar } from 'vue-chartjs'; // Importar gráfico de barras
+
   
+  const rut = ref(''); // Sin tipo
+
   
   const { $axios } = useNuxtApp();
   
@@ -134,16 +137,18 @@
     }
   };
   
-  const fetchPafPorUnidadMayor = async () => {
+  const fetchPafPorUnidadMayor = async (rut) => {
     try {
-      const response = await $axios.get('/estadisticas/frecuencia-unidades-mayores');
+      console.log(rut)
+      const response1 = await $axios.get(`/contratos/${rut}`)
+      const response = await $axios.get(`/estadisticas/unidad/${response1.data.unidadMayor}`);
+      console.log(response)
       const unidadesData = response.data;
-  
       pafPorUnidadMayorChartData.value = {
         labels: Object.keys(unidadesData),
         datasets: [
           {
-            label: 'Cantidad de PAF por Unidad Mayor',
+            label: 'Cantidad de PAF por Unidad Menor',
             data: Object.values(unidadesData),
             backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#AB47BC', '#EF5350'], // Colores de las barras
           },
@@ -222,11 +227,13 @@
   };
   
   onMounted(async () => {
+    rut.valueOf = sessionStorage.getItem('rut') || '';
+    console.log(`RUT recibido: ${rut.valueOf}`);
     await Promise.all([
       fetchCantidadPersonasSai(),
       fetchCantidadPafPorEstado(),
       fetchPromedioTiempoPorEstado(),
-      fetchPafPorUnidadMayor(),
+      fetchPafPorUnidadMayor(rut.valueOf),
       fetchCantidadPafSai(),
     ]);
     configurarGraficos();

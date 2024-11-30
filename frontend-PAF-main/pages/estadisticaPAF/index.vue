@@ -138,7 +138,7 @@ const fetchPafPorUnidadMayor = async () => {
   try {
     const response = await $axios.get('/estadisticas/frecuencia-unidades-mayores');
     const unidadesData = response.data;
-
+    console.log(response)
     pafPorUnidadMayorChartData.value = {
       labels: Object.keys(unidadesData),
       datasets: [

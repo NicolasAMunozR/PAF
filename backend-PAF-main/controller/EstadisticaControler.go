@@ -31,13 +31,13 @@ func (c *EstadisticasController) ObtenerEstadisticas(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, estadisticas)
 }
 
-// ContarRegistrosPorUnidadContratante maneja la solicitud para contar registros por nombre de unidad contratante
-func (c *EstadisticasController) ContarRegistrosPorUnidadContratante(ctx *gin.Context) {
-	// Obtener el nombre de la unidad contratante desde los parámetros de la URL
-	nombreUnidadContratante := ctx.Param("nombreUnidadContratante")
+// ContarRegistrosPorUnidadMayor maneja la solicitud para contar registros por nombre de unidad Mayor
+func (c *EstadisticasController) ContarRegistrosPorUnidadMayor(ctx *gin.Context) {
+	// Obtener el nombre de la unidad Mayor desde los parámetros de la URL
+	nombreUnidadMayor := ctx.Param("nombreUnidadMayor")
 
 	// Llamar al servicio para contar los registros
-	count, err := c.Service.ContarRegistrosPorNombreUnidadContratante(nombreUnidadContratante)
+	count, err := c.Service.ContarRegistrosPorNombreUnidadMayor(nombreUnidadMayor)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error al contar registros: %v", err)})
 		return
@@ -45,7 +45,7 @@ func (c *EstadisticasController) ContarRegistrosPorUnidadContratante(ctx *gin.Co
 
 	// Responder con el conteo en formato JSON
 	ctx.JSON(http.StatusOK, gin.H{
-		"nombreUnidadContratante": nombreUnidadContratante,
+		"nombreUnidadMayor": nombreUnidadMayor,
 		"conteo":                  count,
 	})
 }

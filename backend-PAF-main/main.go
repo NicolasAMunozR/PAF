@@ -74,7 +74,7 @@ func main() {
 
 	// Ruta para obtener las estadísticas
 	r.GET("/estadisticas", estadisticasController.ObtenerEstadisticas)
-	r.GET("/estadisticas/unidad/:nombreUnidadContratante", estadisticasController.ContarRegistrosPorUnidadContratante)
+	r.GET("/estadisticas/unidad/:nombreUnidadMayor", estadisticasController.ContarRegistrosPorUnidadMayor)
 	r.GET("/estadisticas/frecuencia-unidades-mayores", estadisticasController.ObtenerFrecuenciaNombreUnidadMayor)
 	r.GET("/estadisticas/PafActivas", estadisticasController.ContarRegistrosPorCodEstado)
 

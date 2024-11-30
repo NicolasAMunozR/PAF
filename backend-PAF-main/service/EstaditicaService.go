@@ -96,15 +96,15 @@ func (s *EstadisticasService) ObtenerEstadisticas() (*EstadisticasResponse, erro
 	return &resp, nil
 }
 
-// ContarRegistrosPorNombreUnidadContratante cuenta los registros en Pipelsoft que coinciden con el nombre de la unidad contratante
-func (s *EstadisticasService) ContarRegistrosPorNombreUnidadContratante(nombreUnidadContratante string) (int64, error) {
+// ContarRegistrosPorNombreUnidadMayor cuenta los registros en Pipelsoft que coinciden con el nombre de la unidad Mayor
+func (s *EstadisticasService) ContarRegistrosPorNombreUnidadMayor(nombreUnidadMayor string) (int64, error) {
 	var count int64
 
-	// Contar los registros que coinciden con el nombre de unidad contratante
+	// Contar los registros que coinciden con el nombre de unidad Mayor
 	if err := s.DB.Model(&models.Pipelsoft{}).
-		Where("nombre_unidad_contratante = ?", nombreUnidadContratante).
+		Where("nombre_unidad_Mayor = ?", nombreUnidadMayor).
 		Count(&count).Error; err != nil {
-		return 0, fmt.Errorf("error al contar los registros por nombre de unidad contratante: %w", err)
+		return 0, fmt.Errorf("error al contar los registros por nombre de unidad Mayor: %w", err)
 	}
 
 	return count, nil
