@@ -56,10 +56,34 @@ func (c *ContratoController) GetContratosByUnidadMayorHandler(ctx *gin.Context) 
 		return
 	}
 
-	contratos, err := c.Service.GetContratosByUnidadMayor(unidad)
+	contratos, numElementos, err := c.Service.GetContratosByUnidadMayor(unidad)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, contratos)
+
+	// Crear un objeto de respuesta con contratos y el número de elementos
+	response := gin.H{
+		"contratos":    contratos,
+		"numElementos": numElementos,
+	}
+
+	ctx.JSON(http.StatusOK, response)
+}
+
+// CountContratosByUnidadMayorHandler maneja las solicitudes para contar los contratos por unidad mayor.
+func (c *ContratoController) CountContratosByUnidadMayorHandler(ctx *gin.Context) {
+	contratoCounts, pipelsoftCounts, err := c.Service.CountContratosByUnidadMayor()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Crear un objeto de respuesta que incluya ambos conteos
+	response := gin.H{
+		"contratoCounts":  contratoCounts,
+		"pipelsoftCounts": pipelsoftCounts,
+	}
+
+	ctx.JSON(http.StatusOK, response)
 }

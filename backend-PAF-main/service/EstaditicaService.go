@@ -56,8 +56,8 @@ func (s *EstadisticasService) ObtenerEstadisticas() (*EstadisticasResponse, erro
 
 	// Contar los Run de los profesores que no existen en pipelsofts
 	var profesoresNoEnPipelsoft int64
-	if err := s.DB.Table("profesor_dbs").
-		Where("run NOT IN (SELECT run_empleado FROM pipelsofts)").
+	if err := s.DB.Table("contratos").
+		Where("run NOT IN (SELECT run_docente FROM pipelsofts)").
 		Count(&profesoresNoEnPipelsoft).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los profesores que no están en pipelsofts: %w", err)
 	}
