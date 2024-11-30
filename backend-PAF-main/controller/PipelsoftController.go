@@ -2,6 +2,8 @@
 package controller
 
 import (
+	"net/http"
+
 	"github.com/NicolasAMunozR/PAF/backend-PAF/service"
 	"github.com/gin-gonic/gin"
 )
@@ -109,4 +111,24 @@ func (c *PipelsoftController) ObtenerContratosPorNombreUnidadMenor(ctx *gin.Cont
 	}
 
 	ctx.JSON(200, contratos)
+}
+
+// ObtenerUnidadesMenores obtiene todas las unidades menores asociadas a una unidad mayor
+func (c *PipelsoftController) ObtenerUnidadesMenores(ctx *gin.Context) {
+	// Leer el parámetro NombreUnidadMayor desde la URL o consulta
+	nombreUnidadMayor := ctx.Query("nombreUnidadMayor")
+	if nombreUnidadMayor == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro nombreUnidadMayor es requerido"})
+		return
+	}
+
+	// Llamar al servicio para obtener las unidades menores
+	unidadesMenores, err := c.Service.ObtenerNombreUnidadMenorPorMayor(nombreUnidadMayor)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al consultar la base de datos"})
+		return
+	}
+
+	// Responder con la lista de unidades menores
+	ctx.JSON(http.StatusOK, gin.H{"unidadesMenores": unidadesMenores})
 }
