@@ -67,7 +67,6 @@ export default {
         { value: "profesor", label: "Profesor" },
         { value: "personal-dei", label: "Personal del Dir" },
         { value: "encargado", label: "Encargado" },
-        { value: "coordinador", label: "Coordinador" },
       ],
     };
   },
@@ -82,8 +81,6 @@ export default {
           this.$router.push(`/profesorPAF?run=${this.run}`);
         } else if (this.selectedRole === "personal-dei") {
           this.$router.push("/personas");
-        } else if (this.selectedRole === "coordinador") {
-          this.$router.push("/seguimientoPAF");
         } else if (this.selectedRole === "encargado") {
           this.$router.push(`/unidadMayorPAF?run=${this.run}`);
         }

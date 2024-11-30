@@ -1,7 +1,7 @@
 <template>
   <div class="filters">
     <!-- Filtro Nombre Asignatura -->
-    <div class="filter-item" v-if="!isSeguimientoPAF">
+    <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF">
       <label for="nombreAsignatura" class="label">Nombre Asignatura</label>
       <input
         v-model="filtros.nombreAsignatura"
@@ -23,18 +23,18 @@
     </div>
     
     <!-- Filtro Código de PAF -->
-    <div class="filter-item" v-if="!isSeguimientoPAF">
+    <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF">
       <label for="codigoPAF" class="label">Código de PAF</label>
       <input
         v-model="filtros.codigoPAF"
         type="text"
-        class="input"
+        class="input" 
         placeholder="Filtrar por código de PAF"
       />
     </div>
     
     <!-- Filtro Código de Asignatura -->
-    <div class="filter-item" v-if="!isSeguimientoPAF">
+    <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF">
       <label for="codigoAsignatura" class="label">Código de Asignatura</label>
       <input
         v-model="filtros.codigoAsignatura"
@@ -45,7 +45,7 @@
     </div>
     
     <!-- Filtro Estado de Proceso -->
-    <div class="filter-item" v-if="!isSeguimientoPAF">
+    <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF">
       <label for="estadoProceso" class="label">Estado de Proceso</label>
       <select id="estadoProceso" v-model="filtros.estadoProceso" class="select">
         <option value="">Todos</option>
@@ -63,7 +63,7 @@
     </div>
     
     <!-- Filtro Categoría -->
-    <div class="filter-item" v-if="!isSeguimientoPAF">
+    <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF">
       <label for="calidad" class="label">Categoria</label>
       <select id="calidad" v-model="filtros.calidad" class="select">
         <option value="">Todas</option>
@@ -72,7 +72,7 @@
     </div>
 
     <!-- Filtro Nombre Unidad Mayor (solo visible si es seguimientoPAF) -->
-    <div class="filter-item" v-if="isSeguimientoPAF">
+    <div class="filter-item" v-if="isSeguimientoPAF && !isUnidadMayorPAF">
       <label for="nombreUnidadMayor" class="label">Nombre Unidad Mayor</label>
       <input
         v-model="filtros.nombreUnidadMayor"
@@ -83,7 +83,7 @@
     </div>
     
     <!-- Filtro Nombre Unidad Menor (solo visible si es seguimientoPAF) -->
-    <div class="filter-item" v-if="isSeguimientoPAF">
+    <div class="filter-item" v-if="isSeguimientoPAF || isUnidadMayorPAF" >
       <label for="nombreUnidadMenor" class="label">Nombre Unidad Menor</label>
       <input
         v-model="filtros.nombreUnidadMenor"
@@ -94,7 +94,7 @@
     </div>
     
     <!-- Ordenar por (solo visible si es seguimientoPAF) -->
-    <div class="sort-item" v-if="!isSeguimientoPAF">
+    <div class="sort-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF">
       <label for="sort" class="label">Ordenar por</label>
       <select v-model="sortBy" class="select">
         <option value="NombreAsignatura">Nombre de Asignatura</option>
@@ -141,9 +141,11 @@ const sortOrder = ref('asc')
 // Detecta si estamos en seguimientoPAF.vue
 const route = useRoute()
 const isSeguimientoPAF = ref(false)
+const isUnidadMayorPAF = ref(false)
 
 onMounted(() => {
   isSeguimientoPAF.value = route.name === 'seguimientoPAF'
+  isUnidadMayorPAF.value = route.name === 'unidadMayorPAF'
 })
 
 watch(filtros, (newFilters) => {
@@ -152,6 +154,15 @@ watch(filtros, (newFilters) => {
     ? newFilters
     : Object.fromEntries(
         Object.entries(newFilters).filter(([key]) => key !== 'nombreUnidadMayor' && key !== 'nombreUnidadMenor')
+      )
+  emit('filter', filtersToEmit)
+}, { deep: true })
+
+watch(filtros, (newFilters) => {
+  const filtersToEmit = isUnidadMayorPAF.value
+    ? newFilters
+    : Object.fromEntries(
+        Object.entries(newFilters).filter(([key]) => key !== 'nombreUnidadMenor')
       )
   emit('filter', filtersToEmit)
 }, { deep: true })

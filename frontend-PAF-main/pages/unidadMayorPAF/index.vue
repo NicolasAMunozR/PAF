@@ -82,34 +82,37 @@
   
   // Computed para filtrar y ordenar
   const filteredPersonas = computed(() => {
-    let filtered = contratos.value.filter(contrato => {
-
-      return (
-        contrato.PipelsoftData.NombreUnidadMayor?.toLowerCase().includes(filtros.value.nombreUnidadMayor.toLowerCase() || '') &&
-        contrato.PipelsoftData.NombreUnidadMenor?.toLowerCase().includes(filtros.value.nombreUnidadMenor.toLowerCase() || '') &&
-        contrato.PipelsoftData.RunEmpleado?.toLowerCase().includes(filtros.value.run.toLowerCase() || '')
-      );
-    });
-  
-    if (sortBy.value) {
-      filtered = filtered.sort((a, b) => {
-        const compareA = a.PipelsoftData[sortBy.value];
-        const compareB = b.PipelsoftData[sortBy.value];
-        if (compareA < compareB) return sortOrder.value === 'asc' ? -1 : 1;
-        if (compareA > compareB) return sortOrder.value === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
-  
-    return filtered;
+  let filtered = contratos.value.filter(contrato => {
+    return (
+      (contrato.PipelsoftData.NombreUnidadMayor || '').toLowerCase().includes((filtros.value.nombreUnidadMayor || '').toLowerCase()) &&
+      (contrato.PipelsoftData.NombreUnidadMenor || '').toLowerCase().includes((filtros.value.nombreUnidadMenor || '').toLowerCase()) &&
+      (contrato.PipelsoftData.RunEmpleado || '').toLowerCase().includes((filtros.value.run || '').toLowerCase())
+    );
   });
+
+  if (sortBy.value) {
+    filtered = filtered.sort((a, b) => {
+      const compareA = a.PipelsoftData[sortBy.value];
+      const compareB = b.PipelsoftData[sortBy.value];
+      if (compareA < compareB) return sortOrder.value === 'asc' ? -1 : 1;
+      if (compareA > compareB) return sortOrder.value === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+
+  return filtered;
+});
+
   
   // Fetch inicial de datos
   const fetchContratos = async () => {
     try {
-      console.log(run.value);
-      const response = await $axios.get(`/contratos/${run.value}`);
-      console.log(response.data);
+      const response1 = await $axios.get(`/contratos/${run.value}`);
+      console.log(response1.data.unidadMayor)
+      if (response1.data.unidadMayor == "RECTORIA" || response1.data.unidadMayor == "VR ACADEMICA") {
+        useRouter().push("/seguimientoPAF");
+      }
+      const response = await $axios.get(`/pipelsoft/contratos-nombreUnidadMayor/${response1.data.unidadMayor}`);
       if (response.data && Array.isArray(response.data)) {
         contratos.value = response.data;
       } else {

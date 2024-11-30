@@ -81,12 +81,10 @@ const sortData = (newSortBy: string, newSortOrder: string) => {
 // Computed para filtrar y ordenar
 const filteredPersonas = computed(() => {
   let filtered = contratos.value.filter(contrato => {
-    console.log('contrato:', contrato);
-    console.log('filtros:', filtros.value);
     return (
-      contrato.PipelsoftData.NombreUnidadMayor?.toLowerCase().includes(filtros.value.nombreUnidadMayor.toLowerCase() || '') &&
-      contrato.PipelsoftData.NombreUnidadMenor?.toLowerCase().includes(filtros.value.nombreUnidadMenor.toLowerCase() || '') &&
-      contrato.PipelsoftData.RunEmpleado?.toLowerCase().includes(filtros.value.run.toLowerCase() || '')
+      (contrato.PipelsoftData.NombreUnidadMayor || '').toLowerCase().includes((filtros.value.nombreUnidadMayor || '').toLowerCase()) &&
+      (contrato.PipelsoftData.NombreUnidadMenor || '').toLowerCase().includes((filtros.value.nombreUnidadMenor || '').toLowerCase()) &&
+      (contrato.PipelsoftData.RunEmpleado || '').toLowerCase().includes((filtros.value.run || '').toLowerCase())
     );
   });
 
