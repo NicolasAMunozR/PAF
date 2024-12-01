@@ -35,7 +35,7 @@ func (s *EstadisticasService) ObtenerEstadisticas() (*EstadisticasResponse, erro
 	var resp EstadisticasResponse
 
 	// Contar todos los registros en la tabla profesor_dbs
-	if err := s.DB.Model(&models.ProfesorDB{}).Count(&resp.TotalProfesores).Error; err != nil {
+	if err := s.DB.Model(&models.Contrato{}).Count(&resp.TotalProfesores).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los profesores: %w", err)
 	}
 
@@ -57,7 +57,7 @@ func (s *EstadisticasService) ObtenerEstadisticas() (*EstadisticasResponse, erro
 	// Contar los Run de los profesores que no existen en pipelsofts
 	var profesoresNoEnPipelsoft int64
 	if err := s.DB.Table("contratos").
-		Where("run NOT IN (SELECT run_docente FROM pipelsofts)").
+		Where("run_docente NOT IN (SELECT run_empleado FROM pipelsofts)").
 		Count(&profesoresNoEnPipelsoft).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los profesores que no están en pipelsofts: %w", err)
 	}

@@ -88,6 +88,7 @@ const totalPorcPaf = ref([]);
 const fetchCantidadPersonasSai = async () => {
   try {
     const response = await $axios.get('/estadisticas');
+    console.log("aaaaa", response)
     cantidadPersonasSai.value = response.data.TotalProfesores;
     cantidadPafUnicas.value = response.data.TotalPipelsoftUnicos;
   } catch (error) {
@@ -98,6 +99,7 @@ const fetchCantidadPersonasSai = async () => {
 const fetchCantidadPafSai = async () => {
   try {
     const response = await $axios.get('/estadisticas/PafActivas');
+    console.log("aaaaa", response)
     cantidadPafActivas.value = response.data.conteo;
   } catch (error) {
     console.error('Error al obtener la cantidad de personas del SAI:', error);
