@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/NicolasAMunozR/PAF/backend-PAF/models"
 	"gorm.io/gorm"
@@ -141,7 +142,6 @@ func (s *ContratoService) ProfesorUnidadMayorNOPaf() (map[string]int, map[string
 	return contratoCounts, pipelsoftCounts, nil
 }
 
-// Servicio que devuelve las PAF por estado para una unidad mayor dada
 func (s *ContratoService) GetPafByUnidadMayor(nombreUnidadMayor string) (map[string][]models.Pipelsoft, error) {
 	// Definir los estados posibles
 	estados := []string{
@@ -152,7 +152,14 @@ func (s *ContratoService) GetPafByUnidadMayor(nombreUnidadMayor string) (map[str
 	var pipelsofts []models.Pipelsoft
 	result := s.DB.Where("nombre_unidad_mayor = ?", nombreUnidadMayor).Find(&pipelsofts)
 	if result.Error != nil {
+		log.Println("Error al buscar las PAF:", result.Error)
 		return nil, result.Error
+	}
+
+	// Log para verificar cuántos registros se obtuvieron
+	log.Printf("Cantidad de PAF encontradas para '%s': %d\n", nombreUnidadMayor, len(pipelsofts))
+	if len(pipelsofts) == 0 {
+		log.Println("No se encontraron PAF para esta unidad mayor.")
 	}
 
 	// Crear un mapa para almacenar las PAF divididas por estado
@@ -165,12 +172,21 @@ func (s *ContratoService) GetPafByUnidadMayor(nombreUnidadMayor string) (map[str
 
 	// Iterar sobre las PAF encontradas y clasificarlas por estado
 	for _, pipelsoft := range pipelsofts {
+		// Log para verificar cada registro de PAF
+		log.Printf("PAF encontrada: %+v\n", pipelsoft)
+
 		// Verificar si el estado de la PAF es uno de los estados definidos
 		if _, exists := pafPorEstado[pipelsoft.CodEstado]; exists {
 			// Añadir la PAF al estado correspondiente
 			pafPorEstado[pipelsoft.CodEstado] = append(pafPorEstado[pipelsoft.CodEstado], pipelsoft)
+			log.Printf("PAF añadida al estado %s: %+v\n", pipelsoft.CodEstado, pipelsoft)
+		} else {
+			log.Printf("Estado no reconocido: %s\n", pipelsoft.CodEstado)
 		}
 	}
+
+	// Log para verificar el mapa resultante
+	log.Println("Mapa de PAF por estado:", pafPorEstado)
 
 	// Devolver el mapa con las PAF por estado
 	return pafPorEstado, nil

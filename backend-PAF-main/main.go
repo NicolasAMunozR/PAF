@@ -90,7 +90,7 @@ func main() {
 		contrato.GET("/unidad-mayor", contratoController.GetContratosByUnidadMayorHandler)
 		contrato.GET("/profesorUnidadMayorPaf", contratoController.ProfesoresUnidadMayorPafHandler)
 		contrato.GET("/ProfesorUnidadMayorNoPaf", contratoController.ProfesorUnidadMayorNOPafHandler)
-		contrato.GET("/estadisticas/PafUnidadMayor", contratoController.GetPafByUnidadMayorHandler)
+		contrato.GET("/estadisticas/PafUnidadMayor/:nombreUnidadMayor", contratoController.GetPafByUnidadMayorHandler)
 
 	}
 
