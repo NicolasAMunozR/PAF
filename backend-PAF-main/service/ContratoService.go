@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/NicolasAMunozR/PAF/backend-PAF/models"
 	"gorm.io/gorm"
@@ -28,12 +29,12 @@ func (s *ContratoService) GetAllContratos() ([]models.Contrato, error) {
 	return contratos, nil
 }
 
-// GetContratoByRun devuelve un contrato específico por el RUN del docente.
 func (s *ContratoService) GetContratoByRun(run string) (*models.Contrato, error) {
 	var contrato models.Contrato
 	result := s.DB.Where("run_docente = ?", run).First(&contrato)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, nil
+		// Es mejor devolver un error específico en lugar de retornar nil
+		return nil, fmt.Errorf("contrato no encontrado para el RUN %s", run)
 	}
 	if result.Error != nil {
 		return nil, result.Error
@@ -54,8 +55,52 @@ func (s *ContratoService) GetContratosByUnidadMayor(unidad string) ([]models.Con
 	return contratos, numElementos, nil
 }
 
-// CountContratosByUnidadMayor cuenta la cantidad de contratos por cada unidad mayor y los profesores en Pipelsoft.
-func (s *ContratoService) CountContratosByUnidadMayor() (map[string]int, map[string]int, error) {
+func (s *ContratoService) ProfesorUnidadMayorYPaf() (map[string]int, map[string]int, error) {
+	var contratos []models.Contrato
+	result := s.DB.Find(&contratos)
+	if result.Error != nil {
+		// Devolver mapas vacíos si ocurre un error al obtener los contratos
+		return make(map[string]int), make(map[string]int), result.Error
+	}
+
+	// Crear un mapa de Pipelsoft para mejorar la búsqueda
+	var pipelsofts []models.Pipelsoft
+	result = s.DB.Find(&pipelsofts)
+	if result.Error != nil {
+		// Devolver mapas vacíos si ocurre un error al obtener los pipelsofts
+		return make(map[string]int), make(map[string]int), result.Error
+	}
+
+	// Crear un mapa de RunEmpleado de Pipelsoft para búsqueda rápida
+	pipelsoftMap := make(map[string]struct{}) // Mapa de RunEmpleado
+	for _, pipelsoft := range pipelsofts {
+		pipelsoftMap[pipelsoft.RunEmpleado] = struct{}{}
+	}
+
+	// Crear un mapa para contar los contratos por unidad mayor
+	contratoCounts := make(map[string]int)
+	for _, contrato := range contratos {
+		contratoCounts[contrato.UnidadMayor]++
+	}
+
+	// Crear un mapa para contar los profesores de pipelsofts por unidad mayor
+	pipelsoftCounts := make(map[string]int)
+	for _, contrato := range contratos {
+		// Verificar si el RunDocente del contrato está en el mapa de pipelsofts
+		if _, encontrado := pipelsoftMap[contrato.RunDocente]; encontrado {
+			// Si hay coincidencia, sumar 1 en pipelsoftCounts
+			pipelsoftCounts[contrato.UnidadMayor]++
+		}
+		// Si no se encuentra coincidencia, no hacer nada (seguir con el siguiente contrato)
+	}
+
+	// Devolver los resultados
+	return contratoCounts, pipelsoftCounts, nil
+}
+
+// ProfesorUnidadMayorNOPaf cuenta la cantidad de contratos por unidad mayor
+// y los profesores en Pipelsoft, sumando 1 cuando no hay coincidencias.
+func (s *ContratoService) ProfesorUnidadMayorNOPaf() (map[string]int, map[string]int, error) {
 	var contratos []models.Contrato
 	result := s.DB.Find(&contratos)
 	if result.Error != nil {
@@ -77,13 +122,56 @@ func (s *ContratoService) CountContratosByUnidadMayor() (map[string]int, map[str
 	// Crear un mapa para contar los profesores de pipelsofts por unidad mayor
 	pipelsoftCounts := make(map[string]int)
 	for _, contrato := range contratos {
+		// Inicializar la variable `found` como `false`
+		found := false
 		for _, pipelsoft := range pipelsofts {
+			// Si el RunDocente del contrato coincide con RunEmpleado del pipelsoft
 			if contrato.RunDocente == pipelsoft.RunEmpleado {
-				pipelsoftCounts[contrato.UnidadMayor]++
-				break
+				found = true
+				break // No hace falta hacer nada, si hay coincidencia, se detiene la búsqueda
 			}
+		}
+
+		// Si no se encontró una coincidencia, se incrementa el contador para esa UnidadMayor
+		if !found {
+			pipelsoftCounts[contrato.UnidadMayor]++
 		}
 	}
 
 	return contratoCounts, pipelsoftCounts, nil
+}
+
+// Servicio que devuelve las PAF por estado para una unidad mayor dada
+func (s *ContratoService) GetPafByUnidadMayor(nombreUnidadMayor string) (map[string][]models.Pipelsoft, error) {
+	// Definir los estados posibles
+	estados := []string{
+		"A1", "A2", "A3", "B1", "B9", "C1D", "C9D", "F1", "F9", "A9",
+	}
+
+	// Buscar las PAF correspondientes a la unidad mayor
+	var pipelsofts []models.Pipelsoft
+	result := s.DB.Where("nombre_unidad_mayor = ?", nombreUnidadMayor).Find(&pipelsofts)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	// Crear un mapa para almacenar las PAF divididas por estado
+	pafPorEstado := make(map[string][]models.Pipelsoft)
+
+	// Inicializar las listas de PAF por estado, incluso si están vacías
+	for _, estado := range estados {
+		pafPorEstado[estado] = []models.Pipelsoft{}
+	}
+
+	// Iterar sobre las PAF encontradas y clasificarlas por estado
+	for _, pipelsoft := range pipelsofts {
+		// Verificar si el estado de la PAF es uno de los estados definidos
+		if _, exists := pafPorEstado[pipelsoft.CodEstado]; exists {
+			// Añadir la PAF al estado correspondiente
+			pafPorEstado[pipelsoft.CodEstado] = append(pafPorEstado[pipelsoft.CodEstado], pipelsoft)
+		}
+	}
+
+	// Devolver el mapa con las PAF por estado
+	return pafPorEstado, nil
 }

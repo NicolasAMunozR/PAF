@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/NicolasAMunozR/PAF/backend-PAF/service"
@@ -71,19 +72,52 @@ func (c *ContratoController) GetContratosByUnidadMayorHandler(ctx *gin.Context) 
 	ctx.JSON(http.StatusOK, response)
 }
 
-// CountContratosByUnidadMayorHandler maneja las solicitudes para contar los contratos por unidad mayor.
-func (c *ContratoController) CountContratosByUnidadMayorHandler(ctx *gin.Context) {
-	contratoCounts, pipelsoftCounts, err := c.Service.CountContratosByUnidadMayor()
+func (c *ContratoController) ProfesoresUnidadMayorPafHandler(ctx *gin.Context) {
+	contratoCounts, pipelsoftCounts, err := c.Service.ProfesorUnidadMayorYPaf()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Crear un objeto de respuesta que incluya ambos conteos
-	response := gin.H{
+	// Depuración adicional (si es necesario)
+	fmt.Println("Contrato counts:", contratoCounts)
+	fmt.Println("Pipelsoft counts:", pipelsoftCounts)
+
+	ctx.JSON(http.StatusOK, gin.H{
 		"contratoCounts":  contratoCounts,
 		"pipelsoftCounts": pipelsoftCounts,
+	})
+}
+
+// ProfesorUnidadMayorYPafHandler maneja las solicitudes para contar los contratos y profesores por unidad mayor.
+func (c *ContratoController) ProfesorUnidadMayorNOPafHandler(ctx *gin.Context) {
+	// Llamar al servicio para obtener los conteos
+	contratoCounts, pipelsoftCounts, err := c.Service.ProfesorUnidadMayorNOPaf()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
-	ctx.JSON(http.StatusOK, response)
+	// Responder con los conteos
+	ctx.JSON(http.StatusOK, gin.H{
+		"contratoCounts":  contratoCounts,
+		"pipelsoftCounts": pipelsoftCounts,
+	})
+}
+
+// Controlador para manejar la petición de PAF por Unidad Mayor
+func (c *ContratoController) GetPafByUnidadMayorHandler(ctx *gin.Context) {
+	// Obtener el nombre de la unidad mayor de los parámetros de la URL
+	nombreUnidadMayor := ctx.Param("nombreUnidadMayor")
+
+	// Llamar al servicio
+	pafs, err := c.Service.GetPafByUnidadMayor(nombreUnidadMayor)
+	if err != nil {
+		// Responder con un error si el servicio falla
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Responder con los datos en formato JSON
+	ctx.JSON(http.StatusOK, pafs)
 }

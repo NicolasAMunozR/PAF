@@ -88,6 +88,10 @@ func main() {
 		contrato.GET("/", contratoController.GetAllContratosHandler)
 		contrato.GET("/:run", contratoController.GetContratoByRunHandler)
 		contrato.GET("/unidad-mayor", contratoController.GetContratosByUnidadMayorHandler)
+		contrato.GET("/profesorUnidadMayorPaf", contratoController.ProfesoresUnidadMayorPafHandler)
+		contrato.GET("/ProfesorUnidadMayorNoPaf", contratoController.ProfesorUnidadMayorNOPafHandler)
+		contrato.GET("/estadisticas/PafUnidadMayor", contratoController.GetPafByUnidadMayorHandler)
+
 	}
 
 	// Iniciar el cron job para actualización periódica

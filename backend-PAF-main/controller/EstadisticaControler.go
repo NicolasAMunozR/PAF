@@ -46,7 +46,7 @@ func (c *EstadisticasController) ContarRegistrosPorUnidadMayor(ctx *gin.Context)
 	// Responder con el conteo en formato JSON
 	ctx.JSON(http.StatusOK, gin.H{
 		"nombreUnidadMayor": nombreUnidadMayor,
-		"conteo":                  count,
+		"conteo":            count,
 	})
 }
 
