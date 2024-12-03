@@ -1,5 +1,5 @@
 <template>
-  <div class="flex">
+  <div class="flex" @click="cerrarTodosLosBloques">
     <!-- Botón para volver -->
     <div class="mt-4 ml-4">
       <button @click="volver" class="volver-button">Volver</button>
@@ -14,7 +14,7 @@
       <div v-if="persona.length > 0">
         <div class="mb-4">
           <label for="semestre">Seleccionar Semestre:</label>
-          <select id="semestre" v-model="semestreSeleccionado" class="select-input">
+          <select id="semestre" v-model="semestreSeleccionado" class="select-input" @click.stop>
             <option v-for="sem in semestres" :key="sem" :value="sem">{{ sem }}</option>
           </select>
         </div>
@@ -27,60 +27,66 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(horario, index) in horarios" :key="index" :class="{ alternado: index % 2 === 0 }">
+            <tr
+              v-for="(horario, index) in horarios"
+              :key="index"
+              :class="{ alternado: index % 2 === 0 }"
+            >
               <td>{{ horario.modulo }}</td>
               <td v-for="dia in dias" :key="dia" class="relative">
                 <div>
                   <!-- Mostrar "Tope Horario" si hay más de 2 bloques -->
                   <div v-if="bloquesPorDia(dia, index + 1).length > 2">
-  <button class="tope-horario-button" @click="mostrarBloques(dia, index + 1)">
-    Tope Horario
-  </button>
-  <div
-    v-if="isBloqueVisible(dia, index + 1)"
-    class="detalle-horarios-popup"
-  >
-    <ul>
-      <li
-        v-for="(bloque, idx) in bloquesPorDia(dia, index + 1)"
-        :key="bloque.nombre"
-        class="bloque"
-        :style="{ backgroundColor: bloque.color, marginBottom: '10px'  }"
-      >
-        <label>
-          <input
-            type="checkbox"
-            :value="`${dia}${index + 1}/${bloque.nombre}/${bloque.seccion}/${bloque.ID}`"
-            v-model="bloquesSeleccionados"
-          />
-          {{ bloque.nombre }} <br />
-          Sección: {{ bloque.seccion }}
-        </label>
-      </li>
-    </ul>
-  </div>
-</div>
-
+                    <button
+                      class="tope-horario-button"
+                      @click.stop="mostrarBloques(dia, index + 1)"
+                    >
+                      Tope Horario
+                    </button>
+                    <div
+                      v-if="isBloqueVisible(dia, index + 1)"
+                      class="detalle-horarios-popup"
+                      @click.stop
+                    >
+                      <ul>
+                        <li
+                          v-for="(bloque, idx) in bloquesPorDia(dia, index + 1)"
+                          :key="bloque.nombre"
+                          class="bloque"
+                          :style="{ backgroundColor: bloque.color, marginBottom: '10px' }"
+                        >
+                          <label>
+                            <input
+                              type="checkbox"
+                              :value="`${dia}${index + 1}/${bloque.nombre}/${bloque.seccion}/${bloque.ID}/${bloque.cupo}/${bloque.codigo_asignatura}/${bloque.tipo}/${bloque.run}/${bloque.semestre}`"
+                              v-model="bloquesSeleccionados"
+                            />
+                            {{ bloque.nombre }} <br />
+                            Sección: {{ bloque.seccion }}
+                          </label>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
 
                   <!-- Mostrar bloques directamente si son 2 o menos -->
                   <div v-else>
-  <div
-    v-for="(bloque, bloqueIndex) in bloquesPorDia(dia, index + 1)"
-    :key="`${bloque.nombre}-${bloqueIndex}`"
-    class="bloque"
-    :style="{ backgroundColor: bloque.color }"
-  >
-    <label>
-      <input
-        type="checkbox"
-        :value="`${dia}${index + 1}/${bloque.nombre}/${bloque.seccion}/${bloque.ID}`"  
-        v-model="bloquesSeleccionados"
-      />
-      {{ bloque.nombre }} <br /> Sección: {{ bloque.seccion }}
-    </label>
-  </div>
-</div>
-
+                    <div
+                      v-for="(bloque, bloqueIndex) in bloquesPorDia(dia, index + 1)"
+                      :key="`${bloque.nombre}-${bloqueIndex}`"
+                      class="bloque"
+                      :style="{ backgroundColor: bloque.color }"
+                    >
+                      <label>
+                        <input
+                          type="checkbox"
+                          :value="`${dia}${index + 1}/${bloque.nombre}/${bloque.seccion}/${bloque.ID}/${bloque.cupo}/${bloque.codigo_asignatura}/${bloque.tipo}/${bloque.run}/${bloque.semestre}`"
+                          v-model="bloquesSeleccionados"
+                        />
+                        {{ bloque.nombre }} <br /> Sección: {{ bloque.seccion }}
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </td>
             </tr>
@@ -88,7 +94,9 @@
         </table>
       </div>
       <div v-else>
-        <p class="info-text">Cargando datos o no se encontraron registros para el RUN.</p>
+        <p class="info-text">
+          Cargando datos o no se encontraron registros para el RUN.
+        </p>
       </div>
     </div>
 
@@ -96,6 +104,23 @@
     <div class="w-1/3 pl-4 mt-12">
       <h2 class="sub-title">Selecciona PAF y Asignatura</h2>
 
+      <h2 class="sub-title">PAF con Asignatura</h2>
+      <div v-if="fichasPAFMatch.length > 0">
+        <div
+          v-for="(p, index) in fichasPAFMatch"
+          :key="index"
+          class="card"
+          :style="{ backgroundColor: '#FFCC80' }"
+        >
+          <p><strong>Código PAF:</strong> {{ p.CodigoPaf }}</p>
+          <p><strong>Unidad Menor:</strong> {{ p.NombreUnidadMenor }}</p>
+          <p><strong>Codigo de Asignatura:</strong> {{ p.CodigoAsignatura }}</p>
+          <p><strong>Nombre de Asignatura:</strong> {{ p.NombreAsignatura }}</p>
+          <p><strong>Bloque:</strong> {{ p.bloque }}</p>
+          <p><strong>Cupo:</strong> {{ p.cupo }}</p>
+          <p><strong>Sección:</strong> {{ p.seccion }}</p>
+        </div>
+      </div>
       <!-- Fichas de PAF -->
       <h2 class="sub-title">PAF</h2>
       <div v-if="fichasPAF.length > 0">
@@ -119,18 +144,19 @@
           :key="index"
           class="card"
           :style="{ backgroundColor: fichaSeleccionadaAsignatura === p ? '#B3E5FC' : coloresAsignaturas[index % coloresAsignaturas.length] }"
-          @click="fichaSeleccionadaAsignatura = p"
+          
         >
           <p><strong>Código de Asignatura:</strong> {{ p.codigo_asignatura }}</p>
           <p><strong>Nombre de Asignatura:</strong> {{ p.nombre_asignatura }}</p>
           <p><strong>Sección:</strong> {{ p.seccion }}</p>
           <p><strong>Bloque:</strong> {{ p.bloque }}</p>
+          <p><strong>Cupo:</strong> {{ p.Cupo }}</p>
         </div>
       </div>
 
       <div class="flex justify-end mt-4">
         <button
-          v-if="fichaSeleccionadaPAF && fichaSeleccionadaAsignatura && bloquesSeleccionados.length > 0"
+          v-if="fichaSeleccionadaPAF && bloquesSeleccionados.length > 0"
           @click="enviarSeleccion"
           class="procesar-button"
         >
@@ -146,7 +172,24 @@ import { useRoute, useRouter } from 'vue-router'
 import { onMounted, ref, computed } from 'vue'
 import { useNuxtApp } from '#app'
 
-const historialSeleccionado = computed(() => persona.value.find((p) => p.ID !== 0) || null);
+const historialSeleccionado = computed(() => persona.value.filter((p) => p.ID !== 0) || null);
+
+// Cerrar todos los popups
+const cerrarTodosLosBloques = () => {
+  Object.keys(visibleBloques.value).forEach((key) => {
+    visibleBloques.value[key] = false;
+  });
+};
+
+
+// Agregar y remover el evento global
+onMounted(() => {
+  document.addEventListener('click', cerrarTodosLosBloques);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', cerrarTodosLosBloques);
+});
 
 const visibleBloques = ref<Record<string, boolean>>({});
 
@@ -164,15 +207,36 @@ const isBloqueVisible = (dia: string, modulo: number) => {
 
 const fichasPAF = computed(() =>
   persona.value.filter((p) => 
-    p.CodigoPaf !== historialSeleccionado.value?.CodigoPaf
+    !historialSeleccionado.value.some(h => 
+      h.codigo == p.CodigoAsignatura || h.paf === p.CodigoPaf || h.CodigoA === p.CodigoAsignatura
+    )
+  )
+);
+
+const fichasPAFMatch = computed(() =>
+  persona.value.filter((p) => 
+    historialSeleccionado.value.some(h => 
+      h.codigo == p.CodigoAsignatura || h.paf === p.CodigoPaf || h.CodigoA === p.CodigoAsignatura
+    )
   )
 );
 
 const fichasAsignaturas = computed(() =>
   persona1.value.filter((p) => 
-    p.codigo_asignatura !== historialSeleccionado.value?.CodigoAsignatura
+    !historialSeleccionado.value.some((historial) => 
+      historial.codigo === p.codigo_asignatura
+    )
   )
 );
+
+const fichasAsignaturasNo = computed(() =>
+  persona1.value.filter((p) => 
+    historialSeleccionado.value.some((historial) => 
+      historial.codigo === p.codigo_asignatura
+    )
+  )
+);
+
 
 
 const fichaSeleccionadaPAF = ref<Persona | null>(null);
@@ -196,6 +260,12 @@ interface Persona {
   SegundoApellido: string;
   ID: number;
   semestre?: string; // Add the 'semestre' property
+  codigo: string;
+  paf: number;
+  bloque: string;
+  cupo: number;
+  seccion: string;
+  CodigoA: string;
 }
 
 interface Horario {
@@ -203,10 +273,11 @@ interface Horario {
   codigo_asignatura: string;
   nombre_asignatura: string;
   bloque?: string;
-  cupo?: number;
+  Cupo?: number;
   seccion?: string;
   semestre?: string;
   ID: number;
+  tipo?: string;
 }
 
 const persona = ref<Persona[]>([])
@@ -229,30 +300,30 @@ const semestreSeleccionado = ref('')
 const semestres = computed(() => [...new Set(persona1.value.map(p => p.semestre))])
 const personaFiltrada = computed(() => persona1.value.filter(p => p.semestre === semestreSeleccionado.value))
 const bloquesPorDia = (dia: string, modulo: number) => {
-  // Mapear iniciales de días con sus nombres completos
   const inicialDia: { [key: string]: string } = {
     Lunes: 'L',
     Martes: 'M',
-    Miércoles: 'W', // 'W' para distinguir de miércoles
+    Miércoles: 'W',
     Jueves: 'J',
     Viernes: 'V',
     Sábado: 'S',
   };
 
-  // Filtrar asignaturas para el día específico y el módulo actual
+  // Filtrar bloques horarios en función de la ficha seleccionada
   return personaFiltrada.value
     .filter((p) => {
       if (!p.bloque) return false;
 
-      // Separar bloques (por ejemplo: M2-M5-V1 se divide en ["M2", "M5", "V1"]).
+      // Excluir bloques asociados con las fichas seleccionadas en 'fichasAsignaturasNo'
+      if (fichasAsignaturasNo.value.some((ficha) => ficha.codigo_asignatura === p.codigo_asignatura)) {
+        return false;
+      }
+
+      // Filtrar por día y módulo
       const bloques = p.bloque.split('-');
-
-      // Buscar un bloque que coincida con el día y el módulo actual
       return bloques.some((b) => {
-        const diaBloque = b.charAt(0); // Primera letra es el día (M, V, etc.)
-        const moduloBloque = b.slice(1); // Resto es el número de módulo
-
-        // Comparar con el día actual y el módulo actual
+        const diaBloque = b.charAt(0);
+        const moduloBloque = b.slice(1);
         return inicialDia[dia] === diaBloque && parseInt(moduloBloque) === modulo;
       });
     })
@@ -261,6 +332,11 @@ const bloquesPorDia = (dia: string, modulo: number) => {
       seccion: p.seccion,
       color: colores[persona1.value.indexOf(p) % colores.length],
       ID: p.ID,
+      cupo: p.Cupo,
+      codigo_asignatura: p.codigo_asignatura,
+      tipo: p.tipo,
+      run: p.run,
+      semestre: p.semestre,
       // Crear el formato "V3-M2" con la inicial del día y el número de módulo
       bloque: (p.bloque ?? '').split('-')
         .map(b => `${b.charAt(0)}${b.slice(1)}`) // Mapear para obtener "V3", "M2", etc.
@@ -272,11 +348,12 @@ const bloquesPorDia = (dia: string, modulo: number) => {
 const obtenerDatosPersona = async () => {
   try {
     const response = await $axios.get(`/pipelsoft/contratos-run/${run.value}`);
+    console.log("response", response.data)
     const response1 = await $axios.get(`/profesorDB/${run.value}`);
     persona1.value = response1.data;
     console.log("persona1", persona1.value)
     persona.value = response.data.map((item: any) => ({
-      CodigoPaf: item.PipelsoftData.IdPaf,
+      CodigoPaf: item.PipelsoftData.IdPaf,  
       CodigoAsignatura: item.PipelsoftData.CodigoAsignatura,
       Nombres: item.PipelsoftData.Nombres,
       NombreAsignatura: item.PipelsoftData.NombreAsignatura,
@@ -290,6 +367,12 @@ const obtenerDatosPersona = async () => {
       Semestre: response1.data.semestre,
       ID: item.HistorialPafData.ID,
       semestre: item.HistorialPafData.semestre,
+      codigo: item.HistorialPafData.codigo_asignatura,
+      paf: item.HistorialPafData.CodigoPaf,
+      bloque: item.HistorialPafData.bloque,
+      cupo: item.HistorialPafData.cupo,
+      seccion: item.HistorialPafData.seccion,
+      CodigoA: item.HistorialPafData.CodigoAsignatura,
     }))
     console.log("persona", persona.value);
 
@@ -332,32 +415,51 @@ const enviarSeleccion = async () => {
         .replace("Sábado", "S")
         .replace("Domingo", "D");
 });
-let grouped: { [key: string]: string[] } = {};
+
+const grouped: { [key: string]: string[] } = {};
+
+// Agrupar elementos por los valores después del primer "/"
 lista.forEach(item => {
-    // Obtener el contenido después del primer "/"
-    let rest = item.split('/').slice(1).join('/');
+  // Dividir el elemento
+  const partes = item.split('/');
+  
+  // Desestructurar las partes
+  const [bloque, nombreAsignatura, seccion, Id, cupo, codigoAsignatura, tipo, run, semestre] = partes;
+  
+  // Generar la clave para agrupar
+  const rest = partes.slice(1).join('/');
 
-    // Si ya existe el grupo, lo unimos, si no, creamos uno nuevo
-    if (grouped[rest]) {
-        grouped[rest].push(item.split('/')[0]); // Solo almacenar el primer elemento antes de "/"
-    } else {
-        grouped[rest] = [item.split('/')[0]]; // Crear nuevo grupo con el primer elemento
-    }
+  // Agrupar por la clave
+  if (!grouped[rest]) {
+    grouped[rest] = [];
+  }
+  grouped[rest].push(bloque);
 });
-let resultado = Object.values(grouped).map(group => group.join('-')).join(',');
 
-console.log(resultado[0]+resultado[1]);
+// Formatear el resultado en el formato deseado
+const resultado = Object.entries(grouped).map(([rest, bloques]) => {
+  const [nombreAsignatura, seccion, Id, cupo, codigoAsignatura, tipo, run, semestre] = rest.split('/');
+  return {
+    profesor: {
+      run,
+      semestre,
+      tipo,
+      nombre_asignatura: nombreAsignatura,
+      seccion,
+      cupo: parseInt(cupo), // Convertir cupo a número
+      bloque: bloques.join(", "), // Unir los bloques separados por coma
+      codigo_asignatura: codigoAsignatura
+    },
+    bloque: bloques // Bloques agrupados como un array
+  };
+});
+
+// Mostrar el resultado en consola
+console.log(resultado);
+
     // si bloqueseleccionadosString tiene un elemento Miercoles Trasformarlo en W y los demas tipo Lunes o Matrtes dejarlos como L o M
     
-    const data = {
-      run: fichaSeleccionadaAsignatura?.value?.run || '', // Cambiar según lo que necesitas enviar
-      semestre: fichaSeleccionadaAsignatura?.value?.semestre || '',
-      codigo_asignatura: fichaSeleccionadaAsignatura?.value?.codigo_asignatura || '',
-      nombre_asignatura: fichaSeleccionadaAsignatura?.value?.nombre_asignatura || '',
-      seccion: fichaSeleccionadaAsignatura?.value?.seccion || '',
-      cupo: fichaSeleccionadaAsignatura?.value?.cupo || 0, 
-      bloque: resultado[0]+resultado[1], 
-    };
+    const data = resultado[0];
     console.log('Datos a enviar:', data);
     await $axios.post(`/historial/post/${codigoPAF}`, data);
     alert('Datos enviados correctamente.');

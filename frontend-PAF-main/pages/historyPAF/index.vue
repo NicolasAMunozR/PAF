@@ -1,11 +1,5 @@
 <template>
   <div class="container">
-    <!-- Filtros -->
-    <Filtros @filter="filterData" @sort="sortData" />
-    
-    <!-- Tabla -->
-    <Tabla :data="filteredPersonas" :showButtons="false" />
-    
     <!-- Advertencias -->
     <div v-if="warnings.length" class="warnings">
       <h3>Advertencias:</h3>
@@ -13,6 +7,12 @@
         <li v-for="warning in warnings" :key="warning">{{ warning }}</li>
       </ul>
     </div>
+    
+    <!-- Filtros -->
+    <Filtros @filter="filterData" @sort="sortData" />
+    
+    <!-- Tabla -->
+    <Tabla :data="filteredPersonas" :showButtons="false" @rowStatusChanged="handleRowStatusChanged" />
   </div>
 </template>
 
@@ -25,7 +25,7 @@ const { $axios } = useNuxtApp() as unknown as { $axios: typeof import('axios').d
 
 interface Persona {
   ID: number;
-  IdPAF: number;
+  IdPaf: number;
   codigo_asignatura: string;
   Run: string;
   EstadoProceso: string;
@@ -39,6 +39,8 @@ interface Persona {
   codigo_modificacion: number;
   bandera_modificacion: number;
   descripcion_modificacion: string;
+  seccion: string;
+  rowClass?: string;
 }
 
 const personas = ref<Persona[]>([]);
@@ -57,13 +59,11 @@ const warnings = ref<string[]>([]);
 const filteredPersonas = computed(() => {
   warnings.value = [];
   let filtered = personas.value.filter(persona => {
-    console.log('persona:', persona);
-    console.log('filtros:', filtros.value);
     return (
       persona.codigo_asignatura.toLowerCase().includes(filtros.value.codigoAsignatura.toLowerCase()) &&
       (filtros.value.estadoProceso ? persona.EstadoProceso.toString() === filtros.value.estadoProceso : true) &&
       (filtros.value.calidad ? persona.Calidad === filtros.value.calidad : true) &&
-      persona.IdPAF.toString().toLowerCase().includes(filtros.value.codigoPAF.toLowerCase()) &&
+      persona.IdPaf.toString().toLowerCase().includes(filtros.value.codigoPAF.toLowerCase()) &&
       persona.Run.toLowerCase().includes(filtros.value.run.toLowerCase()) &&
       (filtros.value.jerarquia ? persona.Jerarquia === filtros.value.jerarquia : true)
     );
@@ -71,9 +71,11 @@ const filteredPersonas = computed(() => {
 
   filtered = filtered.map(persona => {
     if (persona.bandera_modificacion === 1) {
-      warnings.value.push(`Advertencia: La PAF ${persona.IdPAF} ha sido modificada.`);
+
+      persona.rowClass = 'modified-row'; // Marca la fila como modificada
     } else if (persona.bandera_modificacion === 2) {
-      warnings.value.push(`Advertencia: La PAF ${persona.IdPAF} ha sido eliminada.`);
+
+      persona.rowClass = 'deleted-row'; // Marca la fila como eliminada
     }
 
     if (persona.codigo_modificacion === 1) {
@@ -95,6 +97,12 @@ const filteredPersonas = computed(() => {
 
   return filtered;
 });
+
+// Método para manejar la notificación a Tabla.vue
+const handleRowStatusChanged = (persona: Persona) => {
+  // Emitir el cambio de estado (modificación o eliminación)
+  console.log(`La fila de PAF ${persona.IdPaf} ha sido actualizada`);
+};
 
 onMounted(async () => {
   try {

@@ -81,7 +81,7 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 		FechaInicioContrato:      pipelsoft.FechaInicioContrato,
 		FechaFinContrato:         pipelsoft.FechaFinContrato,
 		CodigoAsignatura:         pipelsoft.CodigoAsignatura,
-		NombreAsignatura:         pipelsoft.NombreAsignatura,
+		NombreAsignatura:         profesor.NombreAsignatura,
 		CantidadHoras:            profesor.Cupo,
 		Jerarquia:                pipelsoft.Jerarquia, // Obtenido desde Pipelsoft
 		EstadoProceso:            nuevoEstado,         // Nuevo estado calculado
@@ -91,7 +91,7 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 		ProfesorRun:              profesor.RUN,
 		Semestre:                 profesor.Semestre,
 		Tipo:                     profesor.Tipo,
-		ProfesorNombreAsignatura: profesor.NombreAsignatura,
+		ProfesorCodigoAsignatura: profesor.CodigoAsignatura,
 		Seccion:                  profesor.Seccion,
 		Cupo:                     profesor.Cupo,
 		Bloque:                   string(bloqueJSON), // Asignar el JSON serializado como string

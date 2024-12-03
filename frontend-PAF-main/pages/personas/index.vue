@@ -33,7 +33,7 @@ interface Persona {
   NombreUnidadMayor: string;
   CodigoUnidadContratante?: string;
   Bloque?: string;
-  Seccion?: string;
+  seccion?: string;
   Semestre?: string;
   Cupo?: number;
   Id: number;
@@ -85,6 +85,7 @@ const filteredPersonas = computed(() => {
 onMounted(async () => {
   try {
     const response = await $axios.get('/pipelsoft/contratos');
+    console.log('response:', response);
     personas.value = response.data.map((item: any) => ({
       CodigoAsignatura: item.PipelsoftData.CodigoAsignatura,
       Nombres: item.PipelsoftData.Nombres,
@@ -99,7 +100,7 @@ onMounted(async () => {
       NombreAsignatura: item.PipelsoftData.NombreAsignatura,
       FechaUltimaModificacionProceso: item.PipelsoftData.UpdatedAt,
       Id: item.PipelsoftData.Id,
-      Seccion: item.HistorialPafData.Seccion,
+      seccion: item.HistorialPafData.seccion,
     }));
   } catch (error) {
     console.error('Error al obtener personas:', error);

@@ -13,12 +13,12 @@
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
-        <tr v-for="persona in data" :key="persona.Id" class="hover:bg-gray-50 transition-colors">
-          <td class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoPAF }} {{ persona.IdPAF }}</td>
-          <td class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoAsignatura }} {{ persona.codigo_asignatura }}</td>
+        <tr v-for="persona in data" :key="persona.Id" :class="persona.rowClass" class="hover:bg-gray-50 transition-colors">
+          <td class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoPAF }} {{ persona.IdPaf }}</td>
+          <td class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoAsignatura }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.Run }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.NombreAsignatura }} {{ persona.nombre_asignatura }}</td>
-          <td class="px-4 py-3 text-gray-700">{{ persona.Seccion }}</td>
+          <td class="px-4 py-3 text-gray-700">{{ persona.seccion }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.Cupo }} {{ persona.cupo }}</td>
           <td v-if="showButtons" class="px-4 py-3">
             <a :href="`/paf?codigoPaf=${persona.CodigoPAF}`" class="button">Ver PAF</a>
@@ -41,7 +41,12 @@ export default {
     },
     showButtons: {
       type: Boolean,
-      default: true // Por defecto, se muestran los botones
+      default: true
+    }
+  },
+  methods: {
+    handleRowStatusChanged(persona) {
+      // Si necesitas manejar cambios adicionales en el estado de las filas, puedes hacerlo aquí
     }
   }
 }
@@ -56,6 +61,15 @@ export default {
   --background-color: #1d558d; /* Fondo neutro */
   --button-background-color: #4CAF50; /* Color de fondo de los botones */
   --button-hover-color: #388E3C; /* Color de hover en los botones */
+}
+
+/* Fila modificada y eliminada */
+.modified-row {
+  background-color: yellow; /* Amarillo suave */
+}
+
+.deleted-row {
+  background-color: red; /* Rojo suave */
 }
 
 /* Contenedor de la tabla */
