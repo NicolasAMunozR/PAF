@@ -3,7 +3,7 @@
       <h1 class="titulo-principal">Datos SAI y PAF</h1>
   
       <!-- Cantidades -->
-      <p class="cantidad-text">Cantidad de personas en el SAI: <strong>{{ cantidadPersonasSai }}</strong></p>
+      <p class="cantidad-text">Cantidad de personas: <strong>{{ cantidadPersonasSai }}</strong></p>
       <p class="cantidad-text">Cantidad de PAF únicas: <strong>{{ cantidadPafUnicas }}</strong></p>
       <br />
       <br />
@@ -88,9 +88,11 @@
   const pafPorUnidadMayorChartData = ref(null);
   const totalPorcPaf = ref([]);
   
-  const fetchCantidadPersonasSai = async () => {
+  const fetchCantidadPersonasSai = async (rut) => {
     try {
-      const response = await $axios.get('/estadisticas');
+      const response1 = await $axios.get(`/contratos/${rut}`)
+      //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
+      const response = await $axios.get(`/estadisticas/unidad-mayor/${response1.data.unidadMayor}`);
       cantidadPersonasSai.value = response.data.TotalProfesores;
       cantidadPafUnicas.value = response.data.TotalPipelsoftUnicos;
     } catch (error) {
@@ -107,10 +109,12 @@
     }
   };
   
-  const fetchCantidadPafPorEstado = async () => {
+  const fetchCantidadPafPorEstado = async (rut) => {
     try {
-      const response = await $axios.get('/estadisticas');
-  
+      const response1 = await $axios.get(`/contratos/${rut}`)
+      //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
+      const response = await $axios.get(`/estadisticas/unidad-mayor/${response1.data.unidadMayor}`);
+      console.log(response)
       // Ordenar el objeto EstadoProcesoCount para que A9 sea el último
       const estadoProcesoCount = response.data.EstadoProcesoCount;
       const { A9, ...otrosEstados } = estadoProcesoCount; // Extraer A9 y el resto
@@ -141,8 +145,8 @@
     try {
       const response1 = await $axios.get(`/contratos/${rut}`)
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
-      const response = await $axios.get(`/contratos/unidad-mayor?unidad=${response1.data.unidadMayor}`);
-      console.log(response)
+      const response = await $axios.get(`/estadisticas/unidad-mayor/${response1.data.unidadMayor}`);
+
       const unidadesData = response.data;
       pafPorUnidadMayorChartData.value = {
         labels: Object.keys(unidadesData),
@@ -229,11 +233,11 @@
   onMounted(async () => {
     rut.valueOf = sessionStorage.getItem('rut') || '';
     await Promise.all([
-      fetchCantidadPersonasSai(),
-      fetchCantidadPafPorEstado(),
+      fetchCantidadPersonasSai(rut.valueOf),
+      fetchCantidadPafPorEstado(rut.valueOf),
       fetchPromedioTiempoPorEstado(),
       fetchPafPorUnidadMayor(rut.valueOf),
-      fetchCantidadPafSai(),
+      fetchCantidadPafSai(rut.valueOf),
     ]);
     configurarGraficos();
   });
