@@ -31,7 +31,6 @@ interface Persona {
   EstadoProceso: string;
   Calidad: string;
   Jerarquia: string;
-  CantidadHoras: number;
   FechaInicioContrato: string;
   FechaFinContrato: string;
   nombre_asignatura: string;

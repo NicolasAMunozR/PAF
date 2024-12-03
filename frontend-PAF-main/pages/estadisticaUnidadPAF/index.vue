@@ -139,9 +139,9 @@
   
   const fetchPafPorUnidadMayor = async (rut) => {
     try {
-      //const response1 = await $axios.get(`/contratos/${rut}`)
+      const response1 = await $axios.get(`/contratos/${rut}`)
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
-      const response = await $axios.get('/contratos/unidad-mayor')
+      const response = await $axios.get(`/contratos/unidad-mayor?unidad=${response1.data.unidadMayor}`);
       console.log(response)
       const unidadesData = response.data;
       pafPorUnidadMayorChartData.value = {

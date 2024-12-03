@@ -3,7 +3,7 @@
     <h1 class="titulo-principal">Datos SAI y PAF</h1>
 
     <!-- Cantidades -->
-    <p class="cantidad-text">Cantidad de personas en el SAI: <strong>{{ cantidadPersonasSai }}</strong></p>
+    <p class="cantidad-text">Cantidad de docentes: <strong>{{ cantidadPersonasSai }}</strong></p>
     <p class="cantidad-text">Cantidad de PAF únicas: <strong>{{ cantidadPafUnicas }}</strong></p>
     <br />
     <br />

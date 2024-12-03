@@ -67,7 +67,6 @@ const obtenerDatosPaf = async () => {
         NombreAsignatura: item.PipelsoftData.NombreAsignatura,
         PrimerApellido: item.PipelsoftData.PrimerApellido,
         SegundoApellido: item.PipelsoftData.SegundoApellido,
-        CantidadHoras: item.PipelsoftData.CantidadHoras,
         NombreUnidadMenor: item.PipelsoftData.NombreUnidadMenor,
         NombreUnidadMayor: item.PipelsoftData.NombreUnidadMayor,
         Bloque: item.HistorialPafData.bloque,

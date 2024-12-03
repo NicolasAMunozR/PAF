@@ -133,7 +133,7 @@
         >
           <p><strong>Código PAF:</strong> {{ p.CodigoPaf }}</p>
           <p><strong>Unidad Menor:</strong> {{ p.NombreUnidadMenor }}</p>
-          <p><strong>Cantidad de Horas:</strong> {{ p.CantidadHoras }}</p>
+
         </div>
       </div>
 
@@ -253,7 +253,6 @@ interface Persona {
   CodigoPaf: number;
   CodigoAsignatura: string;
   NombreAsignatura: string;
-  CantidadHoras: number;
   NombreUnidadMenor: string;
   Nombres: string;
   PrimerApellido: string;
@@ -359,7 +358,6 @@ const obtenerDatosPersona = async () => {
       NombreAsignatura: item.PipelsoftData.NombreAsignatura,
       PrimerApellido: item.PipelsoftData.PrimerApp,
       SegundoApellido: item.PipelsoftData.SegundoApp,
-      CantidadHoras: item.PipelsoftData.CantidadHorasPaf,
       NombreUnidadMenor: item.PipelsoftData.NombreUnidadMenor,
       Bloque: response1.data.bloque,
       Cupo: response1.data.cupo,
