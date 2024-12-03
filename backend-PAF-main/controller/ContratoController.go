@@ -125,24 +125,3 @@ func (c *ContratoController) GetPafByUnidadMayorHandler(ctx *gin.Context) {
 	// Responder con los datos en formato JSON
 	ctx.JSON(http.StatusOK, pafs)
 }
-
-func (c *EstadisticasController) ObtenerEstadisticasPorUnidadMayorHandler(ctx *gin.Context) {
-	// Obtener el valor de 'unidad-mayor' desde los parámetros de la URL
-	unidadMayor := ctx.Param("unidad-mayor")
-
-	// Validar que el parámetro no esté vacío
-	if unidadMayor == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'unidad-mayor' es obligatorio"})
-		return
-	}
-
-	// Llamar al servicio
-	resp, err := c.Service.ObtenerEstadisticasPorUnidadMayor(unidadMayor)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	// Responder con los datos en formato JSON
-	ctx.JSON(http.StatusOK, resp)
-}

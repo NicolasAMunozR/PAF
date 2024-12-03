@@ -215,3 +215,32 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidadMayor(unidadMayor stri
 
 	return &resp, nil
 }
+
+func (s *EstadisticasService) ObtenerFrecuenciaNombreUnidadMenorPorUnidadMayor(nombreUnidadMayor string) (map[string]int, error) {
+	var resultados []struct {
+		NombreUnidadMenor string
+		Conteo            int
+	}
+
+	// Validar que se proporciona el parámetro
+	if nombreUnidadMayor == "" {
+		return nil, fmt.Errorf("el nombre de la unidad mayor es obligatorio")
+	}
+
+	// Realizar la consulta agrupada
+	if err := s.DB.Model(&models.Pipelsoft{}).
+		Select("nombre_unidad_menor, COUNT(*) as conteo").
+		Where("nombre_unidad_mayor = ?", nombreUnidadMayor).
+		Group("nombre_unidad_menor").
+		Scan(&resultados).Error; err != nil {
+		return nil, fmt.Errorf("error al obtener la frecuencia de NombreUnidadMenor: %w", err)
+	}
+
+	// Convertir los resultados en un mapa
+	frecuencia := make(map[string]int)
+	for _, resultado := range resultados {
+		frecuencia[resultado.NombreUnidadMenor] = resultado.Conteo
+	}
+
+	return frecuencia, nil
+}

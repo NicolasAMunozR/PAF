@@ -78,6 +78,7 @@ func main() {
 	r.GET("/estadisticas/frecuencia-unidades-mayores", estadisticasController.ObtenerFrecuenciaNombreUnidadMayor)
 	r.GET("/estadisticas/PafActivas", estadisticasController.ContarRegistrosPorCodEstado)
 	r.GET("/estadisticas/unidad-mayor/:unidad-mayor", estadisticasController.ObtenerEstadisticasPorUnidadMayorHandler)
+	r.GET("estadisticas/unidad-mayor/unidades-menores-frecuencia/:unidad-mayor", estadisticasController.ObtenerFrecuenciaNombreUnidadMenorPorUnidadMayorHandler)
 
 	// Inicializar servicios y controladores
 	contratoService := service.NewContratoService(DB.DBPersonal)
