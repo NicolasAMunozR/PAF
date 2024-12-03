@@ -413,30 +413,25 @@ const enviarSeleccion = async () => {
         .replace("Sábado", "S")
         .replace("Domingo", "D");
 });
-
+console.log(lista)
 const grouped: { [key: string]: string[] } = {};
 
-// Agrupar elementos por los valores después del primer "/"
 lista.forEach(item => {
-  // Dividir el elemento
   const partes = item.split('/');
-  
-  // Desestructurar las partes
+
   const [bloque, nombreAsignatura, seccion, Id, cupo, codigoAsignatura, tipo, run, semestre] = partes;
-  
-  // Generar la clave para agrupar
   const rest = partes.slice(1).join('/');
 
-  // Agrupar por la clave
   if (!grouped[rest]) {
     grouped[rest] = [];
   }
   grouped[rest].push(bloque);
 });
 
-// Formatear el resultado en el formato deseado
+// Formatear el resultado en el formato de la imagen
 const resultado = Object.entries(grouped).map(([rest, bloques]) => {
   const [nombreAsignatura, seccion, Id, cupo, codigoAsignatura, tipo, run, semestre] = rest.split('/');
+
   return {
     profesor: {
       run,
@@ -445,19 +440,31 @@ const resultado = Object.entries(grouped).map(([rest, bloques]) => {
       nombre_asignatura: nombreAsignatura,
       seccion,
       cupo: parseInt(cupo), // Convertir cupo a número
-      bloque: bloques.join(", "), // Unir los bloques separados por coma
+      bloque: `Bloque ${bloques.join(", ")}`, // Prefijo "Bloque" antes de los bloques agrupados
       codigo_asignatura: codigoAsignatura
     },
-    bloque: bloques // Bloques agrupados como un array
+    bloque: bloques.map(b => `${codigoAsignatura} ${seccion} ${cupo} ${b}`)
   };
 });
+const result = resultado.map(item => {
+  if (item.bloque.length >= 2) {
+    // Une los elementos con un "-"
+    const merged = item.bloque[0] + "-" + item.bloque.slice(1).join("-").split(" ")[3];
+    return merged;
+  }
+  return item.bloque[0];
+});
+
+console.log(result);
+
 
 // Mostrar el resultado en consola
-console.log(resultado);
+
 
     // si bloqueseleccionadosString tiene un elemento Miercoles Trasformarlo en W y los demas tipo Lunes o Matrtes dejarlos como L o M
     
     const data = resultado[0];
+    data.bloque = result;
     console.log('Datos a enviar:', data);
     await $axios.post(`/historial/post/${codigoPAF}`, data);
     alert('Datos enviados correctamente.');
