@@ -6,7 +6,7 @@
     </div>
 
     <!-- Tabla de horarios -->
-    <div class="w-2/3 mt-12">
+    <div class="w-2/3 mt-12 relative">
       <h1 class="section-title">
         Horario para: {{ persona[0]?.Nombres }} {{ persona[0]?.PrimerApellido }} {{ persona[0]?.SegundoApellido }}
       </h1>
@@ -29,16 +29,58 @@
           <tbody>
             <tr v-for="(horario, index) in horarios" :key="index" :class="{ alternado: index % 2 === 0 }">
               <td>{{ horario.modulo }}</td>
-              <td v-for="dia in dias" :key="dia">
-                <div v-for="bloque in bloquesPorDia(dia, index + 1)" :key="bloque.nombre" class="bloque" :style="{ backgroundColor: bloque.color }">
-                  <label>
-                    <input
-                      type="checkbox"
-                      :value="`${dia}-${index + 1}`"
-                      v-model="bloquesSeleccionados"
-                    />
-                    {{ bloque.nombre }}
-                  </label>
+              <td v-for="dia in dias" :key="dia" class="relative">
+                <div>
+                  <!-- Mostrar "Tope Horario" si hay más de 2 bloques -->
+                  <div v-if="bloquesPorDia(dia, index + 1).length > 2">
+  <button class="tope-horario-button" @click="mostrarBloques(dia, index + 1)">
+    Tope Horario
+  </button>
+  <div
+    v-if="isBloqueVisible(dia, index + 1)"
+    class="detalle-horarios-popup"
+  >
+    <ul>
+      <li
+        v-for="(bloque, idx) in bloquesPorDia(dia, index + 1)"
+        :key="bloque.nombre"
+        class="bloque"
+        :style="{ backgroundColor: bloque.color, marginBottom: '10px'  }"
+      >
+        <label>
+          <input
+            type="checkbox"
+            :value="`${dia}${index + 1}/${bloque.nombre}/${bloque.seccion}/${bloque.ID}`"
+            v-model="bloquesSeleccionados"
+          />
+          {{ bloque.nombre }} <br />
+          Sección: {{ bloque.seccion }}
+        </label>
+      </li>
+    </ul>
+  </div>
+</div>
+
+
+                  <!-- Mostrar bloques directamente si son 2 o menos -->
+                  <div v-else>
+  <div
+    v-for="(bloque, bloqueIndex) in bloquesPorDia(dia, index + 1)"
+    :key="`${bloque.nombre}-${bloqueIndex}`"
+    class="bloque"
+    :style="{ backgroundColor: bloque.color }"
+  >
+    <label>
+      <input
+        type="checkbox"
+        :value="`${dia}${index + 1}/${bloque.nombre}/${bloque.seccion}/${bloque.ID}`"  
+        v-model="bloquesSeleccionados"
+      />
+      {{ bloque.nombre }} <br /> Sección: {{ bloque.seccion }}
+    </label>
+  </div>
+</div>
+
                 </div>
               </td>
             </tr>
@@ -52,7 +94,6 @@
 
     <!-- Fichas y botón de envío -->
     <div class="w-1/3 pl-4 mt-12">
-      <!-- Fichas de historial, PAF y asignaturas -->
       <h2 class="sub-title">Selecciona PAF y Asignatura</h2>
 
       <!-- Fichas de PAF -->
@@ -71,7 +112,6 @@
         </div>
       </div>
 
-      <!-- Fichas de asignaturas -->
       <h2 class="sub-title">Horario Asignatura</h2>
       <div v-if="fichasAsignaturas.length > 0">
         <div
@@ -88,7 +128,6 @@
         </div>
       </div>
 
-      <!-- Botón para enviar selección -->
       <div class="flex justify-end mt-4">
         <button
           v-if="fichaSeleccionadaPAF && fichaSeleccionadaAsignatura && bloquesSeleccionados.length > 0"
@@ -102,14 +141,26 @@
   </div>
 </template>
 
-
-
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import { onMounted, ref, computed } from 'vue'
 import { useNuxtApp } from '#app'
 
 const historialSeleccionado = computed(() => persona.value.find((p) => p.ID !== 0) || null);
+
+const visibleBloques = ref<Record<string, boolean>>({});
+
+// Mostrar u ocultar los bloques según día y módulo
+const mostrarBloques = (dia: string, modulo: number) => {
+  const key = `${dia}-${modulo}`;
+  visibleBloques.value[key] = !visibleBloques.value[key];
+};
+
+// Verificar si los bloques son visibles
+const isBloqueVisible = (dia: string, modulo: number) => {
+  const key = `${dia}-${modulo}`;
+  return !!visibleBloques.value[key];
+};
 
 const fichasPAF = computed(() =>
   persona.value.filter((p) => 
@@ -155,6 +206,7 @@ interface Horario {
   cupo?: number;
   seccion?: string;
   semestre?: string;
+  ID: number;
 }
 
 const persona = ref<Persona[]>([])
@@ -208,6 +260,7 @@ const bloquesPorDia = (dia: string, modulo: number) => {
       nombre: p.nombre_asignatura,
       seccion: p.seccion,
       color: colores[persona1.value.indexOf(p) % colores.length],
+      ID: p.ID,
       // Crear el formato "V3-M2" con la inicial del día y el número de módulo
       bloque: (p.bloque ?? '').split('-')
         .map(b => `${b.charAt(0)}${b.slice(1)}`) // Mapear para obtener "V3", "M2", etc.
@@ -269,6 +322,31 @@ const enviarSeleccion = async () => {
     console.log('Código PAF:', codigoPAF);
     const bloquesSeleccionadosString = computed(() => bloquesSeleccionados.value.join(','))
     console.log(bloquesSeleccionadosString.value)
+    let lista = bloquesSeleccionadosString.value.split(',').map(item => {
+    return item
+        .replace("Lunes", "L")
+        .replace("Martes", "M")
+        .replace("Miércoles", "W")
+        .replace("Jueves", "J")
+        .replace("Viernes", "V")
+        .replace("Sábado", "S")
+        .replace("Domingo", "D");
+});
+let grouped: { [key: string]: string[] } = {};
+lista.forEach(item => {
+    // Obtener el contenido después del primer "/"
+    let rest = item.split('/').slice(1).join('/');
+
+    // Si ya existe el grupo, lo unimos, si no, creamos uno nuevo
+    if (grouped[rest]) {
+        grouped[rest].push(item.split('/')[0]); // Solo almacenar el primer elemento antes de "/"
+    } else {
+        grouped[rest] = [item.split('/')[0]]; // Crear nuevo grupo con el primer elemento
+    }
+});
+let resultado = Object.values(grouped).map(group => group.join('-')).join(',');
+
+console.log(resultado[0]+resultado[1]);
     // si bloqueseleccionadosString tiene un elemento Miercoles Trasformarlo en W y los demas tipo Lunes o Matrtes dejarlos como L o M
     
     const data = {
@@ -278,7 +356,7 @@ const enviarSeleccion = async () => {
       nombre_asignatura: fichaSeleccionadaAsignatura?.value?.nombre_asignatura || '',
       seccion: fichaSeleccionadaAsignatura?.value?.seccion || '',
       cupo: fichaSeleccionadaAsignatura?.value?.cupo || 0, 
-      bloque: bloquesSeleccionados.value, 
+      bloque: resultado[0]+resultado[1], 
     };
     console.log('Datos a enviar:', data);
     await $axios.post(`/historial/post/${codigoPAF}`, data);
@@ -369,4 +447,32 @@ const coloresAsignaturas = ['#C8E6C9', '#A5D6A7', '#81C784', '#66BB6A', '#4CAF50
   color: #394049;
   font-family: "Helvetica Neue LT", sans-serif;
 }
+
+.tope-horario-button {
+  background-color: #C8102E;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.tope-horario-button:hover {
+  background-color: #A50D20;
+}
+
+.detalle-horarios-popup {
+  position: absolute;
+  top: -10px;
+  left: 0;
+  z-index: 10;
+  width: 200px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+}
+
 </style>
