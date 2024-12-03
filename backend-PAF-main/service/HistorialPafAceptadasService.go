@@ -48,7 +48,7 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 
 	// Verificar si ya existe un registro con el Código PAF
 	var historialExistente models.HistorialPafAceptadas
-	if err := tx.Where("codigo_paf = ?", codigoPAF).First(&historialExistente).Error; err == nil {
+	if err := tx.Where("id_paf = ?", codigoPAF).First(&historialExistente).Error; err == nil {
 		// Si el registro existe, eliminarlo
 		if err := tx.Delete(&historialExistente).Error; err != nil {
 			tx.Rollback() // Rollback si ocurre un error al eliminar
