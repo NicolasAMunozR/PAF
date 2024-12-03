@@ -1,10 +1,19 @@
 package models
 
 import (
+	"encoding/json"
 	"time"
 
 	"gorm.io/gorm"
 )
+
+// BloqueDTO representa un bloque de información relacionado con horarios y asignaturas.
+type BloqueDTO struct {
+	CodigoAsignatura string `json:"codigoAsignatura"` // Código de la asignatura
+	Seccion          string `json:"seccion"`          // Sección
+	Cupos            int    `json:"cupos"`            // Cupos disponibles
+	Bloques          string `json:"bloques"`          // Información de bloques, e.g., "V7-J1-M5"
+}
 
 // HistorialPafAceptadas representa el historial de aceptaciones de PAFs con información relevante.
 type HistorialPafAceptadas struct {
@@ -24,23 +33,22 @@ type HistorialPafAceptadas struct {
 	// Campos de Proceso
 	EstadoProceso string `gorm:"type:text;not null"`
 
-	//solo puede ser 0 o 1 e indica cuando se detecta que se modifico, si es un cero no se modifico, si es un 1 se modifico
-	CodigoModificacion int `gorm:"type:int;null" json:"codigo_modificacion"`
-
-	// Código que indica el tipo de modificación (puede ser nulo)
-	// 0 = todo bien, 1 = modificación, 2 = eliminada, 3 = rechazada
-	BanderaModificacion int `gorm:"type:int;null" json:"bandera_modificacion"`
-
-	// Descripción detallada de la modificación (puede ser nulo)
+	// Indicadores de Modificación
+	CodigoModificacion      int     `gorm:"type:int;null" json:"codigo_modificacion"`
+	BanderaModificacion     int     `gorm:"type:int;null" json:"bandera_modificacion"`
 	DescripcionModificacion *string `gorm:"type:text;null" json:"descripcion_modificacion"`
 
-	ProfesorRun              string `json:"run"`                      // RUN (identificador único)
-	Semestre                 string `json:"semestre"`                 // Semestre de la asignatura
-	Tipo                     string `json:"codigo_asignatura"`        // Código de la asignatura
-	ProfesorNombreAsignatura string `json:"nombre_asignatura"`        // Nombre de la asignatura
-	Seccion                  string `json:"seccion"`                  // Sección o grupo
-	Cupo                     int    `json:"cupo"`                     // Capacidad del grupo
-	Bloque                   string `json:"bloque" gorm:"type:jsonb"` // Bloque horario
+	// Información del Profesor
+	ProfesorRun              string `json:"run"`               // RUN (identificador único)
+	Semestre                 string `json:"semestre"`          // Semestre de la asignatura
+	Tipo                     string `json:"codigo_asignatura"` // Código de la asignatura
+	ProfesorNombreAsignatura string `json:"nombre_asignatura"` // Nombre de la asignatura
+	Seccion                  string `json:"seccion"`           // Sección o grupo
+	Cupo                     int    `json:"cupo"`              // Capacidad del grupo
 
-	BanderaAceptacion int `gorm:"type:int;null"`
+	// Bloques: Lista de objetos BloqueDTO almacenados como JSONB
+	Bloque json.RawMessage `gorm:"type:jsonb"`
+
+	BanderaAceptacion int    `gorm:"type:int;null"`
+	Llave             string `gorm:"type:text"`
 }

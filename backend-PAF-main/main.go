@@ -131,7 +131,7 @@ func actualizarModificaciones() {
 		var pipelsoft models.Pipelsoft // Inicializa la variable limpia para evitar conflictos.
 
 		// Buscar el registro correspondiente en Pipelsoft
-		if err := db.Where("codigo_paf = ?", h.IdPaf).Take(&pipelsoft).Error; err != nil {
+		if err := db.Where("id_paf = ?", h.IdPaf).Take(&pipelsoft).Error; err != nil {
 			// Si no se encuentra en Pipelsoft, marcamos como eliminada
 			if err := db.Model(&h).Updates(map[string]interface{}{
 				"codigo_modificacion":      1, // Se marca como modificada (en este caso, eliminada)
