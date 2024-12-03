@@ -42,7 +42,7 @@ type HistorialPafAceptadas struct {
 	ProfesorRun              string `json:"run"`               // RUN (identificador único)
 	Semestre                 string `json:"semestre"`          // Semestre de la asignatura
 	Tipo                     string `json:"codigo_asignatura"` // Código de la asignatura
-	ProfesorNombreAsignatura string `json:"nombre_asignatura"` // Nombre de la asignatura
+	ProfesorCodigoAsignatura string `json:"codigo_asignatura"` // codigo de la asignatura
 	Seccion                  string `json:"seccion"`           // Sección o grupo
 	Cupo                     int    `json:"cupo"`              // Capacidad del grupo
 
