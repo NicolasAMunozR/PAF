@@ -13,4 +13,5 @@ type ProfesorDB struct {
 	Cupo             int    `gorm:"type:int"`          // Capacidad del grupo
 	Bloque           string `json:"bloque"`            // Bloque horario
 	CodigoAsignatura string `json:"codigo_asignatura"`
+	CantidadHoras    int    `gorm:"type:int"`
 }

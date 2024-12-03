@@ -35,4 +35,6 @@ type Pipelsoft struct {
 	// Campos de Proceso
 	CodEstado string `gorm:"type:text"`
 	DesEstado string `gorm:"type:text"`
+	Llave     string `gorm:"type:text"`
+	Veces     string `gorm:"type:text"`
 }
