@@ -77,6 +77,7 @@ func main() {
 	r.GET("/estadisticas/unidad/:nombreUnidadMayor", estadisticasController.ContarRegistrosPorUnidadMayor)
 	r.GET("/estadisticas/frecuencia-unidades-mayores", estadisticasController.ObtenerFrecuenciaNombreUnidadMayor)
 	r.GET("/estadisticas/PafActivas", estadisticasController.ContarRegistrosPorCodEstado)
+	r.GET("/estadisticas/unidad-mayor/:unidad-mayor", estadisticasController.ObtenerEstadisticasPorUnidadMayorHandler)
 
 	// Inicializar servicios y controladores
 	contratoService := service.NewContratoService(DB.DBPersonal)
@@ -87,7 +88,8 @@ func main() {
 		contrato.Use(cors.Default())
 		contrato.GET("/", contratoController.GetAllContratosHandler)
 		contrato.GET("/:run", contratoController.GetContratoByRunHandler)
-		contrato.GET("/unidad-mayor", contratoController.GetContratosByUnidadMayorHandler)
+		contrato.GET("/unidad-mayor/:unidad", contratoController.GetPafByUnidadMayorHandler)
+
 	}
 
 	// Iniciar el cron job para actualización periódica
@@ -105,7 +107,7 @@ func iniciarCronJob() {
 	c := cron.New()
 
 	// Ejecutar cada 30 minutos
-	c.AddFunc("@every 30m", func() {
+	c.AddFunc("@every 1m", func() {
 		actualizarModificaciones()
 	})
 	c.Start()
@@ -140,7 +142,7 @@ func actualizarModificaciones() {
 			}).Error; err != nil {
 				log.Println("Error al actualizar HistorialPafAceptadas como eliminada:", err)
 			} else {
-				fmt.Printf("PAF eliminada, no encontrada en Pipelsoft: CodigoPAF %d\n", h.IdPaf)
+				fmt.Printf("PAF eliminada, no encontrada en Pipelsoft: id_paf %d\n", h.IdPaf)
 			}
 			continue // Si no se encuentra, seguimos con el siguiente registro
 		}

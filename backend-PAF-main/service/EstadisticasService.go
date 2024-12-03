@@ -163,3 +163,55 @@ func (s *EstadisticasService) ContarRegistrosExcluyendoEstados() (int64, float64
 
 	return count, porcentaje, nil
 }
+
+func (s *EstadisticasService) ObtenerEstadisticasPorUnidadMayor(unidadMayor string) (*EstadisticasResponse, error) {
+	var resp EstadisticasResponse
+
+	// Validar que el parámetro no esté vacío
+	if unidadMayor == "" {
+		return nil, fmt.Errorf("el parámetro 'unidad-mayor' es obligatorio")
+	}
+
+	// Contar los registros en pipelsofts que coincidan con la unidad mayor
+	if err := s.DB.Model(&models.Pipelsoft{}).Where("nombre_unidad_mayor = ?", unidadMayor).Count(&resp.TotalPipelsoft).Error; err != nil {
+		return nil, fmt.Errorf("error al contar los registros en pipelsofts para la unidad mayor %s: %w", unidadMayor, err)
+	}
+
+	// Contar los registros únicos de Run en la tabla pipelsofts para la unidad mayor
+	if err := s.DB.Model(&models.Pipelsoft{}).Where("nombre_unidad_mayor = ?", unidadMayor).
+		Distinct("run_empleado").Count(&resp.TotalPipelsoftUnicos).Error; err != nil {
+		return nil, fmt.Errorf("error al contar los registros únicos de Run en pipelsofts para la unidad mayor %s: %w", unidadMayor, err)
+	}
+
+	// Calcular el porcentaje de registros únicos en Pipelsoft
+	if resp.TotalPipelsoft > 0 {
+		resp.PorcentajeUnicos = float64(resp.TotalPipelsoftUnicos) / float64(resp.TotalPipelsoft) * 100
+	}
+
+	// Contar los registros en pipelsofts por cada EstadoProceso filtrando por unidad mayor
+	resp.EstadoProcesoCount = make(map[string]int)
+	resp.EstadoProcesoPct = make(map[string]float64)
+
+	// Los códigos de estado definidos
+	estados := []string{
+		"A1", "A2", "A3", "B1", "B9", "C1D", "C9D", "F1", "F9", "A9",
+	}
+
+	// Contar registros por cada estado
+	for _, estado := range estados {
+		var count int64
+		if err := s.DB.Model(&models.Pipelsoft{}).
+			Where("nombre_unidad_mayor = ? AND cod_estado = ?", unidadMayor, estado).
+			Count(&count).Error; err != nil {
+			return nil, fmt.Errorf("error al contar los registros de pipelsofts con estado %s para la unidad mayor %s: %w", estado, unidadMayor, err)
+		}
+		resp.EstadoProcesoCount[estado] = int(count)
+
+		// Calcular el porcentaje de registros por cada estado
+		if resp.TotalPipelsoft > 0 {
+			resp.EstadoProcesoPct[estado] = float64(count) / float64(resp.TotalPipelsoft) * 100
+		}
+	}
+
+	return &resp, nil
+}

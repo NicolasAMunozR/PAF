@@ -85,27 +85,26 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 
 	// Crear el nuevo registro de historial
 	historial := models.HistorialPafAceptadas{
-		Run:                      profesor.RUN,
-		IdPaf:                    codigoPAF,
-		FechaInicioContrato:      pipelsoft.FechaInicioContrato,
-		FechaFinContrato:         pipelsoft.FechaFinContrato,
-		CodigoAsignatura:         pipelsoft.CodigoAsignatura,
-		NombreAsignatura:         profesor.NombreAsignatura,
-		CantidadHoras:            profesor.Cupo,
-		Jerarquia:                pipelsoft.Jerarquia,
-		EstadoProceso:            nuevoEstado,
-		Llave:                    pipelsoft.Llave,
-		CodigoModificacion:       0,
-		BanderaModificacion:      0,
-		DescripcionModificacion:  nil,
-		ProfesorRun:              profesor.RUN,
-		Semestre:                 profesor.Semestre,
-		Tipo:                     profesor.Tipo,
-		ProfesorCodigoAsignatura: profesor.CodigoAsignatura,
-		Seccion:                  profesor.Seccion,
-		Cupo:                     profesor.Cupo,
-		Bloque:                   bloquesJSON, // Usa el JSON serializado
-		BanderaAceptacion:        0,
+		Run:                     profesor.RUN,
+		IdPaf:                   codigoPAF,
+		FechaInicioContrato:     pipelsoft.FechaInicioContrato,
+		FechaFinContrato:        pipelsoft.FechaFinContrato,
+		CodigoAsignatura:        pipelsoft.CodigoAsignatura,
+		NombreAsignatura:        profesor.NombreAsignatura,
+		CantidadHoras:           profesor.Cupo,
+		Jerarquia:               pipelsoft.Jerarquia,
+		EstadoProceso:           nuevoEstado,
+		Llave:                   pipelsoft.Llave,
+		CodigoModificacion:      0,
+		BanderaModificacion:     0,
+		DescripcionModificacion: nil,
+		ProfesorRun:             profesor.RUN,
+		Semestre:                profesor.Semestre,
+		Tipo:                    profesor.Tipo,
+		Seccion:                 profesor.Seccion,
+		Cupo:                    profesor.Cupo,
+		Bloque:                  bloquesJSON, // Usa el JSON serializado
+		BanderaAceptacion:       0,
 	}
 
 	// Insertar el nuevo historial en la base de datos

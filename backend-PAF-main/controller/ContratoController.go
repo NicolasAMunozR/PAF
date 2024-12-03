@@ -105,19 +105,44 @@ func (c *ContratoController) ProfesorUnidadMayorNOPafHandler(ctx *gin.Context) {
 	})
 }
 
-// Controlador para manejar la petición de PAF por Unidad Mayor
 func (c *ContratoController) GetPafByUnidadMayorHandler(ctx *gin.Context) {
-	// Obtener el nombre de la unidad mayor de los parámetros de la URL
-	nombreUnidadMayor := ctx.Param("nombreUnidadMayor")
+	// Obtener el parámetro 'unidad' desde la URL
+	unidad := ctx.Param("unidad")
+
+	// Validar si el parámetro 'unidad' está presente
+	if unidad == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'unidad' es obligatorio"})
+		return
+	}
 
 	// Llamar al servicio
-	pafs, err := c.Service.GetPafByUnidadMayor(nombreUnidadMayor)
+	pafs, err := c.Service.GetPafByUnidadMayor(unidad)
 	if err != nil {
-		// Responder con un error si el servicio falla
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Responder con los datos en formato JSON
 	ctx.JSON(http.StatusOK, pafs)
+}
+
+func (c *EstadisticasController) ObtenerEstadisticasPorUnidadMayorHandler(ctx *gin.Context) {
+	// Obtener el valor de 'unidad-mayor' desde los parámetros de la URL
+	unidadMayor := ctx.Param("unidad-mayor")
+
+	// Validar que el parámetro no esté vacío
+	if unidadMayor == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'unidad-mayor' es obligatorio"})
+		return
+	}
+
+	// Llamar al servicio
+	resp, err := c.Service.ObtenerEstadisticasPorUnidadMayor(unidadMayor)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Responder con los datos en formato JSON
+	ctx.JSON(http.StatusOK, resp)
 }
