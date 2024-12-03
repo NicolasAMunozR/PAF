@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 
 	"github.com/NicolasAMunozR/PAF/backend-PAF/models"
 	"gorm.io/gorm"
@@ -19,11 +21,18 @@ func NewHistorialPafAceptadasService(db *gorm.DB) *HistorialPafAceptadasService 
 	}
 }
 
+// Método para crear un historial
 func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor models.ProfesorDB, bloque []string) (*models.HistorialPafAceptadas, error) {
-	// Serializar el campo Bloque a JSON
-	bloqueJSON, err := json.Marshal(bloque)
+	// Parsear los bloques en una lista de BloqueDTO
+	bloquesDTO, err := parseBloques(bloque)
 	if err != nil {
-		return nil, fmt.Errorf("error al serializar el campo Bloque: %w", err)
+		return nil, fmt.Errorf("error al procesar el bloque: %w", err)
+	}
+
+	// Serializar los bloques a JSON
+	bloquesJSON, err := json.Marshal(bloquesDTO)
+	if err != nil {
+		return nil, fmt.Errorf("error al serializar los bloques a JSON: %w", err)
 	}
 
 	// Definir el orden de los estados
@@ -46,9 +55,16 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 		return nil, fmt.Errorf("error al iniciar la transacción: %w", err)
 	}
 
+	// Obtener los valores de jerarquía, calidad y estado desde la tabla Pipelsoft
+	var pipelsoft models.Pipelsoft
+	if err := tx.Where("id_paf = ?", codigoPAF).First(&pipelsoft).Error; err != nil {
+		tx.Rollback()
+		return nil, fmt.Errorf("error al obtener datos de Pipelsoft: %w", err)
+	}
+
 	// Verificar si ya existe un registro con el Código PAF
 	var historialExistente models.HistorialPafAceptadas
-	if err := tx.Where("id_paf = ?", codigoPAF).First(&historialExistente).Error; err == nil {
+	if err := tx.Where("llave = ?", pipelsoft.Llave).First(&historialExistente).Error; err == nil {
 		// Si el registro existe, eliminarlo
 		if err := tx.Delete(&historialExistente).Error; err != nil {
 			tx.Rollback() // Rollback si ocurre un error al eliminar
@@ -58,13 +74,6 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 	} else if err != gorm.ErrRecordNotFound { // Si ocurre un error distinto de "registro no encontrado"
 		tx.Rollback()
 		return nil, fmt.Errorf("error al buscar historial existente: %w", err)
-	}
-
-	// Obtener los valores de jerarquía, calidad y estado desde la tabla Pipelsoft
-	var pipelsoft models.Pipelsoft
-	if err := tx.Where("id_paf = ?", codigoPAF).First(&pipelsoft).Error; err != nil {
-		tx.Rollback()
-		return nil, fmt.Errorf("error al obtener datos de Pipelsoft: %w", err)
 	}
 
 	// Determinar el siguiente estado del proceso
@@ -83,8 +92,9 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 		CodigoAsignatura:         pipelsoft.CodigoAsignatura,
 		NombreAsignatura:         profesor.NombreAsignatura,
 		CantidadHoras:            profesor.Cupo,
-		Jerarquia:                pipelsoft.Jerarquia, // Obtenido desde Pipelsoft
-		EstadoProceso:            nuevoEstado,         // Nuevo estado calculado
+		Jerarquia:                pipelsoft.Jerarquia,
+		EstadoProceso:            nuevoEstado,
+		Llave:                    pipelsoft.Llave,
 		CodigoModificacion:       0,
 		BanderaModificacion:      0,
 		DescripcionModificacion:  nil,
@@ -94,7 +104,7 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 		ProfesorCodigoAsignatura: profesor.CodigoAsignatura,
 		Seccion:                  profesor.Seccion,
 		Cupo:                     profesor.Cupo,
-		Bloque:                   string(bloqueJSON), // Asignar el JSON serializado como string
+		Bloque:                   bloquesJSON, // Usa el JSON serializado
 		BanderaAceptacion:        0,
 	}
 
@@ -111,6 +121,32 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 
 	log.Println("Nuevo registro creado con éxito")
 	return &historial, nil
+}
+
+// Función auxiliar para parsear bloques
+func parseBloques(bloquesRaw []string) ([]models.BloqueDTO, error) {
+	var bloques []models.BloqueDTO
+	for _, bloque := range bloquesRaw {
+		partes := strings.Fields(bloque) // Separar por espacios
+		if len(partes) < 4 {
+			return nil, fmt.Errorf("bloque mal formado: %s", bloque)
+		}
+
+		// Convertir el tercer elemento (cupos) a entero
+		cupos, err := strconv.Atoi(partes[2])
+		if err != nil {
+			return nil, fmt.Errorf("error al convertir cupos a entero en bloque '%s': %w", bloque, err)
+		}
+
+		// Crear el objeto BloqueDTO
+		bloques = append(bloques, models.BloqueDTO{
+			CodigoAsignatura: partes[0],
+			Seccion:          partes[1],
+			Cupos:            cupos,                         // Valor convertido a int
+			Bloques:          strings.Join(partes[3:], "-"), // Combina los bloques restantes
+		})
+	}
+	return bloques, nil
 }
 
 // ObtenerHistorialPorID devuelve un registro de HistorialPafAceptadas por su ID desde DBPersonal
