@@ -67,10 +67,13 @@ func (s *PipelsoftService) comprobarYCombinarDatosPorCodigoPAF(pipelsofts []mode
 		return nil, err
 	}
 
-	// Crear un map para almacenar los registros de HistorialPafAceptadas por CódigoPAF
-	historialPafMap := make(map[int]models.HistorialPafAceptadas)
+	// Crear un mapa para almacenar los registros de HistorialPafAceptadas por CódigoPAF y CodigoAsignatura
+	historialPafMap := make(map[int]map[string]models.HistorialPafAceptadas)
 	for _, historial := range historialPafAceptadas {
-		historialPafMap[historial.IdPaf] = historial
+		if _, exists := historialPafMap[historial.IdPaf]; !exists {
+			historialPafMap[historial.IdPaf] = make(map[string]models.HistorialPafAceptadas)
+		}
+		historialPafMap[historial.IdPaf][historial.CodigoAsignatura] = historial
 	}
 
 	// Crear una lista para almacenar los datos combinados
@@ -81,8 +84,8 @@ func (s *PipelsoftService) comprobarYCombinarDatosPorCodigoPAF(pipelsofts []mode
 			PipelsoftData: pipel,
 		}
 
-		// Buscar si el CódigoPAF del registro de Pipelsoft está en HistorialPafAceptadas
-		if historial, found := historialPafMap[pipel.IdPaf]; found {
+		// Buscar si el CódigoPAF y CodigoAsignatura del registro de Pipelsoft están en HistorialPafAceptadas
+		if historial, found := historialPafMap[pipel.IdPaf][pipel.CodigoAsignatura]; found {
 			// Si se encuentra, agregar los datos del historialPafAceptadas al objeto DatosCombinados
 			dato.HistorialPafData = historial
 		} else {

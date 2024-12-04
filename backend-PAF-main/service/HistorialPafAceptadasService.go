@@ -50,6 +50,7 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 		return nil, fmt.Errorf("no se encontró el codigo_asignatura en los bloques")
 	}
 	codigoAsignatura := bloquesParsed[0].CodigoAsignatura
+	fmt.Println("Codigo Asignatura:", codigoAsignatura)
 
 	// Definir el orden de los estados
 	estadoSiguiente := map[string]string{
@@ -115,11 +116,11 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 		BanderaModificacion:     0,
 		DescripcionModificacion: nil,
 		ProfesorRun:             profesor.RUN,
-		Semestre:                profesor.Semestre,
+		Semestre:                profesor.Semestre, // Semestre al principio
 		Tipo:                    profesor.Tipo,
 		Seccion:                 profesor.Seccion,
 		Cupo:                    profesor.Cupo,
-		Bloque:                  bloquesJSON, // Usa el JSON serializado
+		Bloque:                  bloquesJSON, // Bloques al final (ya en JSON)
 		BanderaAceptacion:       0,
 	}
 
@@ -138,31 +139,30 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 	return &historial, nil
 }
 
-// Función auxiliar para parsear bloques
 func parseBloques(bloquesRaw []string) ([]models.BloqueDTO, error) {
 	var bloques []models.BloqueDTO
 	for _, bloque := range bloquesRaw {
 		partes := strings.Fields(bloque) // Separar por espacios
-		if len(partes) < 4 {
+		if len(partes) < 5 {             // Asegúrate de que haya al menos 5 elementos
 			return nil, fmt.Errorf("bloque mal formado: %s", bloque)
 		}
 
-		// Convertir el tercer elemento (cupos) a entero
-		cupos, err := strconv.Atoi(partes[2])
+		// Convertir el cuarto elemento (cupos) a entero
+		cupos, err := strconv.Atoi(partes[3])
 		if err != nil {
 			return nil, fmt.Errorf("error al convertir cupos a entero en bloque '%s': %w", bloque, err)
 		}
 
-		// El semestre es ahora el último elemento
-		semestre := partes[len(partes)-1]
+		// El semestre es el primer elemento
+		semestre := partes[0]
 
 		// Crear el objeto BloqueDTO
 		bloques = append(bloques, models.BloqueDTO{
-			CodigoAsignatura: partes[0],
-			Seccion:          partes[1],
-			Cupos:            cupos,                                      // Valor convertido a int
-			Bloques:          strings.Join(partes[3:len(partes)-1], "-"), // Combina los bloques restantes
-			Semestre:         semestre,                                   // Asignar el semestre
+			Semestre:         semestre,  // Asignar el semestre al inicio
+			CodigoAsignatura: partes[1], // Asignar el código de la asignatura
+			Seccion:          partes[2], // Asignar la sección
+			Cupos:            cupos,     // Asignar los cupos
+			Bloques:          partes[4], // Asignar los bloques (último elemento)
 		})
 	}
 	return bloques, nil
