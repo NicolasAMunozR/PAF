@@ -100,10 +100,12 @@
     }
   };
   
-  const fetchCantidadPafSai = async () => {
+  const fetchCantidadPafSai = async (rut) => {
     try {
-      const response = await $axios.get('/estadisticas/PafActivas');
-      cantidadPafActivas.value = response.data.conteo;
+      const response1 = await $axios.get(`/contratos/${rut}`)
+      //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
+      const response = await $axios.get(`/estadisticas/pafActivas/unidad-mayor/${response1.data.unidadMayor}`);
+      cantidadPafActivas.value = response.data.paf_activas;
     } catch (error) {
       console.error('Error al obtener la cantidad de personas del SAI:', error);
     }
@@ -114,7 +116,6 @@
       const response1 = await $axios.get(`/contratos/${rut}`)
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
       const response = await $axios.get(`/estadisticas/unidad-mayor/${response1.data.unidadMayor}`);
-      console.log(response)
       // Ordenar el objeto EstadoProcesoCount para que A9 sea el último
       const estadoProcesoCount = response.data.EstadoProcesoCount;
       const { A9, ...otrosEstados } = estadoProcesoCount; // Extraer A9 y el resto
@@ -145,7 +146,7 @@
     try {
       const response1 = await $axios.get(`/contratos/${rut}`)
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
-      const response = await $axios.get(`estadisticas/unidad-mayor/unidades-menores-frecuencia/${response1.data.unidadMayor}`);
+      const response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${response1.data.unidadMayor}`);
 
       const unidadesData = response.data;
       pafPorUnidadMayorChartData.value = {
