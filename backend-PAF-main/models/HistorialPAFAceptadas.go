@@ -9,11 +9,12 @@ import (
 
 // BloqueDTO representa un bloque de información relacionado con horarios y asignaturas.
 type BloqueDTO struct {
+	Semestre         string `json:"semestre"`
 	CodigoAsignatura string `json:"codigoAsignatura"` // Código de la asignatura
 	Seccion          string `json:"seccion"`          // Sección
 	Cupos            int    `json:"cupos"`            // Cupos disponibles
 	Bloques          string `json:"bloques"`          // Información de bloques, e.g., "V7-J1-M5"
-	Semestre         string `json:"semestre"`
+
 }
 
 // HistorialPafAceptadas representa el historial de aceptaciones de PAFs con información relevante.
