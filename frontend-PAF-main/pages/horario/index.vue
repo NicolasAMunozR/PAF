@@ -118,6 +118,7 @@
           <p><strong>Bloque:</strong> {{ p.bloque }}</p>
           <p><strong>Cupo:</strong> {{ p.cupo }}</p>
           <p><strong>Sección:</strong> {{ p.seccion }}</p>
+          <p><strong>Semestre:</strong> {{ p.semestre1 }}</p>
         </div>
       </div>
       <!-- Fichas de PAF -->
@@ -151,6 +152,7 @@
           <p><strong>Sección:</strong> {{ p.seccion }}</p>
           <p><strong>Bloque:</strong> {{ p.bloque }}</p>
           <p><strong>Cupo:</strong> {{ p.Cupo }}</p>
+          <p><strong>Semestre:</strong> {{ p.semestre }}</p>
         </div>
       </div>
 
@@ -225,19 +227,48 @@ const fichasAsignaturas = computed(() =>
   persona1.value.filter((p) =>
     !historialSeleccionado.value.some((historial) => {
       const codigosA = historial.CodigoA ? historial.CodigoA.split("/") : []; // Dividir CodigoA en un arreglo
-      return codigosA.includes(p.codigo_asignatura); // Verificar si codigo_asignatura está en la lista
+      const semestres1 = historial.semestre1 ? historial.semestre1.split("/") : []; // Dividir semestre1 en un arreglo
+      
+      // Verificar que ambos arreglos tengan la misma longitud
+      if (codigosA.length !== semestres1.length) {
+        return false;
+      }
+
+      // Comparar cada par de elementos en codigosA y semestres1
+      return codigosA.some((codigo, index) => {
+        return (
+          codigo === p.codigo_asignatura && // Comparar CodigoA
+          semestres1[index] === p.semestre   // Comparar semestre correspondiente
+        );
+      });
     })
   )
 );
+
 
 const fichasAsignaturasNo = computed(() =>
   persona1.value.filter((p) =>
     historialSeleccionado.value.some((historial) => {
       const codigosA = historial.CodigoA ? historial.CodigoA.split("/") : []; // Dividir CodigoA en un arreglo
-      return codigosA.includes(p.codigo_asignatura); // Verificar si codigo_asignatura está en la lista
+      const semestres1 = historial.semestre1 ? historial.semestre1.split("/") : []; // Dividir semestre1 en un arreglo
+      
+      // Verificar que ambos arreglos tengan la misma longitud
+      if (codigosA.length !== semestres1.length) {
+        return false;
+      }
+
+      // Comparar cada par de elementos en codigosA y semestres1
+      return codigosA.some((codigo, index) => {
+        return (
+          codigo === p.codigo_asignatura && // Comparar CodigoA
+          semestres1[index] === p.semestre   // Comparar semestre correspondiente
+        );
+      });
     })
   )
 );
+
+
 
 
 const fichaSeleccionadaPAF = ref<Persona | null>(null);
@@ -267,6 +298,7 @@ interface Persona {
   seccion: string;
   CodigoA: string;
   bloques: string;
+  semestre1: string;
 }
 
 interface Horario {
@@ -316,7 +348,7 @@ const bloquesPorDia = (dia: string, modulo: number) => {
       if (!p.bloque) return false;
 
       // Excluir bloques asociados con las fichas seleccionadas en 'fichasAsignaturasNo'
-      if (fichasAsignaturasNo.value.some((ficha) => ficha.codigo_asignatura === p.codigo_asignatura)) {
+      if (fichasAsignaturasNo.value.some((ficha) => ficha.codigo_asignatura === p.codigo_asignatura && ficha.semestre === p.semestre)) {
         return false;
       }
 
@@ -363,6 +395,7 @@ const obtenerDatosPersona = async () => {
       const CodigoA = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.codigoAsignatura).join("/") : "";
       const cupo = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.cupos).join("/") : "";
       const seccion = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.seccion).join("/") : "";
+      const semestre1 = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.semestre).join("/") : "";
 
       return {
         CodigoPaf: item.PipelsoftData.IdPaf,
@@ -384,6 +417,7 @@ const obtenerDatosPersona = async () => {
         CodigoA,
         cupo,
         seccion,
+        semestre1,
       };
     });
 
@@ -458,13 +492,13 @@ const resultado = Object.entries(grouped).map(([rest, bloques]) => {
       bloque: `Bloque ${bloques.join(", ")}`, // Prefijo "Bloque" antes de los bloques agrupados
       codigo_asignatura: codigoAsignatura
     },
-    bloque: bloques.map(b => `${codigoAsignatura} ${seccion} ${cupo} ${b} ${semestre}`)
+    bloque: bloques.map(b => `${semestre} ${codigoAsignatura} ${seccion} ${cupo} ${b}`)
   };
 });
 const result = resultado.map(item => {
   if (item.bloque.length >= 2) {
     // Une los elementos con un "-"
-    const merged = item.bloque[0] + "-" + item.bloque.slice(1).join("-").split(" ")[3];
+    const merged = item.bloque[0] + "-" + item.bloque.slice(1).join("-").split(" ")[4];
     return merged;
   }
   return item.bloque[0];

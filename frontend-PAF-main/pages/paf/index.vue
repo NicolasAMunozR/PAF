@@ -19,10 +19,14 @@
           class="paf-container"
         >
           <p><strong>Código PAF:</strong> {{ persona.CodigoPaf }}</p>
-          <p><strong>Código Asignatura:</strong> {{ persona.CodigoAsignatura }}</p>
+          <p><strong>Código Asignatura PAF:</strong> {{ persona.CodigoAsignatura }}</p>
           <p><strong>Nombre:</strong> {{ persona.Nombres }} {{ persona.PrimerApellido }} {{ persona.SegundoApellido }}</p>
           <p><strong>Asignatura:</strong> {{ persona.NombreAsignatura }}</p>
-          <p><strong>Bloque:</strong> {{ persona.Bloque }}</p>
+          <p><strong>Bloque:</strong> {{ persona.bloque }}</p>
+          <p><strong>Código Asignatura Asociadas:</strong> {{ persona.CodigoA }}</p>
+          <p><strong>Cupo:</strong> {{ persona.cupo }}</p>
+          <p><strong>Sección:</strong> {{ persona.seccion }}</p>
+          <p><strong>Semestre:</strong> {{ persona.semestre1 }}</p>
           <p><strong>Unidad Menor:</strong> {{ persona.NombreUnidadMenor }}</p>
           <p><strong>Unidad Mayor:</strong> {{ persona.NombreUnidadMayor }}</p>
 
@@ -60,7 +64,17 @@ const obtenerDatosPaf = async () => {
     if (!codigoPaf.value) return;
     const response = await $axios.get(`/contratos/codigo_paf/${codigoPaf.value}`);
     if (response.data) {
-      paf.value = response.data.map((item: any) => ({
+      paf.value = response.data.map((item: any) => {
+        const bloquesArray = item.HistorialPafData.Bloque || []; // Asegurar que Bloque sea un arreglo (vacío si es null o undefined)
+
+      // Verificar si el arreglo no está vacío antes de hacer el map
+      const bloque = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.bloques).join("/") : "";
+      const CodigoA = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.codigoAsignatura).join("/") : "";
+      const cupo = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.cupos).join("/") : "";
+      const seccion = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.seccion).join("/") : "";
+      const semestre1 = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.semestre).join("/") : "";
+
+      return {
         CodigoPaf: item.PipelsoftData.IdPaf,
         CodigoAsignatura: item.PipelsoftData.CodigoAsignatura,
         Nombres: item.PipelsoftData.Nombres,
@@ -69,8 +83,13 @@ const obtenerDatosPaf = async () => {
         SegundoApellido: item.PipelsoftData.SegundoApellido,
         NombreUnidadMenor: item.PipelsoftData.NombreUnidadMenor,
         NombreUnidadMayor: item.PipelsoftData.NombreUnidadMayor,
-        Bloque: item.HistorialPafData.bloque,
-      }));
+        bloque, // Agregar las cadenas combinadas como propiedades
+        CodigoA,
+        cupo,
+        seccion,
+        semestre1,
+      };
+    });
     }
   } catch (error) {
     console.error('Error al obtener los datos de la PAF:', error);
