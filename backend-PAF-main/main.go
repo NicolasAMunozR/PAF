@@ -94,6 +94,12 @@ func main() {
 
 	}
 
+	// Crear el servicio y controlador
+	usuariosService := service.NewUsuariosService(DB.DBPersonal)
+	usuariosController := controller.NewUsuariosController(usuariosService)
+	// Ruta para obtener un usuario por su Run
+	r.GET("/usuario/rut/:run", usuariosController.GetUsuarioByRun)
+
 	// Iniciar el cron job para actualización periódica
 	go iniciarCronJob()
 
