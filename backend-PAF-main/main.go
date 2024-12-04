@@ -134,20 +134,22 @@ func actualizarModificaciones() {
 	for _, h := range historial {
 		var pipelsoft models.Pipelsoft // Inicializa la variable limpia para evitar conflictos.
 
-		// Buscar el registro correspondiente en Pipelsoft
-		if err := db.Where("id_paf = ?", h.IdPaf).Take(&pipelsoft).Error; err != nil {
+		// Buscar el registro correspondiente en Pipelsoft filtrando por id_paf y cod_asignatura
+		if err := db.Where("id_paf = ? AND codigo_asignatura = ?", h.IdPaf, h.CodigoAsignatura).Take(&pipelsoft).Error; err != nil {
 			// Si no se encuentra en Pipelsoft, marcamos como eliminada
 			if err := db.Model(&h).Updates(map[string]interface{}{
 				"codigo_modificacion":      1, // Se marca como modificada (en este caso, eliminada)
 				"bandera_modificacion":     2, // 2 = Eliminada
-				"descripcion_modificacion": fmt.Sprintf("PAF con CodigoPAF: %d eliminada, no se encuentra en Pipelsoft", h.IdPaf),
+				"descripcion_modificacion": fmt.Sprintf("PAF con id_paf: %d y cod_asignatura: %s eliminada, no se encuentra en Pipelsoft", h.IdPaf, h.CodigoAsignatura),
 			}).Error; err != nil {
 				log.Println("Error al actualizar HistorialPafAceptadas como eliminada:", err)
 			} else {
-				fmt.Printf("PAF eliminada, no encontrada en Pipelsoft: id_paf %d\n", h.IdPaf)
+				fmt.Printf("PAF eliminada, no encontrada en Pipelsoft: id_paf %d, cod_asignatura %s\n", h.IdPaf, h.CodigoAsignatura)
 			}
 			continue // Si no se encuentra, seguimos con el siguiente registro
 		}
+
+		// Si se encuentra el registro, puedes continuar con otras operaciones aquí
 
 		// Variable para almacenar los cambios detectados
 		var cambios []string
