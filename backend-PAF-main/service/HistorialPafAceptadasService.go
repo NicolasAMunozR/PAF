@@ -153,12 +153,16 @@ func parseBloques(bloquesRaw []string) ([]models.BloqueDTO, error) {
 			return nil, fmt.Errorf("error al convertir cupos a entero en bloque '%s': %w", bloque, err)
 		}
 
+		// El semestre es ahora el último elemento
+		semestre := partes[len(partes)-1]
+
 		// Crear el objeto BloqueDTO
 		bloques = append(bloques, models.BloqueDTO{
 			CodigoAsignatura: partes[0],
 			Seccion:          partes[1],
-			Cupos:            cupos,                         // Valor convertido a int
-			Bloques:          strings.Join(partes[3:], "-"), // Combina los bloques restantes
+			Cupos:            cupos,                                      // Valor convertido a int
+			Bloques:          strings.Join(partes[3:len(partes)-1], "-"), // Combina los bloques restantes
+			Semestre:         semestre,                                   // Asignar el semestre
 		})
 	}
 	return bloques, nil

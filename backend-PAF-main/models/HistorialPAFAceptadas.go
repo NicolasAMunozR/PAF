@@ -13,6 +13,7 @@ type BloqueDTO struct {
 	Seccion          string `json:"seccion"`          // Sección
 	Cupos            int    `json:"cupos"`            // Cupos disponibles
 	Bloques          string `json:"bloques"`          // Información de bloques, e.g., "V7-J1-M5"
+	Semestre         string `json:"semestre"`
 }
 
 // HistorialPafAceptadas representa el historial de aceptaciones de PAFs con información relevante.
@@ -41,7 +42,7 @@ type HistorialPafAceptadas struct {
 	// Información del Profesor
 	ProfesorRun              string `json:"run"`               // RUN (identificador único)
 	Semestre                 string `json:"semestre"`          // Semestre de la asignatura
-	Tipo                     string `json:"tipo"` 			   // tipo
+	Tipo                     string `json:"tipo"`              // tipo
 	ProfesorCodigoAsignatura string `json:"codigo_asignatura"` // codigo de la asignatura
 	Seccion                  string `json:"seccion"`           // Sección o grupo
 	Cupo                     int    `json:"cupo"`              // Capacidad del grupo
