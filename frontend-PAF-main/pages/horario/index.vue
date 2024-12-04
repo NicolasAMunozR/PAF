@@ -381,11 +381,9 @@ const bloquesPorDia = (dia: string, modulo: number) => {
 const obtenerDatosPersona = async () => {
   try {
     const response = await $axios.get(`/pipelsoft/contratos-run/${run.value}`);
-    console.log("response", response.data);
 
     const response1 = await $axios.get(`/profesorDB/${run.value}`);
     persona1.value = response1.data;
-    console.log("persona1", persona1.value);
 
     persona.value = response.data.map((item: any) => {
       const bloquesArray = item.HistorialPafData.Bloque || []; // Asegurar que Bloque sea un arreglo (vacío si es null o undefined)
@@ -421,8 +419,6 @@ const obtenerDatosPersona = async () => {
       };
     });
 
-    console.log("persona", persona.value);
-
     // Identificar el semestre más reciente
     const semestresDisponibles = persona1.value.map(p => p.semestre).filter(Boolean);
     const semestreReciente = semestresDisponibles.sort((a, b) => {
@@ -449,9 +445,7 @@ const enviarSeleccion = async () => {
 
   try {
     const codigoPAF = fichaSeleccionadaPAF.value?.CodigoPaf; // Ajustar si el código es otro campo
-    console.log('Código PAF:', codigoPAF);
     const bloquesSeleccionadosString = computed(() => bloquesSeleccionados.value.join(','))
-    console.log(bloquesSeleccionadosString.value)
     let lista = bloquesSeleccionadosString.value.split(',').map(item => {
     return item
         .replace("Lunes", "L")
@@ -462,7 +456,6 @@ const enviarSeleccion = async () => {
         .replace("Sábado", "S")
         .replace("Domingo", "D");
 });
-console.log(lista)
 const grouped: { [key: string]: string[] } = {};
 
 lista.forEach(item => {
@@ -504,17 +497,10 @@ const result = resultado.map(item => {
   return item.bloque[0];
 });
 
-console.log(result);
-
-
-// Mostrar el resultado en consola
-
-
     // si bloqueseleccionadosString tiene un elemento Miercoles Trasformarlo en W y los demas tipo Lunes o Matrtes dejarlos como L o M
     
     const data = resultado[0];
     data.bloque = result;
-    console.log('Datos a enviar:', data);
     await $axios.post(`/historial/post/${codigoPAF}`, data);
     alert('Datos enviados correctamente.');
   } catch (error) {
