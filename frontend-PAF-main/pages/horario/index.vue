@@ -114,8 +114,7 @@
         >
           <p><strong>Código PAF:</strong> {{ p.CodigoPaf }}</p>
           <p><strong>Unidad Menor:</strong> {{ p.NombreUnidadMenor }}</p>
-          <p><strong>Codigo de Asignatura:</strong> {{ p.CodigoAsignatura }}</p>
-          <p><strong>Nombre de Asignatura:</strong> {{ p.NombreAsignatura }}</p>
+          <p><strong>Codigo de Asignatura:</strong> {{ p.CodigoA }}</p>
           <p><strong>Bloque:</strong> {{ p.bloque }}</p>
           <p><strong>Cupo:</strong> {{ p.cupo }}</p>
           <p><strong>Sección:</strong> {{ p.seccion }}</p>
@@ -133,6 +132,7 @@
         >
           <p><strong>Código PAF:</strong> {{ p.CodigoPaf }}</p>
           <p><strong>Unidad Menor:</strong> {{ p.NombreUnidadMenor }}</p>
+          <p><strong>Codigo de Asignatura:</strong> {{ p.CodigoAsignatura }}</p>
 
         </div>
       </div>
@@ -208,7 +208,7 @@ const isBloqueVisible = (dia: string, modulo: number) => {
 const fichasPAF = computed(() =>
   persona.value.filter((p) => 
     !historialSeleccionado.value.some(h => 
-      h.codigo == p.CodigoAsignatura || h.paf === p.CodigoPaf || h.CodigoA === p.CodigoAsignatura
+      h.codigo == p.CodigoAsignatura || h.paf === p.CodigoPaf 
     )
   )
 );
@@ -216,27 +216,28 @@ const fichasPAF = computed(() =>
 const fichasPAFMatch = computed(() =>
   persona.value.filter((p) => 
     historialSeleccionado.value.some(h => 
-      h.codigo == p.CodigoAsignatura || h.paf === p.CodigoPaf || h.CodigoA === p.CodigoAsignatura
+      h.codigo == p.CodigoAsignatura || h.paf === p.CodigoPaf 
     )
   )
 );
 
 const fichasAsignaturas = computed(() =>
-  persona1.value.filter((p) => 
-    !historialSeleccionado.value.some((historial) => 
-      historial.codigo === p.codigo_asignatura
-    )
+  persona1.value.filter((p) =>
+    !historialSeleccionado.value.some((historial) => {
+      const codigosA = historial.CodigoA ? historial.CodigoA.split("/") : []; // Dividir CodigoA en un arreglo
+      return codigosA.includes(p.codigo_asignatura); // Verificar si codigo_asignatura está en la lista
+    })
   )
 );
 
 const fichasAsignaturasNo = computed(() =>
-  persona1.value.filter((p) => 
-    historialSeleccionado.value.some((historial) => 
-      historial.codigo === p.codigo_asignatura
-    )
+  persona1.value.filter((p) =>
+    historialSeleccionado.value.some((historial) => {
+      const codigosA = historial.CodigoA ? historial.CodigoA.split("/") : []; // Dividir CodigoA en un arreglo
+      return codigosA.includes(p.codigo_asignatura); // Verificar si codigo_asignatura está en la lista
+    })
   )
 );
-
 
 
 const fichaSeleccionadaPAF = ref<Persona | null>(null);
@@ -265,6 +266,7 @@ interface Persona {
   cupo: number;
   seccion: string;
   CodigoA: string;
+  bloques: string;
 }
 
 interface Horario {
@@ -347,31 +349,44 @@ const bloquesPorDia = (dia: string, modulo: number) => {
 const obtenerDatosPersona = async () => {
   try {
     const response = await $axios.get(`/pipelsoft/contratos-run/${run.value}`);
-    console.log("response", response.data)
+    console.log("response", response.data);
+
     const response1 = await $axios.get(`/profesorDB/${run.value}`);
     persona1.value = response1.data;
-    console.log("persona1", persona1.value)
-    persona.value = response.data.map((item: any) => ({
-      CodigoPaf: item.PipelsoftData.IdPaf,  
-      CodigoAsignatura: item.PipelsoftData.CodigoAsignatura,
-      Nombres: item.PipelsoftData.Nombres,
-      NombreAsignatura: item.PipelsoftData.NombreAsignatura,
-      PrimerApellido: item.PipelsoftData.PrimerApp,
-      SegundoApellido: item.PipelsoftData.SegundoApp,
-      NombreUnidadMenor: item.PipelsoftData.NombreUnidadMenor,
-      Bloque: response1.data.bloque,
-      Cupo: response1.data.cupo,
-      Seccion: response1.data.seccion,
-      Semestre: response1.data.semestre,
-      ID: item.HistorialPafData.ID,
-      semestre: item.HistorialPafData.semestre,
-      codigo: item.HistorialPafData.codigo_asignatura,
-      paf: item.HistorialPafData.CodigoPaf,
-      bloque: item.HistorialPafData.bloque,
-      cupo: item.HistorialPafData.cupo,
-      seccion: item.HistorialPafData.seccion,
-      CodigoA: item.HistorialPafData.CodigoAsignatura,
-    }))
+    console.log("persona1", persona1.value);
+
+    persona.value = response.data.map((item: any) => {
+      const bloquesArray = item.HistorialPafData.Bloque;
+
+      // Combinar los campos en cadenas separadas por comas
+      const bloque = bloquesArray.map((bloque: any) => bloque.bloques).join("/");
+      const CodigoA = bloquesArray.map((bloque: any) => bloque.codigoAsignatura).join("/");
+      const cupo = bloquesArray.map((bloque: any) => bloque.cupos).join("/");
+      const seccion = bloquesArray.map((bloque: any) => bloque.seccion).join("/");
+
+      return {
+        CodigoPaf: item.PipelsoftData.IdPaf,
+        CodigoAsignatura: item.PipelsoftData.CodigoAsignatura,
+        Nombres: item.PipelsoftData.Nombres,
+        NombreAsignatura: item.PipelsoftData.NombreAsignatura,
+        PrimerApellido: item.PipelsoftData.PrimerApp,
+        SegundoApellido: item.PipelsoftData.SegundoApp,
+        NombreUnidadMenor: item.PipelsoftData.NombreUnidadMenor,
+        Bloque: response1.data.bloque,
+        Cupo: response1.data.cupo,
+        Seccion: response1.data.seccion,
+        Semestre: response1.data.semestre,
+        ID: item.HistorialPafData.ID,
+        semestre: item.HistorialPafData.semestre,
+        codigo: item.HistorialPafData.CodigoAsignatura,
+        paf: item.HistorialPafData.CodigoPaf,
+        bloque, // Agregar las cadenas combinadas como propiedades
+        CodigoA,
+        cupo,
+        seccion,
+      };
+    });
+
     console.log("persona", persona.value);
 
     // Identificar el semestre más reciente
@@ -382,15 +397,17 @@ const obtenerDatosPersona = async () => {
       }
       return 0;
     })[0];
-    
+
     // Establecer el semestre más reciente como seleccionado
     if (semestreReciente) {
       semestreSeleccionado.value = semestreReciente;
     }
   } catch (error) {
-    console.error('Error al obtener los datos:', error);
+    console.error("Error al obtener los datos:", error);
   }
 };
+
+
 
 const enviarSeleccion = async () => {
   if (!fichaSeleccionadaPAF || !fichaSeleccionadaAsignatura) {
