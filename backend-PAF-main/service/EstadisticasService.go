@@ -213,6 +213,11 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidadMayor(unidadMayor stri
 		}
 	}
 
+	// Contar la cantidad de profesores en la tabla contratos que tengan la misma unidad mayor
+	if err := s.DB.Model(&models.Contrato{}).Where("unidad_mayor = ?", unidadMayor).Count(&resp.TotalProfesores).Error; err != nil {
+		return nil, fmt.Errorf("error al contar los profesores en la tabla contratos para la unidad mayor %s: %w", unidadMayor, err)
+	}
+
 	return &resp, nil
 }
 
