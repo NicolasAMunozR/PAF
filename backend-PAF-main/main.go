@@ -115,7 +115,7 @@ func iniciarCronJob() {
 	c := cron.New()
 
 	// Ejecutar cada 30 minutos
-	c.AddFunc("@every 30m", func() {
+	c.AddFunc("@every 1m", func() {
 		actualizarModificaciones()
 	})
 	c.Start()
@@ -140,17 +140,17 @@ func actualizarModificaciones() {
 	for _, h := range historial {
 		var pipelsoft models.Pipelsoft // Inicializa la variable limpia para evitar conflictos.
 
-		// Buscar el registro correspondiente en Pipelsoft filtrando por id_paf y cod_asignatura
-		if err := db.Where("id_paf = ? AND codigo_asignatura = ?", h.IdPaf, h.CodigoAsignatura).Take(&pipelsoft).Error; err != nil {
+		// Buscar el registro correspondiente en Pipelsoft filtrando por id_paf, codigo_asignatura y fecha_inicio_contrato
+		if err := db.Where("id_paf = ? AND codigo_asignatura = ? AND fecha_inicio_contrato = ?", h.IdPaf, h.CodigoAsignatura, h.FechaInicioContrato).Take(&pipelsoft).Error; err != nil {
 			// Si no se encuentra en Pipelsoft, marcamos como eliminada
 			if err := db.Model(&h).Updates(map[string]interface{}{
 				"codigo_modificacion":      1, // Se marca como modificada (en este caso, eliminada)
 				"bandera_modificacion":     2, // 2 = Eliminada
-				"descripcion_modificacion": fmt.Sprintf("PAF con id_paf: %d y cod_asignatura: %s eliminada, no se encuentra en Pipelsoft", h.IdPaf, h.CodigoAsignatura),
+				"descripcion_modificacion": fmt.Sprintf("PAF con id_paf: %d, cod_asignatura: %s y fecha_inicio_contrato: %s eliminada, no se encuentra en Pipelsoft", h.IdPaf, h.CodigoAsignatura, h.FechaInicioContrato),
 			}).Error; err != nil {
 				log.Println("Error al actualizar HistorialPafAceptadas como eliminada:", err)
 			} else {
-				fmt.Printf("PAF eliminada, no encontrada en Pipelsoft: id_paf %d, cod_asignatura %s\n", h.IdPaf, h.CodigoAsignatura)
+				fmt.Printf("PAF eliminada, no encontrada en Pipelsoft: id_paf %d, cod_asignatura %s, fecha_inicio_contrato %s\n", h.IdPaf, h.CodigoAsignatura, h.FechaInicioContrato)
 			}
 			continue // Si no se encuentra, seguimos con el siguiente registro
 		}
