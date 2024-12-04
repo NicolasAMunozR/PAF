@@ -244,3 +244,27 @@ func (s *EstadisticasService) ObtenerFrecuenciaNombreUnidadMenorPorUnidadMayor(n
 
 	return frecuencia, nil
 }
+
+// ContarRegistrosPorUnidadMayor cuenta los registros en Pipelsoft de una unidad mayor específica
+// donde cod_estado no sea "F1", "F9", o "A9", y calcula el porcentaje respecto al total de profesores en Contrato.
+func (s *EstadisticasService) ContarRegistrosPorUnidadMayor(unidadMayor string) (int64, error) {
+	var count int64
+	var totalProfesores int64
+
+	// Contar los registros en Pipelsoft para la unidad mayor especificada donde cod_estado no sea "F1", "F9", o "A9"
+	if err := s.DB.Model(&models.Pipelsoft{}).
+		Where("cod_estado NOT IN ?", []string{"F1", "F9", "A9"}).
+		Where("nombre_unidad_mayor = ?", unidadMayor).
+		Count(&count).Error; err != nil {
+		return 0, fmt.Errorf("error al contar los registros de la unidad mayor %s: %w", unidadMayor, err)
+	}
+
+	// Contar el total de profesores en Contrato para la misma unidad mayor
+	if err := s.DB.Model(&models.Contrato{}).
+		Where("unidad_mayor = ?", unidadMayor).
+		Count(&totalProfesores).Error; err != nil {
+		return 0, fmt.Errorf("error al contar el total de profesores en contratos de la unidad mayor %s: %w", unidadMayor, err)
+	}
+
+	return count, nil
+}
