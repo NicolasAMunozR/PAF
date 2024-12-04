@@ -81,7 +81,7 @@ export default {
         sessionStorage.setItem('rut', this.run); // Guardar en sesión
         if (this.selectedRole === "profesor") {
           this.$router.push(`/profesorPAF?run=${this.run}`);
-        } else if (this.selectedRole === "personal-dei") {
+        } else if (this.selectedRole === "personal-dir") {
           this.$router.push("/personas");
         } else if (this.selectedRole === "encargado") {
           this.$router.push(`/unidadMayorPAF?run=${this.run}`);

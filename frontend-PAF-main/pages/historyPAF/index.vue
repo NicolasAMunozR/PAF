@@ -70,10 +70,10 @@ const filteredPersonas = computed(() => {
 
   filtered = filtered.map(persona => {
     if (persona.bandera_modificacion === 1) {
-
+      warnings.value.push(`Advertencia: La PAF ${persona.IdPaf} ha sido modificada.`);
       persona.rowClass = 'modified-row'; // Marca la fila como modificada
     } else if (persona.bandera_modificacion === 2) {
-
+      warnings.value.push(`Advertencia: La PAF ${persona.IdPaf} ha sido eliminada.`);
       persona.rowClass = 'deleted-row'; // Marca la fila como eliminada
     }
 
@@ -100,14 +100,12 @@ const filteredPersonas = computed(() => {
 // Método para manejar la notificación a Tabla.vue
 const handleRowStatusChanged = (persona: Persona) => {
   // Emitir el cambio de estado (modificación o eliminación)
-  console.log(`La fila de PAF ${persona.IdPaf} ha sido actualizada`);
 };
 
 onMounted(async () => {
   try {
     const response = await $axios.get('/historial');
     personas.value = response.data;
-    console.log('personas:', personas.value);
   } catch (error) {
     console.error('Error al obtener personas:', error);
   }

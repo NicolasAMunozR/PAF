@@ -145,7 +145,7 @@
     try {
       const response1 = await $axios.get(`/contratos/${rut}`)
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
-      const response = await $axios.get(`/estadisticas/unidad-mayor/${response1.data.unidadMayor}`);
+      const response = await $axios.get(`estadisticas/unidad-mayor/unidades-menores-frecuencia/${response1.data.unidadMayor}`);
 
       const unidadesData = response.data;
       pafPorUnidadMayorChartData.value = {
