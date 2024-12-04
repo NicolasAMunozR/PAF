@@ -458,7 +458,7 @@ const resultado = Object.entries(grouped).map(([rest, bloques]) => {
       bloque: `Bloque ${bloques.join(", ")}`, // Prefijo "Bloque" antes de los bloques agrupados
       codigo_asignatura: codigoAsignatura
     },
-    bloque: bloques.map(b => `${codigoAsignatura} ${seccion} ${cupo} ${b}`)
+    bloque: bloques.map(b => `${codigoAsignatura} ${seccion} ${cupo} ${b} ${semestre}`)
   };
 });
 const result = resultado.map(item => {
