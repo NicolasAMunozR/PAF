@@ -108,7 +108,6 @@
   const fetchContratos = async () => {
     try {
       const response1 = await $axios.get(`/contratos/${run.value}`);
-      console.log(response1.data.unidadMayor)
       if (response1.data.unidadMayor == "RECTORIA" || response1.data.unidadMayor == "VR ACADEMICA") {
         useRouter().push("/seguimientoPAF");
       }
