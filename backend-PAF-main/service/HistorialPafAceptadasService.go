@@ -35,6 +35,22 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 		return nil, fmt.Errorf("error al serializar los bloques a JSON: %w", err)
 	}
 
+	// Extraer el codigo_asignatura del JSON de bloques
+	var bloquesParsed []struct {
+		CodigoAsignatura string `json:"codigoAsignatura"`
+	}
+
+	// Deserializar el JSON de bloques
+	if err := json.Unmarshal(bloquesJSON, &bloquesParsed); err != nil {
+		return nil, fmt.Errorf("error al deserializar bloquesJSON: %w", err)
+	}
+
+	// Verificar si hemos obtenido el codigo_asignatura
+	if len(bloquesParsed) == 0 {
+		return nil, fmt.Errorf("no se encontró el codigo_asignatura en los bloques")
+	}
+	codigoAsignatura := bloquesParsed[0].CodigoAsignatura
+
 	// Definir el orden de los estados
 	estadoSiguiente := map[string]string{
 		"A1":  "A2",
@@ -57,7 +73,7 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 
 	// Obtener los valores de jerarquía, calidad y estado desde la tabla Pipelsoft
 	var pipelsoft models.Pipelsoft
-	if err := tx.Where("id_paf = ?", codigoPAF).First(&pipelsoft).Error; err != nil {
+	if err := tx.Where("id_paf = ? and codigo_asignatura = ?", codigoPAF, codigoAsignatura).First(&pipelsoft).Error; err != nil {
 		tx.Rollback()
 		return nil, fmt.Errorf("error al obtener datos de Pipelsoft: %w", err)
 	}

@@ -109,7 +109,7 @@ func iniciarCronJob() {
 	c := cron.New()
 
 	// Ejecutar cada 30 minutos
-	c.AddFunc("@every 1m", func() {
+	c.AddFunc("@every 30m", func() {
 		actualizarModificaciones()
 	})
 	c.Start()
