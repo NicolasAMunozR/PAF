@@ -356,13 +356,13 @@ const obtenerDatosPersona = async () => {
     console.log("persona1", persona1.value);
 
     persona.value = response.data.map((item: any) => {
-      const bloquesArray = item.HistorialPafData.Bloque;
+      const bloquesArray = item.HistorialPafData.Bloque || []; // Asegurar que Bloque sea un arreglo (vacío si es null o undefined)
 
-      // Combinar los campos en cadenas separadas por comas
-      const bloque = bloquesArray.map((bloque: any) => bloque.bloques).join("/");
-      const CodigoA = bloquesArray.map((bloque: any) => bloque.codigoAsignatura).join("/");
-      const cupo = bloquesArray.map((bloque: any) => bloque.cupos).join("/");
-      const seccion = bloquesArray.map((bloque: any) => bloque.seccion).join("/");
+      // Verificar si el arreglo no está vacío antes de hacer el map
+      const bloque = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.bloques).join("/") : "";
+      const CodigoA = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.codigoAsignatura).join("/") : "";
+      const cupo = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.cupos).join("/") : "";
+      const seccion = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.seccion).join("/") : "";
 
       return {
         CodigoPaf: item.PipelsoftData.IdPaf,
@@ -406,8 +406,6 @@ const obtenerDatosPersona = async () => {
     console.error("Error al obtener los datos:", error);
   }
 };
-
-
 
 const enviarSeleccion = async () => {
   if (!fichaSeleccionadaPAF || !fichaSeleccionadaAsignatura) {

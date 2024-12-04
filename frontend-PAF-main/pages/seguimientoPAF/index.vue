@@ -105,6 +105,7 @@ const filteredPersonas = computed(() => {
 const fetchContratos = async () => {
   try {
     const response = await $axios.get(`/pipelsoft/contratos`);
+    console.log(response.data);
     if (response.data && Array.isArray(response.data)) {
       contratos.value = response.data;
     } else {

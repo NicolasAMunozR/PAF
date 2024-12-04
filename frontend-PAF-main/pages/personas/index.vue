@@ -84,7 +84,16 @@ const filteredPersonas = computed(() => {
 onMounted(async () => {
   try {
     const response = await $axios.get('/pipelsoft/contratos');
-    personas.value = response.data.map((item: any) => ({
+    personas.value = response.data.map((item: any) => {
+      const bloquesArray = item.HistorialPafData.Bloque || []; // Asegurar que Bloque sea un arreglo (vacío si es null o undefined)
+
+      // Verificar si el arreglo no está vacío antes de hacer el map
+      const bloque = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.bloques).join("/") : "";
+      const CodigoA = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.codigoAsignatura).join("/") : "";
+      const Cupo = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.cupos).join("/") : "";
+      const seccion = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.seccion).join("/") : "";
+
+      return {
       CodigoAsignatura: item.PipelsoftData.CodigoAsignatura,
       Nombres: item.PipelsoftData.Nombres,
       PrimerApellido: item.PipelsoftData.PrimerApp,
@@ -94,12 +103,13 @@ onMounted(async () => {
       Jerarquia: item.PipelsoftData.Jerarquia,
       EstadoProceso: item.PipelsoftData.CodEstado,
       Run: item.PipelsoftData.RunEmpleado,
-      Cupo: item.HistorialPafData.cupo,
+      Cupo,
       NombreAsignatura: item.PipelsoftData.NombreAsignatura,
       FechaUltimaModificacionProceso: item.PipelsoftData.UpdatedAt,
       Id: item.PipelsoftData.Id,
-      seccion: item.HistorialPafData.seccion,
-    }));
+      seccion,
+    };
+  });
   } catch (error) {
     console.error('Error al obtener personas:', error);
   }
