@@ -140,3 +140,29 @@ func (c *EstadisticasController) ObtenerFrecuenciaNombreUnidadMenorPorUnidadMayo
 	// Responder con los datos
 	ctx.JSON(http.StatusOK, frecuencia)
 }
+
+func (c *EstadisticasController) ObtenerPafActivasPorUnidadHandler(ctx *gin.Context) {
+	// Obtener la unidad mayor desde los parámetros de la URL
+	unidadMayor := ctx.Param("unidadMayor")
+
+	if unidadMayor == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro unidadMayor es obligatorio"})
+		return
+	}
+
+	// Llamar al servicio para obtener los datos
+	count, err := c.Service.ContarRegistrosPorUnidadMayor(unidadMayor)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Crear una respuesta
+	response := gin.H{
+		"unidad_mayor": unidadMayor,
+		"paf_activas":  count,
+	}
+
+	// Enviar la respuesta al cliente
+	ctx.JSON(http.StatusOK, response)
+}
