@@ -10,17 +10,13 @@ import (
 )
 
 var (
-	DBPipelsoft *gorm.DB
-	DBProfesor  *gorm.DB
-	DBPersonal  *gorm.DB
+	DBPersonal *gorm.DB
 )
 var DSN = "host=localhost user=postgres password=conan2084 dbname=PAF port=5432 sslmode=disable"
 var DB *gorm.DB
 
 // Conexiones para múltiples bases de datos
 var (
-	DSNProfesor  = "host=localhost user=postgres password=conan2084 dbname=Profesor port=5432 sslmode=disable"
-	DSNPipelsoft = "host=localhost user=postgres password=conan2084 dbname=Pipelsoft port=5432 sslmode=disable"
 	DSNTPersonal = "host=localhost user=postgres password=conan2084 dbname=personal port=5432 sslmode=disable"
 )
 
@@ -28,33 +24,10 @@ var (
 func InitDBConnections() {
 	var err error
 
-	// Conectar a la base de datos Pipelsoft
-	DBPipelsoft, err = gorm.Open(postgres.Open(DSNPipelsoft), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("Error al conectar a la base de datos Pipelsoft: %v", err)
-	}
-	err = DBPipelsoft.AutoMigrate(models.Pipelsoft{})
-	if err != nil {
-		log.Fatalf("Error al migrar la base de datos Pipelsoft: %v", err)
-	}
-
-	fmt.Println("Conexión a la base de datos Pipelsoft exitosa.")
-
-	// Conectar a la base de datos ProfesorDB
-	DBProfesor, err = gorm.Open(postgres.Open(DSNProfesor), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("Error al conectar a la base de datos ProfesorDB: %v", err)
-	}
-	err = DBProfesor.AutoMigrate(models.ProfesorDB{})
-	if err != nil {
-		log.Fatalf("Error al migrar la base de datos ProfesorDB: %v", err)
-	}
-	fmt.Println("Conexión a la base de datos ProfesorDB exitosa.")
-
-	// Conectar a la base de datos TerceraDB
+	// Conectar a la base de datos personal
 	DBPersonal, err = gorm.Open(postgres.Open(DSNTPersonal), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("Error al conectar a la base de datos TerceraDB: %v", err)
+		log.Fatalf("Error al conectar a la base de datos personal: %v", err)
 	}
 
 	err = DBPersonal.AutoMigrate(models.HistorialPafAceptadas{})
