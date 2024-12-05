@@ -100,6 +100,13 @@ func main() {
 	// Ruta para obtener un usuario por su Run
 	r.GET("/usuario/rut/:run", usuariosController.GetUsuarioByRun)
 
+	// nuevo y nueva url
+	// Crear servicio y controlador
+	historialService := service.NewHistorialPasosPafService(DB.DBPersonal)
+	historialController := controller.NewHistorialPasosPafController(historialService)
+
+	r.GET("/historial/:id_paf/:run_docente", historialController.ObtenerHistorialYDuracionesPorIdYRun)
+
 	// Iniciar el cron job para actualización periódica
 	go iniciarCronJob()
 
