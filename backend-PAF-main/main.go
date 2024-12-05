@@ -107,6 +107,9 @@ func main() {
 
 	r.GET("/historialPaso/:id_paf/:run_docente", historialController.ObtenerHistorialYDuracionesPorIdYRun)
 
+	//controlador para obtener los profesores que no poseen paf
+	r.GET("/estadisticas/obtener-y-comparar-runs", estadisticasController.ObtenerYCompararRunsHandler)
+
 	// Iniciar el cron job para actualización periódica
 	// de acuerdo al sai profes sin paf y sin contrato sin contar profesores repetidos, desde pipelsoft estan los ruts con un 0 al inicio y con digito verificador
 	// luego se busca en la tabla de contratos, y hay revisamos cuales ruts corresponden,
