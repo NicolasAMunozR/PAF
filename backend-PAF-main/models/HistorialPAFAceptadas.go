@@ -31,7 +31,7 @@ type HistorialPafAceptadas struct {
 	CantidadHoras       int       `gorm:"type:int;not null"`
 	Jerarquia           string    `gorm:"type:text;not null"`
 	Calidad             string    `gorm:"type:text;not null"`
-	SemestrePaf         string    `gorm:"type:text;not null"`
+	SemestrePaf         string    `gorm:"type:text"`
 
 	// Campos de Proceso
 	EstadoProceso string `gorm:"type:text;not null"`
