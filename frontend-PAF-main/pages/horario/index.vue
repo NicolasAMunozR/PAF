@@ -113,12 +113,12 @@
           :style="{ backgroundColor: '#FFCC80' }"
         >
           <p><strong>Código PAF:</strong> {{ p.CodigoPaf }}</p>
+          <p><strong>Semestre PAF:</strong> {{ p.SemestrePaf }}</p>
           <p><strong>Unidad Menor:</strong> {{ p.NombreUnidadMenor }}</p>
           <p><strong>Codigo de Asignatura:</strong> {{ p.CodigoA }}</p>
           <p><strong>Bloque:</strong> {{ p.bloque }}</p>
           <p><strong>Cupo:</strong> {{ p.cupo }}</p>
           <p><strong>Sección:</strong> {{ p.seccion }}</p>
-          <p><strong>Semestre:</strong> {{ p.semestre1 }}</p>
         </div>
       </div>
       <!-- Fichas de PAF -->
@@ -134,6 +134,7 @@
           <p><strong>Código PAF:</strong> {{ p.CodigoPaf }}</p>
           <p><strong>Unidad Menor:</strong> {{ p.NombreUnidadMenor }}</p>
           <p><strong>Codigo de Asignatura:</strong> {{ p.CodigoAsignatura }}</p>
+          <p><strong>Nombre de Asignatura:</strong> {{ p.NombreAsignatura }}</p>
 
         </div>
       </div>
@@ -299,6 +300,7 @@ interface Persona {
   CodigoA: string;
   bloques: string;
   semestre1: string;
+  SemestrePaf: string;
 }
 
 interface Horario {
@@ -403,6 +405,7 @@ const obtenerDatosPersona = async () => {
         PrimerApellido: item.PipelsoftData.PrimerApp,
         SegundoApellido: item.PipelsoftData.SegundoApp,
         NombreUnidadMenor: item.PipelsoftData.NombreUnidadMenor,
+        SemestrePaf: item.PipelsoftData.Semestre,
         Bloque: response1.data.bloque,
         Cupo: response1.data.cupo,
         Seccion: response1.data.seccion,

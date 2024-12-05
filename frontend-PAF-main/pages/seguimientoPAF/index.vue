@@ -23,7 +23,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(contrato, index) in filteredPersonas" :key="index">
+            <tr v-for="(contrato, index) in paginatedData" :key="index">
               <td>{{ contrato.PipelsoftData.IdPaf }}</td>
               <td>{{ contrato.PipelsoftData.RunEmpleado }}</td>
               <td>{{ contrato.PipelsoftData.Jerarquia }}</td>
@@ -45,6 +45,13 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Paginación -->
+        <div class="pagination">
+          <button @click="prevPage" :disabled="currentPage === 1">Anterior</button>
+          <span>{{ currentPage }} de {{ totalPages }}</span>
+          <button @click="nextPage" :disabled="currentPage === totalPages">Siguiente</button>
+        </div>
       </div>
 
       <div v-else-if="errorMessage" class="error">
@@ -69,13 +76,19 @@ const filtros = ref({
 const sortBy = ref('');
 const sortOrder = ref('asc');
 
+// Paginación
+const currentPage = ref(1);
+const itemsPerPage = 20; // Número de elementos por página
+
 const filterData = (newFilters: any) => {
   filtros.value = newFilters;
+  currentPage.value = 1; // Resetear la página al filtrar
 };
 
 const sortData = (newSortBy: string, newSortOrder: string) => {
   sortBy.value = newSortBy;
   sortOrder.value = newSortOrder;
+  currentPage.value = 1; // Resetear la página al ordenar
 };
 
 // Computed para filtrar y ordenar
@@ -100,6 +113,25 @@ const filteredPersonas = computed(() => {
 
   return filtered;
 });
+
+// Computed para la paginación
+const totalPages = computed(() => {
+  return Math.ceil(filteredPersonas.value.length / itemsPerPage);
+});
+
+const paginatedData = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return filteredPersonas.value.slice(start, end);
+});
+
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--;
+};
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++;
+};
 
 // Fetch inicial de datos
 const fetchContratos = async () => {
@@ -203,5 +235,31 @@ th {
 .error {
   color: #C8102E; /* Color institucional para errores */
   font-weight: bold;
+}
+
+/* Paginación */
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pagination button {
+  padding: 8px 16px;
+  background-color: #EA7600;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  font-size: 1rem;
 }
 </style>

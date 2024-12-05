@@ -15,7 +15,7 @@
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
-        <tr v-for="persona in paginatedData" :key="persona.Id" :class="persona.rowClass" class="hover:bg-gray-50 transition-colors">
+        <tr v-for="persona in data" :key="persona.Id" :class="persona.rowClass" class="hover:bg-gray-50 transition-colors">
           <td class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoPAF }} {{ persona.IdPaf }}</td>
           <td class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoAsignatura }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.Run }}</td>
@@ -33,116 +33,28 @@
         </tr>
       </tbody>
     </table>
-    <!-- Paginación -->
-    <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
-      <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-        <div>
-          <p class="text-sm text-gray-700">
-            Showing
-            {{ ' ' }}
-            <span class="font-medium">{{ startIndex + 1 }}</span>
-            {{ ' ' }}
-            to
-            {{ ' ' }}
-            <span class="font-medium">{{ endIndex }}</span>
-            {{ ' ' }}
-            of
-            {{ ' ' }}
-            <span class="font-medium">{{ data.length }}</span>
-            {{ ' ' }}
-            results
-          </p>
-        </div>
-        <div>
-          <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-            <button 
-              :disabled="currentPage === 1"
-              @click="changePage(currentPage - 1)"
-              class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
-            >
-              <span class="sr-only">Previous</span>
-              <ChevronLeftIcon class="size-5" aria-hidden="true" />
-            </button>
-            <button
-              v-for="page in visiblePages"
-              :key="page"
-              @click="changePage(page)"
-              :class="['relative inline-flex items-center px-4 py-2 text-sm font-semibold', page === currentPage ? 'bg-indigo-600 text-white' : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50']"
-            >
-              {{ page }}
-            </button>
-            <button 
-              :disabled="currentPage === totalPages"
-              @click="changePage(currentPage + 1)"
-              class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
-            >
-              <span class="sr-only">Next</span>
-              <ChevronRightIcon class="size-5" aria-hidden="true" />
-            </button>
-          </nav>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
-
-<script setup>
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/20/solid'
-
-const props = defineProps({
-  data: {
-    type: Array,
-    required: true
+<script>
+export default {
+  props: {
+    data: {
+      type: Array,
+      required: true
+    },
+    showButtons: {
+      type: Boolean,
+      default: true
+    }
   },
-  showButtons: {
-    type: Boolean,
-    default: true
-  }
-})
-
-const ITEMS_PER_PAGE = 10
-const totalPages = computed(() => Math.ceil(props.data.length / ITEMS_PER_PAGE))
-const currentPage = ref(1)
-
-const paginatedData = computed(() => {
-  const start = (currentPage.value - 1) * ITEMS_PER_PAGE
-  const end = start + ITEMS_PER_PAGE
-  return props.data.slice(start, end)
-})
-
-const startIndex = computed(() => (currentPage.value - 1) * ITEMS_PER_PAGE)
-const endIndex = computed(() => Math.min(startIndex.value + ITEMS_PER_PAGE, props.data.length))
-
-const visiblePages = computed(() => {
-  const range = []
-  const maxVisible = 5
-  const halfVisible = Math.floor(maxVisible / 2)
-  
-  if (totalPages.value <= maxVisible) {
-    for (let i = 1; i <= totalPages.value; i++) range.push(i)
-  } else if (currentPage.value <= halfVisible) {
-    for (let i = 1; i <= maxVisible; i++) range.push(i)
-    range.push('...')
-  } else if (currentPage.value > totalPages.value - halfVisible) {
-    range.push('...')
-    for (let i = totalPages.value - maxVisible + 1; i <= totalPages.value; i++) range.push(i)
-  } else {
-    range.push('...')
-    for (let i = currentPage.value - halfVisible; i <= currentPage.value + halfVisible; i++) range.push(i)
-    range.push('...')
-  }
-  return range
-})
-
-const changePage = (page) => {
-  if (page !== '...' && page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
+  methods: {
+    handleRowStatusChanged(persona) {
+      // Si necesitas manejar cambios adicionales en el estado de las filas, puedes hacerlo aquí
+    }
   }
 }
 </script>
-
-
 
 <style scoped>
 /* Colores institucionales */
