@@ -57,6 +57,10 @@ func InitDBConnections() {
 	if err != nil {
 		log.Fatalf("Error al migrar la base de datos ProfesorDB: %v", err)
 	}
+	err = DBPersonal.AutoMigrate(models.HistorialPasosPaf{})
+	if err != nil {
+		log.Fatalf("Error al migrar la base de datos ProfesorDB: %v", err)
+	}
 
 	fmt.Println("Conexión a la base de datos TerceraDB exitosa.")
 }
