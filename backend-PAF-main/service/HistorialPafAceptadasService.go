@@ -109,6 +109,7 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 		CodigoAsignatura:        pipelsoft.CodigoAsignatura,
 		NombreAsignatura:        profesor.NombreAsignatura,
 		CantidadHoras:           pipelsoft.HorasAsignatura,
+		DesEstado:               pipelsoft.DesEstado,
 		SemestrePaf:             pipelsoft.Semestre,
 		Jerarquia:               pipelsoft.Jerarquia,
 		EstadoProceso:           nuevoEstado,

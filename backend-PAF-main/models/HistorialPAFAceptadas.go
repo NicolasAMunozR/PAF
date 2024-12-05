@@ -32,6 +32,7 @@ type HistorialPafAceptadas struct {
 	Jerarquia           string    `gorm:"type:text;not null"`
 	Calidad             string    `gorm:"type:text;not null"`
 	SemestrePaf         string    `gorm:"type:text"`
+	DesEstado           string    `gorm:"type:text"`
 
 	// Campos de Proceso
 	EstadoProceso string `gorm:"type:text;not null"`
