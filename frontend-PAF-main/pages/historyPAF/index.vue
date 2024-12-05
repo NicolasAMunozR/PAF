@@ -40,6 +40,8 @@ interface Persona {
   descripcion_modificacion: string;
   seccion: string;
   rowClass?: string;
+  SemestrePaf: string;
+
 }
 
 const personas = ref<Persona[]>([]);

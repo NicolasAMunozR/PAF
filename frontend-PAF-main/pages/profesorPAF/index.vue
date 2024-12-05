@@ -13,7 +13,7 @@
         <thead>
           <tr>
             <th>Código PAF</th>
-            <th>Jefatura</th>
+            <th>Jerarquia</th>
             <th>Nombre de Asignatura</th>
             <th>Estado del Proceso</th>
             <th>Descripción del Proceso</th>

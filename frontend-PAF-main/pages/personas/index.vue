@@ -36,7 +36,7 @@ interface Persona {
   Semestre?: string;
   Cupo?: number;
   Id: number;
-  semestre: string;
+  SemestrePaf: string;
 }
 
 const personas = ref<Persona[]>([]);
@@ -104,7 +104,7 @@ onMounted(async () => {
       Calidad: item.PipelsoftData.Categoria,
       Jerarquia: item.PipelsoftData.Jerarquia,
       EstadoProceso: item.PipelsoftData.CodEstado,
-      semestre: item.PipelsoftData.Semestre,
+      SemestrePaf: item.PipelsoftData.Semestre,
       Run: item.PipelsoftData.RunEmpleado,
       Cupo,
       NombreAsignatura: item.PipelsoftData.NombreAsignatura,
