@@ -76,13 +76,13 @@ func (s *EstadisticasService) ObtenerEstadisticas() (*EstadisticasResponse, erro
 
 	// Los códigos de estado definidos
 	estados := []string{
-		"A1", "A2", "A3", "B1", "B9", "C1D", "C9D", "F1", "F9", "A9",
+		"Sin Solicitar", "Enviada al Interesado", "Enviada al Validador", "Aprobada por Validador", "Rechazada por Validador", "Aprobada por Dir. Pregrado", "Rechazada por Dir. de Pregrado", "Aprobada por RRHH", "Rechazada por RRHH", "Anulada",
 	}
 
 	// Contar registros por cada estado
 	for _, estado := range estados {
 		var count int64
-		if err := s.DB.Model(&models.Pipelsoft{}).Where("cod_estado = ?", estado).Count(&count).Error; err != nil {
+		if err := s.DB.Model(&models.Pipelsoft{}).Where("des_estado = ?", estado).Count(&count).Error; err != nil {
 			return nil, fmt.Errorf("error al contar los registros de pipelsofts con estado %s: %w", estado, err)
 		}
 		resp.EstadoProcesoCount[estado] = int(count)
@@ -194,14 +194,14 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidadMayor(unidadMayor stri
 
 	// Los códigos de estado definidos
 	estados := []string{
-		"A1", "A2", "A3", "B1", "B9", "C1D", "C9D", "F1", "F9", "A9",
+		"Sin Solicitar", "Enviada al Interesado", "Enviada al Validador", "Aprobada por Validador", "Rechazada por Validador", "Aprobada por Dir. Pregrado", "Rechazada por Dir. de Pregrado", "Aprobada por RRHH", "Rechazada por RRHH", "Anulada",
 	}
 
 	// Contar registros por cada estado
 	for _, estado := range estados {
 		var count int64
 		if err := s.DB.Model(&models.Pipelsoft{}).
-			Where("nombre_unidad_mayor = ? AND cod_estado = ?", unidadMayor, estado).
+			Where("nombre_unidad_mayor = ? AND des_estado = ?", unidadMayor, estado).
 			Count(&count).Error; err != nil {
 			return nil, fmt.Errorf("error al contar los registros de pipelsofts con estado %s para la unidad mayor %s: %w", estado, unidadMayor, err)
 		}
