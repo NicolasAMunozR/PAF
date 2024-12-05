@@ -36,6 +36,7 @@ interface Persona {
   Semestre?: string;
   Cupo?: number;
   Id: number;
+  semestre: string;
 }
 
 const personas = ref<Persona[]>([]);
@@ -50,6 +51,7 @@ const filtros = ref({
   nombreAsignatura: '',
   fechaUltimaModificacionProceso: '',
   id: '',
+  semestre: '',
 });
 const sortBy = ref('nombres');
 const sortOrder = ref('asc');
@@ -102,6 +104,7 @@ onMounted(async () => {
       Calidad: item.PipelsoftData.Categoria,
       Jerarquia: item.PipelsoftData.Jerarquia,
       EstadoProceso: item.PipelsoftData.CodEstado,
+      semestre: item.PipelsoftData.Semestre,
       Run: item.PipelsoftData.RunEmpleado,
       Cupo,
       NombreAsignatura: item.PipelsoftData.NombreAsignatura,

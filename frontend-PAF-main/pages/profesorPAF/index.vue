@@ -88,6 +88,7 @@ const fetchProfesorYContratos = async () => {
 
   try {
     const contratosResponse = await $axios.get(`/pipelsoft/contratos-run/${run.value}`);
+    console.log(contratosResponse.data);
     if (contratosResponse.data && Array.isArray(contratosResponse.data)) {
       contratos.value = contratosResponse.data;
       errorMessage.value = "";

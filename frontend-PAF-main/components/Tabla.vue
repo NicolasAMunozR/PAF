@@ -7,8 +7,10 @@
           <th class="px-4 py-3 text-left font-semibold">Código de la Asignatura</th>
           <th class="px-4 py-3 text-left font-semibold">Run</th>
           <th class="px-4 py-3 text-left font-semibold">Nombre de Asignatura</th>
+          <th class="px-4 py-3 text-left font-semibold">Estado de Proceso</th>
           <th class="px-4 py-3 text-left font-semibold">Sección</th>
           <th class="px-4 py-3 text-left font-semibold">Cupos</th>
+          <th class="px-4 py-3 text-left font-semibold">Semestre de PAF</th>
           <th v-if="showButtons" class="px-4 py-3 text-left font-semibold">Opciones</th>
         </tr>
       </thead>
@@ -18,8 +20,10 @@
           <td class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoAsignatura }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.Run }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.NombreAsignatura }} {{ persona.nombre_asignatura }}</td>
+          <td class="px-4 py-3 text-gray-700">{{ persona.EstadoProceso }} {{ persona.estado_proceso }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.seccion }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.Cupo }} {{ persona.cupo }}</td>
+          <td class="px-4 py-3 text-gray-700">{{ persona.semestre }}</td>
           <td v-if="showButtons" class="px-4 py-3">
             <a :href="`/paf?codigoPaf=${persona.CodigoPAF}`" class="button">Ver PAF</a>
             <br>
