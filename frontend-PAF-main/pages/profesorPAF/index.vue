@@ -29,8 +29,8 @@
             <td>{{ contrato.PipelsoftData.CodEstado }}</td>
             <td>{{ contrato.PipelsoftData.DesEstado }}</td>
             <td>
-              {{ new Date(contrato.PipelsoftData.UpdatedAt).toLocaleDateString() }}
-              {{ new Date(contrato.PipelsoftData.UpdatedAt).toLocaleTimeString() }} 
+              {{ new Date(contrato.PipelsoftData.UltimaModificacion).toLocaleDateString() }}
+              {{ new Date(contrato.PipelsoftData.UltimaModificacion).toLocaleTimeString() }} 
             </td>
             <td>
               <div v-for="(estado, idx) in contrato.PipelsoftData.historialEstados" :key="idx">
