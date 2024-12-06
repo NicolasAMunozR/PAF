@@ -108,7 +108,8 @@
       const response1 = await $axios.get(`/contratos/${rut}`)
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
       const response = await $axios.get(`/estadisticas/pafActivas/unidad-mayor/${response1.data.unidadMayor}`);
-      cantidadPafActivas.value = response.data.paf_activas;
+      console.log(response.data);
+      cantidadPafActivas.value = response.data.totalRUNs;
     } catch (error) {
       console.error('Error al obtener la cantidad de personas del SAI:', error);
     }
