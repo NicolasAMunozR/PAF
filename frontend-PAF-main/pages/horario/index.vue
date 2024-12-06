@@ -259,6 +259,7 @@ const fichasAsignaturas = computed(() =>
     !historialSeleccionado.value.some((historial) => {
       const codigosA = historial.CodigoA ? historial.CodigoA.split("/") : []; // Dividir CodigoA en un arreglo
       const semestres1 = historial.semestre1 ? historial.semestre1.split("/") : []; // Dividir semestre1 en un arreglo
+      const secciones = historial.seccion ? historial.seccion.split("/") : []; // Dividir seccion en un arreglo
 
       // Verificar que ambos arreglos tengan la misma longitud
       if (codigosA.length !== semestres1.length) {
@@ -269,7 +270,8 @@ const fichasAsignaturas = computed(() =>
       return codigosA.some((codigo, index) => {
         return (
           codigo === p.codigo_asignatura && // Comparar CodigoA
-          semestres1[index] === p.semestre   // Comparar semestre correspondiente
+          semestres1[index] === p.semestre &&  // Comparar semestre correspondiente
+          secciones[index] === p.seccion // Comparar sección correspondiente
         );
       });
     }) && p.semestre === semestreSeleccionado.value // Comparar con semestreSeleccionado
@@ -281,6 +283,7 @@ const fichasAsignaturasNo = computed(() =>
     historialSeleccionado.value.some((historial) => {
       const codigosA = historial.CodigoA ? historial.CodigoA.split("/") : []; // Dividir CodigoA en un arreglo
       const semestres1 = historial.semestre1 ? historial.semestre1.split("/") : []; // Dividir semestre1 en un arreglo
+      const secciones = historial.seccion ? historial.seccion.split("/") : []; // Dividir seccion en un arreglo
 
       // Verificar que ambos arreglos tengan la misma longitud
       if (codigosA.length !== semestres1.length) {
@@ -291,7 +294,8 @@ const fichasAsignaturasNo = computed(() =>
       return codigosA.some((codigo, index) => {
         return (
           codigo === p.codigo_asignatura && // Comparar CodigoA
-          semestres1[index] === p.semestre   // Comparar semestre correspondiente
+          semestres1[index] === p.semestre &&  // Comparar semestre correspondiente
+          secciones[index] === p.seccion // Comparar sección correspondiente
         );
       });
     }) && p.semestre === semestreSeleccionado.value // Comparar con semestreSeleccionado
@@ -339,6 +343,7 @@ interface Horario {
   semestre?: string;
   ID: number;
   tipo?: string;
+  Seccion: string;
 }
 
 const persona = ref<Persona[]>([])
@@ -376,7 +381,7 @@ const bloquesPorDia = (dia: string, modulo: number) => {
       if (!p.bloque) return false;
 
             // Excluir bloques asociados con las fichas seleccionadas en 'fichasAsignaturasNo'
-            if (fichasAsignaturasNo.value.some((ficha) => ficha.codigo_asignatura === p.codigo_asignatura && ficha.semestre === p.semestre)) {
+            if (fichasAsignaturasNo.value.some((ficha) => ficha.codigo_asignatura === p.codigo_asignatura && ficha.semestre === p.semestre && ficha.seccion === p.seccion)) {
         return false;
       }
       // Filtrar por día y módulo

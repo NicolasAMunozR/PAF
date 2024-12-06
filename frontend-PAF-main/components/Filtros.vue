@@ -45,7 +45,7 @@
     </div>
 
     <!-- Filtro semestre -->
-    <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF">
+    <div class="filter-item">
       <label for="semestre" class="label">Semestre</label>
       <input
         v-model="filtros.semestre"
@@ -178,7 +178,7 @@ watch(filtros, (newFilters) => {
   } else if (isUnidadMayorPAF.value) {
     // Si es UnidadMayorPAF, excluye 'nombreUnidadMenor'
     filtersToEmit = Object.fromEntries(
-      Object.entries(newFilters).filter(([key]) => key == 'nombreUnidadMenor' || key == 'run')
+      Object.entries(newFilters).filter(([key]) => key == 'nombreUnidadMenor' || key == 'run' || key == 'semestre')
     );
     emit('filter', filtersToEmit);
   } else {
