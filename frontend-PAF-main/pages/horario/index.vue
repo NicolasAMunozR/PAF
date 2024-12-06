@@ -53,7 +53,7 @@
                           v-for="(bloque, idx) in bloquesPorDia(dia, index + 1)"
                           :key="bloque.nombre"
                           class="bloque"
-                         :style="{ backgroundColor: obtenerColorAsignatura(bloque.codigo_asignatura) }"
+                          :style="{ backgroundColor: obtenerColorAsignatura(bloque.codigo_asignatura || '', bloque.bloque || '', bloque.seccion || '') }"
                         >
                           <label>
                             <input
@@ -75,7 +75,7 @@
                       v-for="(bloque, bloqueIndex) in bloquesPorDia(dia, index + 1)"
                       :key="`${bloque.nombre}-${bloqueIndex}`"
                       class="bloque"
-                       :style="{ backgroundColor: obtenerColorAsignatura(bloque.codigo_asignatura) }"
+                       :style="{ backgroundColor: obtenerColorAsignatura(bloque.codigo_asignatura || '', bloque.bloque || '', bloque.seccion || '') }"
                     >
                       <label>
                         <input
@@ -145,7 +145,7 @@
           v-for="(p, index, bloque) in fichasAsignaturas"
           :key="index"
           class="card"
-          :style="{ backgroundColor: fichaSeleccionadaAsignatura === p ? '#B3E5FC' : coloresAsignaturas[index % coloresAsignaturas.length] }"
+           :style="{ backgroundColor: fichaSeleccionadaAsignatura === p ? '#B3E5FC' : obtenerColorAsignatura(p.codigo_asignatura, p.bloque || '', p.seccion || '') }"
         >
           <p><strong>Código de Asignatura:</strong> {{ p.codigo_asignatura }}</p>
           <p><strong>Nombre de Asignatura:</strong> {{ p.nombre_asignatura }}</p>
@@ -182,13 +182,22 @@ const cerrarTodosLosBloques = () => {
     visibleBloques.value[key] = false;
   });
 };
+const coloresAsignaturas = [
+  '#33FF57', '#FF69B4', '#FF33A1', 
+  '#8E44AD', '#FF6347', '#ADFF2F', '#4682B4', '#32CD32', '#8A2BE2', 
+  '#FF4500', '#20B2AA', '#FF1493', '#FFD700', '#8B0000', '#7FFF00',
+  '#00CED1', '#800080', '#FF8C00', '#C71585', '#FFDAB9', '#FFA07A',
+  '#D2691E', '#B0C4DE'
+];
 
-const obtenerColorAsignatura = (codigoAsignatura: string) => {
-  const index = fichasAsignaturas.value.findIndex(
-    (asignatura) => asignatura.codigo_asignatura === codigoAsignatura
-  );
-  return coloresAsignaturas[index % coloresAsignaturas.length] || "#E0E0E0";
+const obtenerColorAsignatura = (codigoAsignatura: string, bloqueId: string, seccion: string) => {
+  // Combinar el código de la asignatura, el bloque y la sección para garantizar que el color sea único
+  const hash = (codigoAsignatura + bloqueId + seccion).split('')
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const colorIndex = hash % coloresAsignaturas.length; // Obtener un índice de color basado en el hash
+  return coloresAsignaturas[colorIndex];
 };
+  
 
 // Agregar y remover el evento global
 onMounted(() => {
@@ -213,24 +222,40 @@ const isBloqueVisible = (dia: string, modulo: number) => {
   return !!visibleBloques.value[key];
 };
 
-const fichasPAF = computed(() =>
-  persona.value.filter((p) => 
-    !historialSeleccionado.value.some(h => 
-      h.codigo == p.CodigoAsignatura || h.paf === p.CodigoPaf 
-    )
-  )
+const fichasPAF = computed(() => 
+  persona.value.filter((p) => {
+    // Extraemos el año y semestre de semestreSeleccionado.value (formato 2022-01)
+    const [añoSeleccionado, semestreSeleccionadoNumber] = semestreSeleccionado.value.split('-').map(Number);
+
+    // Extraemos el año y semestre de p.SemestrePaf (formato 2-22)
+    const semestrePafAño = 2000 + parseInt(p.SemestrePaf.split('-')[1], 10); // Convertimos '22' a 2022
+    const semestrePafNumber = parseInt(p.SemestrePaf.split('-')[0], 10);
+
+    // Comparamos los semestres y los años
+    return !historialSeleccionado.value.some(h => 
+      h.codigo == p.CodigoAsignatura || h.paf === p.CodigoPaf
+    ) && semestrePafAño === añoSeleccionado && semestrePafNumber === semestreSeleccionadoNumber;
+  })
 );
 
-const fichasPAFMatch = computed(() =>
-  persona.value.filter((p) => 
-    historialSeleccionado.value.some(h => 
-      h.codigo == p.CodigoAsignatura || h.paf === p.CodigoPaf 
-    )
-  )
+const fichasPAFMatch = computed(() => 
+  persona.value.filter((p) => {
+    // Extraemos el año y semestre de semestreSeleccionado.value (formato 2022-01)
+    const [añoSeleccionado, semestreSeleccionadoNumber] = semestreSeleccionado.value.split('-').map(Number);
+
+    // Extraemos el año y semestre de p.SemestrePaf (formato 2-22)
+    const semestrePafAño = 2000 + parseInt(p.SemestrePaf.split('-')[1], 10); // Convertimos '22' a 2022
+    const semestrePafNumber = parseInt(p.SemestrePaf.split('-')[0], 10);
+
+    // Comparamos los semestres y los años
+    return historialSeleccionado.value.some(h => 
+      h.codigo == p.CodigoAsignatura || h.paf === p.CodigoPaf
+    ) && semestrePafAño === añoSeleccionado && semestrePafNumber === semestreSeleccionadoNumber;
+  })
 );
 
 const fichasAsignaturas = computed(() =>
-persona1.value.filter((p) =>
+  persona1.value.filter((p) =>
     !historialSeleccionado.value.some((historial) => {
       const codigosA = historial.CodigoA ? historial.CodigoA.split("/") : []; // Dividir CodigoA en un arreglo
       const semestres1 = historial.semestre1 ? historial.semestre1.split("/") : []; // Dividir semestre1 en un arreglo
@@ -247,17 +272,16 @@ persona1.value.filter((p) =>
           semestres1[index] === p.semestre   // Comparar semestre correspondiente
         );
       });
-    })
+    }) && p.semestre === semestreSeleccionado.value // Comparar con semestreSeleccionado
   )
 );
-
 
 const fichasAsignaturasNo = computed(() =>
   persona1.value.filter((p) =>
     historialSeleccionado.value.some((historial) => {
       const codigosA = historial.CodigoA ? historial.CodigoA.split("/") : []; // Dividir CodigoA en un arreglo
       const semestres1 = historial.semestre1 ? historial.semestre1.split("/") : []; // Dividir semestre1 en un arreglo
-      
+
       // Verificar que ambos arreglos tengan la misma longitud
       if (codigosA.length !== semestres1.length) {
         return false;
@@ -270,12 +294,9 @@ const fichasAsignaturasNo = computed(() =>
           semestres1[index] === p.semestre   // Comparar semestre correspondiente
         );
       });
-    })
+    }) && p.semestre === semestreSeleccionado.value // Comparar con semestreSeleccionado
   )
 );
-
-
-
 
 const fichaSeleccionadaPAF = ref<Persona | null>(null);
 const fichaSeleccionadaAsignatura = ref<Horario | null>(null);
@@ -354,11 +375,10 @@ const bloquesPorDia = (dia: string, modulo: number) => {
     .filter((p) => {
       if (!p.bloque) return false;
 
-      // Excluir bloques asociados con las fichas seleccionadas en 'fichasAsignaturasNo'
-      if (fichasAsignaturasNo.value.some((ficha) => ficha.codigo_asignatura === p.codigo_asignatura && ficha.semestre === p.semestre)) {
+            // Excluir bloques asociados con las fichas seleccionadas en 'fichasAsignaturasNo'
+            if (fichasAsignaturasNo.value.some((ficha) => ficha.codigo_asignatura === p.codigo_asignatura && ficha.semestre === p.semestre)) {
         return false;
       }
-
       // Filtrar por día y módulo
       const bloques = p.bloque.split('-');
       return bloques.some((b) => {
@@ -370,20 +390,18 @@ const bloquesPorDia = (dia: string, modulo: number) => {
     .map((p) => ({
       nombre: p.nombre_asignatura,
       seccion: p.seccion,
-      color: fichasAsignaturas.value.findIndex((f) => f.codigo_asignatura === p.codigo_asignatura) % coloresAsignaturas.length,
+      color: obtenerColorAsignatura(p.codigo_asignatura, p.bloque || '', p.seccion || ''),
       ID: p.ID,
       cupo: p.Cupo,
       codigo_asignatura: p.codigo_asignatura,
       tipo: p.tipo,
       run: p.run,
       semestre: p.semestre,
-      // Crear el formato "V3-M2" con la inicial del día y el número de módulo
       bloque: (p.bloque ?? '').split('-')
         .map(b => `${b.charAt(0)}${b.slice(1)}`) // Mapear para obtener "V3", "M2", etc.
         .join('-')
     }));
 };
-
 
 const obtenerDatosPersona = async () => {
   try {
@@ -532,12 +550,7 @@ const coloresPAF = [
   '#FFC107', '#FF9800', '#FF7043', '#795548', '#607D8B'  // Tonos cálidos y neutros
 ];
 
-const coloresAsignaturas = [
-  '#C8E6C9', '#A5D6A7', '#81C784', '#66BB6A', '#4CAF50', // Tonos verdes originales
-  '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722', // Tonos cálidos (amarillos y naranjas)
-  '#03A9F4', '#2196F3', '#3F51B5', '#673AB7', '#9C27B0', // Tonos fríos (azules y violetas)
-  '#E91E63', '#F44336', '#795548', '#9E9E9E', '#607D8B'  // Tonos cálidos oscuros y neutros
-];
+
 
 </script>
 
