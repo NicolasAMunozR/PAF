@@ -29,7 +29,7 @@ type Pipelsoft struct {
 	CantidadHorasPaf    int       `gorm:"type:int"`
 	Jerarquia           string    `gorm:"type:text"`
 	Semestre            string    `gorm:"type:text"`
-	UltimaModificacion  time.Time `gorm:"type:Date"`
+	UltimaModificacion  time.Time `gorm:"type:timestamp"`
 
 	Categoria string `gorm:"type:text"`
 

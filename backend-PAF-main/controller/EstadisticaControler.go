@@ -142,30 +142,31 @@ func (c *EstadisticasController) ObtenerFrecuenciaNombreUnidadMenorPorUnidadMayo
 	ctx.JSON(http.StatusOK, frecuencia)
 }
 
+// ObtenerPafActivasPorUnidadHandler maneja el conteo de registros y RUNs únicos
 func (c *EstadisticasController) ObtenerPafActivasPorUnidadHandler(ctx *gin.Context) {
-	// Obtener la unidad mayor desde los parámetros de la URL
+	// Obtener el parámetro unidadMayor desde la URL
 	unidadMayor := ctx.Param("unidadMayor")
-
 	if unidadMayor == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro unidadMayor es obligatorio"})
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "El parámetro unidadMayor es requerido",
+		})
 		return
 	}
 
 	// Llamar al servicio para obtener los datos
-	count, err := c.Service.ContarRegistrosPorUnidadMayor(unidadMayor)
+	count, totalRUNs, err := c.Service.ContarRegistrosPorUnidadMayorConRuns(unidadMayor)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
-	// Crear una respuesta
-	response := gin.H{
-		"unidad_mayor": unidadMayor,
-		"paf_activas":  count,
-	}
-
-	// Enviar la respuesta al cliente
-	ctx.JSON(http.StatusOK, response)
+	// Responder con los resultados
+	ctx.JSON(http.StatusOK, gin.H{
+		"totalRegistros": count,
+		"totalRUNs":      totalRUNs,
+	})
 }
 
 // ObtenerRUNUnicosExcluidosHandler obtiene los RUN únicos de ProfesorDB que no están en Pipelsoft

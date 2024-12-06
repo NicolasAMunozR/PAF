@@ -49,7 +49,7 @@ type HistorialPafAceptadas struct {
 	ProfesorCodigoAsignatura string    `json:"codigo_asignatura"` // codigo de la asignatura
 	Seccion                  string    `json:"seccion"`           // Sección o grupo
 	Cupo                     int       `json:"cupo"`              // Capacidad del grupo
-	UltimaModificacion       time.Time `gorm:"type:Date"`
+	UltimaModificacion       time.Time `gorm:"type:timestamp"`
 
 	// Bloques: Lista de objetos BloqueDTO almacenados como JSONB
 	Bloque json.RawMessage `gorm:"type:jsonb"`

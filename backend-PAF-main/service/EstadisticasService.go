@@ -35,11 +35,11 @@ func NewEstadisticasService(dbPersonal *gorm.DB) *EstadisticasService {
 func (s *EstadisticasService) ObtenerEstadisticas() (*EstadisticasResponse, error) {
 	var resp EstadisticasResponse
 
-	// Contar todos los registros en la tabla profesor_dbs
-	if err := s.DB.Model(&models.Contrato{}).Count(&resp.TotalProfesores).Error; err != nil {
-		return nil, fmt.Errorf("error al contar los profesores: %w", err)
+	// Contar los RUN únicos en la tabla profesor_dbs
+	if err := s.DB.Model(&models.ProfesorDB{}).
+		Distinct("run").Count(&resp.TotalProfesores).Error; err != nil {
+		return nil, fmt.Errorf("error al contar los profesores únicos por RUN: %w", err)
 	}
-
 	// Contar todos los registros en la tabla pipelsofts
 	if err := s.DB.Model(&models.Pipelsoft{}).Count(&resp.TotalPipelsoft).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los registros en pipelsofts: %w", err)
@@ -149,11 +149,10 @@ func (s *EstadisticasService) ContarRegistrosExcluyendoEstados() (int64, float64
 		Count(&count).Error; err != nil {
 		return 0, 0, fmt.Errorf("error al contar los registros excluyendo estados: %w", err)
 	}
-
-	// Contar el total de profesores
+	// Contar el total de RUN únicos en la tabla profesor_dbs
 	if err := s.DB.Model(&models.ProfesorDB{}).
-		Count(&totalProfesores).Error; err != nil {
-		return 0, 0, fmt.Errorf("error al contar el total de profesores: %w", err)
+		Distinct("run").Count(&totalProfesores).Error; err != nil {
+		return 0, 0, fmt.Errorf("error al contar el total de profesores únicos por RUN: %w", err)
 	}
 
 	// Calcular el porcentaje
@@ -251,28 +250,36 @@ func (s *EstadisticasService) ObtenerFrecuenciaNombreUnidadMenorPorUnidadMayor(n
 	return frecuencia, nil
 }
 
-// ContarRegistrosPorUnidadMayor cuenta los registros en Pipelsoft de una unidad mayor específica
-// donde cod_estado no sea "F1", "F9", o "A9", y calcula el porcentaje respecto al total de profesores en Contrato.
-func (s *EstadisticasService) ContarRegistrosPorUnidadMayor(unidadMayor string) (int64, error) {
-	var count int64
-	var totalProfesores int64
+func (s *EstadisticasService) ContarRegistrosPorUnidadMayorConRuns(unidadMayor string) (int64, int64, error) {
+	var count int64     // Conteo de registros finales en Pipelsoft
+	var totalRUNs int64 // Conteo de RUNs únicos
 
-	// Contar los registros en Pipelsoft para la unidad mayor especificada donde cod_estado no sea "F1", "F9", o "A9"
+	// Paso 1: Obtener RUNs únicos de ProfesorDB
+	var runsProfesorDB []string
+	if err := s.DB.Model(&models.ProfesorDB{}).
+		Distinct("run").
+		Pluck("run", &runsProfesorDB).Error; err != nil {
+		return 0, 0, fmt.Errorf("error al obtener RUNs de ProfesorDB: %w", err)
+	}
+
+	// Paso 2: Filtrar Pipelsoft por RUNs coincidentes
 	if err := s.DB.Model(&models.Pipelsoft{}).
+		Where("run_empleado IN ?", runsProfesorDB). // Comparar RUNs
 		Where("cod_estado NOT IN ?", []string{"F1", "F9", "A9"}).
 		Where("nombre_unidad_mayor = ?", unidadMayor).
 		Count(&count).Error; err != nil {
-		return 0, fmt.Errorf("error al contar los registros de la unidad mayor %s: %w", unidadMayor, err)
+		return 0, 0, fmt.Errorf("error al contar registros filtrados de Pipelsoft: %w", err)
 	}
 
-	// Contar el total de profesores en Contrato para la misma unidad mayor
-	if err := s.DB.Model(&models.Contrato{}).
-		Where("unidad_mayor = ?", unidadMayor).
-		Count(&totalProfesores).Error; err != nil {
-		return 0, fmt.Errorf("error al contar el total de profesores en contratos de la unidad mayor %s: %w", unidadMayor, err)
+	// Paso 3: Contar los RUNs únicos coincidentes entre ProfesorDB y Pipelsoft
+	if err := s.DB.Model(&models.Pipelsoft{}).
+		Where("run_empleado IN ?", runsProfesorDB).
+		Distinct("run_empleado").
+		Count(&totalRUNs).Error; err != nil {
+		return 0, 0, fmt.Errorf("error al contar RUNs únicos en Pipelsoft: %w", err)
 	}
 
-	return count, nil
+	return count, totalRUNs, nil
 }
 
 // NormalizarRun elimina el guion y el número posterior, además de manejar el prefijo "0".
