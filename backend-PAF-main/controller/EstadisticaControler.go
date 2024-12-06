@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/NicolasAMunozR/PAF/backend-PAF/service" // Cambiar según la ruta correcta del paquete
@@ -165,4 +166,69 @@ func (c *EstadisticasController) ObtenerPafActivasPorUnidadHandler(ctx *gin.Cont
 
 	// Enviar la respuesta al cliente
 	ctx.JSON(http.StatusOK, response)
+}
+
+// ObtenerRUNUnicosExcluidosHandler obtiene los RUN únicos de ProfesorDB que no están en Pipelsoft
+func (ctrl *EstadisticasController) ObtenerRUNUnicosExcluidosHandler(c *gin.Context) {
+	// Llamar al servicio para obtener los RUN excluidos
+	profesorRuns, excluidos, err := ctrl.Service.ObtenerRUNUnicosExcluidos()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener los RUNs excluidos"})
+		return
+	}
+
+	// Retornar los resultados
+	c.JSON(http.StatusOK, gin.H{
+		"profesorRuns": profesorRuns,
+		"excluidos":    excluidos,
+	})
+}
+
+// CompararRunsHandler compara los RUN excluidos con los RUN en Contrato
+func (ctrl *EstadisticasController) CompararRunsHandler(c *gin.Context) {
+	// Obtener los RUNs excluidos desde el parámetro de la solicitud
+	var runsExcluidos []string
+	if err := c.ShouldBindJSON(&runsExcluidos); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Parámetros inválidos"})
+		return
+	}
+
+	// Llamar al servicio para comparar los RUNs excluidos
+	noEncontrados, cantidad, err := ctrl.Service.CompararRuns(runsExcluidos)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al comparar los RUNs"})
+		return
+	}
+
+	// Retornar los resultados
+	c.JSON(http.StatusOK, gin.H{
+		"noEncontrados": noEncontrados,
+		"cantidad":      cantidad,
+	})
+}
+
+// ObtenerYCompararRunsHandler maneja la ruta para obtener los RUNs únicos de ProfesorDB que no están en Pipelsoft
+// y compara esos RUNs con los RUNs en los contratos.
+func (ctrl *EstadisticasController) ObtenerYCompararRunsHandler(c *gin.Context) {
+	// Obtener los RUNs excluidos de ProfesorDB que no están en Pipelsoft
+	_, excluidos, err := ctrl.Service.ObtenerRUNUnicosExcluidos()
+	if err != nil {
+		log.Println("Error al obtener los RUNs excluidos:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener los RUNs excluidos"})
+		return
+	}
+
+	// Comparar los RUNs excluidos con los RUNs en los contratos
+	noEncontrados, cantidad, err := ctrl.Service.CompararRuns(excluidos)
+	if err != nil {
+		log.Println("Error al comparar los RUNs:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al comparar los RUNs"})
+		return
+	}
+
+	// Retornar los resultados en el formato solicitado
+	c.JSON(http.StatusOK, gin.H{
+		"noEncontrados": noEncontrados,
+		"cantidad":      cantidad,
+	})
 }

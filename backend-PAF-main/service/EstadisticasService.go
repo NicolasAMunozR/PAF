@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/NicolasAMunozR/PAF/backend-PAF/models" // Cambiar con el paquete donde se encuentran los modelos
 	"gorm.io/gorm"
@@ -272,4 +273,71 @@ func (s *EstadisticasService) ContarRegistrosPorUnidadMayor(unidadMayor string) 
 	}
 
 	return count, nil
+}
+
+// NormalizarRun elimina el guion y el número posterior, además de manejar el prefijo "0".
+func NormalizarRun(run string) string {
+	// Dividir en partes por el guion
+	parts := strings.Split(run, "-")
+	// Tomar la primera parte y eliminar ceros iniciales
+	if len(parts) > 0 {
+		return strings.TrimLeft(parts[0], "0")
+	}
+	return ""
+}
+
+// ObtenerRUNUnicosExcluidos obtiene los RUN únicos de ProfesorDB que no están en Pipelsoft.
+func (s *EstadisticasService) ObtenerRUNUnicosExcluidos() ([]string, []string, error) {
+	// Obtener los RUN únicos de ProfesorDB
+	var profesorRuns []string
+	if err := s.DB.Model(&models.ProfesorDB{}).Distinct("run").Pluck("run", &profesorRuns).Error; err != nil {
+		return nil, nil, err
+	}
+
+	// Obtener los RunEmpleado de Pipelsoft
+	var pipelsoftEmpleados []string
+	if err := s.DB.Model(&models.Pipelsoft{}).Pluck("run_empleado", &pipelsoftEmpleados).Error; err != nil {
+		return nil, nil, err
+	}
+
+	// Normalizar los RunEmpleado
+	normalizados := make(map[string]bool)
+	for _, run := range pipelsoftEmpleados {
+		normalizados[NormalizarRun(run)] = true
+	}
+
+	// Filtrar los RUN únicos de ProfesorDB que no están en Pipelsoft
+	var excluidos []string
+	for _, run := range profesorRuns {
+		if !normalizados[NormalizarRun(run)] {
+			excluidos = append(excluidos, run)
+		}
+	}
+
+	return profesorRuns, excluidos, nil
+}
+
+// CompararRuns compara los RUN excluidos con los RunDocente en Contrato.
+func (s *EstadisticasService) CompararRuns(runsExcluidos []string) ([]string, int, error) {
+	// Obtener todos los RunDocente de Contrato
+	var runDocentes []string
+	if err := s.DB.Model(&models.Contrato{}).Distinct("run_docente").Pluck("run_docente", &runDocentes).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Crear un mapa para búsqueda rápida de RunDocente
+	runDocenteMap := make(map[string]bool)
+	for _, run := range runDocentes {
+		runDocenteMap[run] = true
+	}
+
+	// Filtrar los RUN excluidos que no están en Contrato
+	var noEncontrados []string
+	for _, run := range runsExcluidos {
+		if !runDocenteMap[run] {
+			noEncontrados = append(noEncontrados, run)
+		}
+	}
+
+	return noEncontrados, len(noEncontrados), nil
 }
