@@ -178,7 +178,7 @@ watch(filtros, (newFilters) => {
   } else if (isUnidadMayorPAF.value) {
     // Si es UnidadMayorPAF, excluye 'nombreUnidadMenor'
     filtersToEmit = Object.fromEntries(
-      Object.entries(newFilters).filter(([key]) => key == 'nombreUnidadMenor')
+      Object.entries(newFilters).filter(([key]) => key == 'nombreUnidadMenor' || key == 'run')
     );
     emit('filter', filtersToEmit);
   } else {
