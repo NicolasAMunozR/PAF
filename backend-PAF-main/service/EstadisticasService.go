@@ -257,14 +257,14 @@ func (s *EstadisticasService) ContarRegistrosPorUnidadMayorConRuns(unidadMayor s
 	// Paso 1: Obtener RUNs únicos de ProfesorDB
 	var runsProfesorDB []string
 	if err := s.DB.Model(&models.ProfesorDB{}).
-		Distinct("run").
-		Pluck("run", &runsProfesorDB).Error; err != nil {
+		Distinct("RUN"). // Nombre del campo en el modelo de backend
+		Pluck("RUN", &runsProfesorDB).Error; err != nil {
 		return 0, 0, fmt.Errorf("error al obtener RUNs de ProfesorDB: %w", err)
 	}
 
 	// Paso 2: Filtrar Pipelsoft por RUNs coincidentes
 	if err := s.DB.Model(&models.Pipelsoft{}).
-		Where("run_empleado IN ?", runsProfesorDB). // Comparar RUNs
+		Where("run_empleado IN ?", runsProfesorDB). // Nombre del campo en la base de datos
 		Where("cod_estado NOT IN ?", []string{"F1", "F9", "A9"}).
 		Where("nombre_unidad_mayor = ?", unidadMayor).
 		Count(&count).Error; err != nil {
@@ -273,8 +273,8 @@ func (s *EstadisticasService) ContarRegistrosPorUnidadMayorConRuns(unidadMayor s
 
 	// Paso 3: Contar los RUNs únicos coincidentes entre ProfesorDB y Pipelsoft
 	if err := s.DB.Model(&models.Pipelsoft{}).
-		Where("run_empleado IN ?", runsProfesorDB).
-		Distinct("run_empleado").
+		Where("run_empleado IN ?", runsProfesorDB). // Nombre del campo en la base de datos
+		Distinct("run_empleado").                   // Nombre del campo en la base de datos
 		Count(&totalRUNs).Error; err != nil {
 		return 0, 0, fmt.Errorf("error al contar RUNs únicos en Pipelsoft: %w", err)
 	}
