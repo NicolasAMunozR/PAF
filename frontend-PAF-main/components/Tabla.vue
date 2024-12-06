@@ -15,12 +15,12 @@
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
-        <tr v-for="persona in data" :key="persona.Id" :class="persona.rowClass" class="hover:bg-gray-50 transition-colors">
+        <tr v-for="persona in paginatedData" :key="persona.Id" :class="persona.rowClass" class="hover:bg-gray-50 transition-colors">
           <td class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoPAF }} {{ persona.IdPaf }}</td>
           <td class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoAsignatura }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.Run }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.NombreAsignatura }} {{ persona.nombre_asignatura }}</td>
-          <td class="px-4 py-3 text-gray-700">{{ persona.EstadoProceso }} {{ persona.estado_proceso }}</td>
+          <td class="px-4 py-3 text-gray-700">{{ persona.DesEstado }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.seccion }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.Cupo }} {{ persona.cupo }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.Semestre }} {{ persona.SemestrePaf }}</td>
@@ -33,6 +33,21 @@
         </tr>
       </tbody>
     </table>
+
+    <!-- Paginación -->
+    <div class="pagination">
+      <button 
+        @click="goToPage(currentPage - 1)" 
+        :disabled="currentPage === 1">
+        Anterior
+      </button>
+      <span>Página {{ currentPage }} de {{ totalPages }}</span>
+      <button 
+        @click="goToPage(currentPage + 1)" 
+        :disabled="currentPage === totalPages">
+        Siguiente
+      </button>
+    </div>
   </div>
 </template>
 
@@ -48,13 +63,33 @@ export default {
       default: true
     }
   },
+  data() {
+    return {
+      currentPage: 1,         // Página actual
+      itemsPerPage: 10,       // Número de elementos por página
+    };
+  },
+  computed: {
+    // Paginación: calculamos los elementos que se mostrarán según la página
+    paginatedData() {
+      const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+      const endIndex = startIndex + this.itemsPerPage;
+      return this.data.slice(startIndex, endIndex);
+    },
+    // Número total de páginas
+    totalPages() {
+      return Math.ceil(this.data.length / this.itemsPerPage);
+    }
+  },
   methods: {
-    handleRowStatusChanged(persona) {
-      // Si necesitas manejar cambios adicionales en el estado de las filas, puedes hacerlo aquí
+    goToPage(page) {
+      if (page < 1 || page > this.totalPages) return;
+      this.currentPage = page;
     }
   }
 }
 </script>
+
 
 <style scoped>
 /* Colores institucionales */
@@ -124,5 +159,30 @@ tbody td {
 
 .hover\:bg-gray-50:hover {
   background-color: #f1f5f9;
+}
+/* Paginación */
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pagination button {
+  padding: 8px 16px;
+  background-color: #EA7600;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  font-size: 1rem;
 }
 </style>

@@ -37,6 +37,7 @@ interface Persona {
   Cupo?: number;
   Id: number;
   SemestrePaf: string;
+  DesEstado: string;
 }
 
 const personas = ref<Persona[]>([]);
@@ -66,7 +67,8 @@ const filteredPersonas = computed(() => {
       persona.CodigoPAF?.toString().toLowerCase().includes(filtros.value.codigoPAF.toString().toLowerCase() || '') &&
       persona.Run?.toLowerCase().includes(filtros.value.run.toLowerCase() || '') &&
       (filtros.value.jerarquia ? persona.Jerarquia === filtros.value.jerarquia : true) &&
-      persona.FechaUltimaModificacionProceso?.toLowerCase().includes(filtros.value.fechaUltimaModificacionProceso.toLowerCase() || '')
+      persona.FechaUltimaModificacionProceso?.toLowerCase().includes(filtros.value.fechaUltimaModificacionProceso.toLowerCase() || '') &&
+      persona.SemestrePaf?.toLowerCase().includes(filtros.value.semestre.toLowerCase() || '')
     );
   });
 
@@ -104,6 +106,7 @@ onMounted(async () => {
       Calidad: item.PipelsoftData.Categoria,
       Jerarquia: item.PipelsoftData.Jerarquia,
       EstadoProceso: item.PipelsoftData.CodEstado,
+      DesEstado: item.PipelsoftData.DesEstado,
       SemestrePaf: item.PipelsoftData.Semestre,
       Run: item.PipelsoftData.RunEmpleado,
       Cupo,

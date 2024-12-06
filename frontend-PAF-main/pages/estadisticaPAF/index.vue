@@ -37,7 +37,7 @@
     </div>
 
     <!-- Gráficos -->
-    <div v-if="profesoresChartData && pafChartData && pafPorEstadoChartData" class="grafico-container">
+    <div v-if="profesoresChartData && pafChartData" class="grafico-container">
       <div class="pie-chart">
         <h4 class="subtitulo">Profesores con y sin PAF</h4>
         <Pie :data="profesoresChartData" />
@@ -46,10 +46,12 @@
         <h4 class="subtitulo">Profesores con PAF y Profesores con PAF activas</h4>
         <Pie :data="pafChartData" />
       </div>
-      <div class="pie-chart">
-        <h4 class="subtitulo">Porcentaje de PAF por estado</h4>
-        <Pie :data="pafPorEstadoChartData" />
-      </div>
+    </div>
+    <div class="grafico">
+      <div v-if="pafPorEstadoChartData" class="pie-chart1">
+      <h4 class="subtitulo">Cantidad de PAF por Estado</h4>
+      <Pie :data="pafPorEstadoChartData" />
+    </div>
     </div>
     <br />
     <br />
@@ -107,11 +109,41 @@ const fetchCantidadPafSai = async () => {
 const fetchCantidadPafPorEstado = async () => {
   try {
     const response = await $axios.get('/estadisticas');
-
-    // Ordenar el objeto EstadoProcesoCount para que A9 sea el último
+    console.log(response.data.EstadoProcesoCount);
+    
     const estadoProcesoCount = response.data.EstadoProcesoCount;
-    const { A9, ...otrosEstados } = estadoProcesoCount; // Extraer A9 y el resto
-    cantidadPafPorEstado.value = { ...otrosEstados, A9 }; // Reorganizar con A9 al final
+
+    // Normalizar las claves
+    const normalizedEstadoProcesoCount = Object.fromEntries(
+      Object.entries(estadoProcesoCount).map(([key, value]) => [
+        key.replace(/\s+/g, '-').replace(/\./g, '-'), // Reemplaza espacios por guiones y puntos por guiones bajos
+        value
+      ])
+    );
+
+    // Definir el orden de las claves
+    const ordenCorrecto = [
+      'Sin-Solicitar',
+      'Enviada-al-Interesado',
+      'Enviada-al-Validador',
+      'Aprobada-por-Validador',
+      'Rechazada-por-Validador',
+      'Aprobada-por-Dir--Pregrado',
+      'Rechazada-por-Dir--de-Pregrado',
+      'Aprobada-por-RRHH',
+      'Rechazada-por-RRHH',
+      'Anulada'
+    ];
+
+    // Ordenar las claves del objeto según el arreglo 'ordenCorrecto'
+    const orderedEstadoProcesoCount = Object.fromEntries(
+      ordenCorrecto.map(key => [key, normalizedEstadoProcesoCount[key]])
+    );
+
+// Ordenar el objeto EstadoProcesoCount para que A9 sea el último
+
+cantidadPafPorEstado.value = orderedEstadoProcesoCount;
+
 
     totalPaf.value = Object.values(cantidadPafPorEstado.value).reduce((a, b) => a + b, 0);
     totalPorcPaf.value = Object.values(cantidadPafPorEstado.value).map((value) =>
@@ -273,12 +305,25 @@ onMounted(async () => {
   max-width: 500px;
   height: 300px;
 }
+.grafico {
+  display: flex;
+  justify-content: center;  /* Centra horizontalmente */
+  align-items: center;      /* Centra verticalmente */
+  height: 500px;            /* Hace que el contenedor ocupe el 100% de la altura de la ventana */
+  width: 100%;              /* Asegura que el contenedor ocupe el 100% del ancho */
+}
+
+.pie-chart1 {
+  margin: 2rem;
+  width: 80%;  /* Ajusta el ancho para que sea más flexible */
+  max-width: 500px;  /* Establece un tamaño máximo */
+  height: auto;  /* Asegura que el gráfico se ajuste proporcionalmente */
+}
 
 .bar-chart {
   margin: 2rem;
   max-width: 100%;  /* Aumenté el ancho para las barras */
 }
-
 
 /* Estados */
 .estado-linea {
@@ -302,44 +347,44 @@ onMounted(async () => {
   background-color: #333333;
 }
 
-.estado-A1 {
-  background-color: #66BB6A;
+.estado-Anulada {
+  background-color: #394049; /* Verde claro */
 }
 
-.estado-A2 {
-  background-color: #FFA726;
+.estado-Aprobada-por-Dir--Pregrado {
+  background-color: #76095b; /* Naranja claro */
 }
 
-.estado-A3 {
-  background-color: #AB47BC;
+.estado-Aprobada-por-RRHH {
+  background-color: #6d8a0c; /* Morado claro */
 }
 
-.estado-A9 {
-  background-color: #394049;
+.estado-Aprobada-por-Validador {
+  background-color: #0db58b; /* Gris oscuro */
 }
 
-.estado-B1 {
-  background-color: #EA7600;
+.estado-Enviada-al-Interesado {
+  background-color: #42A5F5; /* Naranja oscuro */
 }
 
-.estado-B9 {
-  background-color: #C8102E;
+.estado-Enviada-al-Validador {
+  background-color: #C8102E; /* Rojo */
 }
 
-.estado-C1D {
-  background-color: #42A5F5;
+.estado-Rechazada-por-Dir--de-Pregrado {
+  background-color: #EA7600; /* Azul claro */
 }
 
-.estado-C9D {
-  background-color: #0db58b;
+.estado-Rechazada-por-RRHH {
+  background-color: #AB47BC; /* Verde agua */
 }
 
-.estado-F1 {
-  background-color: #6d8a0c;
+.estado-Rechazada-por-Validador {
+  background-color: #FFA726; /* Verde oliva */
 }
 
-.estado-F9 {
-  background-color: #76095b;
+.estado-Sin-Solicitar {
+  background-color: #66BB6A; /* Morado oscuro */
 }
 
 .detalles-container {
@@ -351,8 +396,8 @@ onMounted(async () => {
 }
 
 .estado-flecha {
-  margin: 0 1rem;
-  font-size: 1.5rem;
+  margin: 0 0rem;
+  font-size: 1rem;
   color: #394049;
   align-self: center;
 }

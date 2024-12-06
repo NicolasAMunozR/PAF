@@ -26,14 +26,14 @@ const { $axios } = useNuxtApp() as unknown as { $axios: typeof import('axios').d
 interface Persona {
   ID: number;
   IdPaf: number;
-  codigo_asignatura: string;
+  CodigoAsignatura: string;
   Run: string;
   EstadoProceso: string;
   Calidad: string;
   Jerarquia: string;
   FechaInicioContrato: string;
   FechaFinContrato: string;
-  nombre_asignatura: string;
+  NombreAsignatura: string;
   cupo: number;
   codigo_modificacion: number;
   bandera_modificacion: number;
@@ -41,7 +41,7 @@ interface Persona {
   seccion: string;
   rowClass?: string;
   SemestrePaf: string;
-
+  DesEstado: string;
 }
 
 const personas = ref<Persona[]>([]);
@@ -52,6 +52,8 @@ const filtros = ref({
   estadoProceso: '',
   calidad: '',
   jerarquia: '',
+  semestre: '',
+  nombreAsignatura: '',
 });
 const sortBy = ref('nombres');
 const sortOrder = ref('asc');
@@ -61,12 +63,14 @@ const filteredPersonas = computed(() => {
   warnings.value = [];
   let filtered = personas.value.filter(persona => {
     return (
-      persona.codigo_asignatura.toLowerCase().includes(filtros.value.codigoAsignatura.toLowerCase()) &&
+      persona.NombreAsignatura?.toLowerCase().includes(filtros.value.nombreAsignatura.toLowerCase() || '') &&
+      persona.CodigoAsignatura?.toLowerCase().includes(filtros.value.codigoAsignatura.toLowerCase() || '') &&
       (filtros.value.estadoProceso ? persona.EstadoProceso.toString() === filtros.value.estadoProceso : true) &&
       (filtros.value.calidad ? persona.Calidad === filtros.value.calidad : true) &&
       persona.IdPaf.toString().toLowerCase().includes(filtros.value.codigoPAF.toLowerCase()) &&
       persona.Run.toLowerCase().includes(filtros.value.run.toLowerCase()) &&
-      (filtros.value.jerarquia ? persona.Jerarquia === filtros.value.jerarquia : true)
+      (filtros.value.jerarquia ? persona.Jerarquia === filtros.value.jerarquia : true) &&
+      persona.SemestrePaf?.toLowerCase().includes(filtros.value.semestre.toLowerCase() || '')
     );
   });
 

@@ -43,22 +43,33 @@
         placeholder="Filtrar por código de asignatura"
       />
     </div>
+
+    <!-- Filtro semestre -->
+    <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF">
+      <label for="semestre" class="label">Semestre</label>
+      <input
+        v-model="filtros.semestre"
+        type="text"
+        class="input"
+        placeholder="Filtrar por código Semestre"
+      />
+    </div>
     
     <!-- Filtro Estado de Proceso -->
     <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF">
       <label for="estadoProceso" class="label">Estado de Proceso</label>
       <select id="estadoProceso" v-model="filtros.estadoProceso" class="select">
         <option value="">Todos</option>
-        <option value="A1">Estado A1</option>
-        <option value="A2">Estado A2</option>
-        <option value="A3">Estado A3</option>
-        <option value="B1">Estado B1</option>
-        <option value="B9">Estado B9</option>
-        <option value="C1D">Estado C1D</option>
-        <option value="C9D">Estado C9D</option>
-        <option value="F1">Estado F1</option>
-        <option value="F9">Estado F9</option>
-        <option value="A9">Estado A9</option>
+        <option value="A1">Estado: Sin Solicitar</option>
+        <option value="A2">Estado: Enviada al Interesado</option>
+        <option value="A3">Estado: Enviada al Validador</option>
+        <option value="B1">Estado: Aprobada por Validador</option>
+        <option value="B9">Estado: Rechazada por Validador</option>
+        <option value="C1D">Estado: Aprobada por Dir. Pregrado</option>
+        <option value="C9D">Estado: Rechazada por Dir. de Pregrado</option>
+        <option value="F1">Estado: Aprobada por RRHH</option>
+        <option value="F9">Estado: Rechazada por RRHH</option>
+        <option value="A9">Estado: Anulada</option>
       </select>
     </div>
     
@@ -72,7 +83,7 @@
     </div>
 
     <!-- Filtro Nombre Unidad Mayor (solo visible si es seguimientoPAF) -->
-    <div class="filter-item" v-if="isSeguimientoPAF && !isUnidadMayorPAF">
+    <div class="filter-item" v-if="isSeguimientoPAF">
       <label for="nombreUnidadMayor" class="label">Nombre Unidad Mayor</label>
       <input
         v-model="filtros.nombreUnidadMayor"
@@ -82,8 +93,8 @@
       />
     </div>
     
-    <!-- Filtro Nombre Unidad Menor (solo visible si es seguimientoPAF) -->
-    <div class="filter-item" v-if="isSeguimientoPAF || isUnidadMayorPAF" >
+    <!-- Filtro Nombre Unidad Menor (solo visible si es seguimientoPAF o unidadMayorPAF) -->
+    <div class="filter-item" v-if="isSeguimientoPAF || isUnidadMayorPAF">
       <label for="nombreUnidadMenor" class="label">Nombre Unidad Menor</label>
       <input
         v-model="filtros.nombreUnidadMenor"
@@ -116,6 +127,8 @@
 
 <script setup lang="ts">
 import { ref, watch, defineEmits, onMounted } from 'vue'
+import UnidadMayorPAF from '../pages/unidadMayorPAF/index.vue'
+import SeguimientoPAF from '../pages/seguimientoPAF/index.vue'
 import { useRoute } from 'vue-router'
 
 const emit = defineEmits<{
@@ -127,57 +140,65 @@ const filtros = ref({
   codigoPAF: '',
   run: '',
   codigoAsignatura: '',
+  semestre: '',
   estadoProceso: '',
   calidad: '',
   nombreAsignatura: '',
   fechaUltimaModificacionProceso: '',
+  nombreUnidadMenor: '',
   nombreUnidadMayor: '',
-  nombreUnidadMenor: ''
 })
 
 const sortBy = ref('nombres')
 const sortOrder = ref('asc')
 
-// Detecta si estamos en seguimientoPAF.vue
-const route = useRoute()
-const isSeguimientoPAF = ref(false)
-const isUnidadMayorPAF = ref(false)
+const routes = [
+  { path: '/seguimientoPAF', name: 'seguimientoPAF', component: SeguimientoPAF },
+  { path: '/unidadMayorPAF', name: 'unidadMayorPAF', component: UnidadMayorPAF },
+  // otras rutas...
+];
+const route = useRoute();
+const isSeguimientoPAF = ref(false);
+const isUnidadMayorPAF = ref(false);
 
-onMounted(() => {
-  isSeguimientoPAF.value = route.name === 'seguimientoPAF'
-  isUnidadMayorPAF.value = route.name === 'unidadMayorPAF'
-})
+watchEffect(() => {
+  const currentRoute = useRoute().name;
+  isSeguimientoPAF.value = currentRoute === 'seguimientoPAF';
+  isUnidadMayorPAF.value = currentRoute === 'unidadMayorPAF';
+});
 
-watch(filtros, (newFilters) => {
-  // Si no es seguimientoPAF, excluye los filtros adicionales
-  const filtersToEmit = isSeguimientoPAF.value
-    ? newFilters
-    : Object.fromEntries(
-        Object.entries(newFilters).filter(([key]) => key !== 'nombreUnidadMayor' && key !== 'nombreUnidadMenor')
-      )
-  emit('filter', filtersToEmit)
-}, { deep: true })
 
 watch(filtros, (newFilters) => {
-  const filtersToEmit = isUnidadMayorPAF.value
-    ? newFilters
-    : Object.fromEntries(
-        Object.entries(newFilters).filter(([key]) => key !== 'nombreUnidadMenor')
-      )
-  emit('filter', filtersToEmit)
-}, { deep: true })
+  let filtersToEmit: Partial<typeof filtros.value> = { ...newFilters };
+
+  // Filtra campos según las rutas
+  if (isSeguimientoPAF.value) {
+    // Si es seguimientoPAF, emite todos los filtros
+    emit('filter', filtersToEmit);
+  } else if (isUnidadMayorPAF.value) {
+    // Si es UnidadMayorPAF, excluye 'nombreUnidadMenor'
+    filtersToEmit = Object.fromEntries(
+      Object.entries(newFilters).filter(([key]) => key == 'nombreUnidadMenor')
+    );
+    emit('filter', filtersToEmit);
+  } else {
+    // En cualquier otro caso, emite los filtros sin cambios
+    emit('filter', filtersToEmit);
+  }
+}, { deep: true });
 
 const resetFilters = () => {
   filtros.value = {
     codigoPAF: '',
     run: '',
     codigoAsignatura: '',
+    semestre: '',
     estadoProceso: '',
     calidad: '',
     nombreAsignatura: '',
     fechaUltimaModificacionProceso: '',
+    nombreUnidadMenor: '',
     nombreUnidadMayor: '',
-    nombreUnidadMenor: ''
   }
   emit('filter', filtros.value)
 }

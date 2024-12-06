@@ -79,7 +79,6 @@ const run = ref<string>("");
 const contratos = ref<any[]>([]);
 const errorMessage = ref('');
 const filtros = ref({
-  nombreUnidadMayor: '',
   nombreUnidadMenor: '',
   run: '',
 });
@@ -121,7 +120,6 @@ const sortData = (newSortBy: string, newSortOrder: string) => {
 const filteredPersonas = computed(() => {
   let filtered = contratos.value.filter(contrato => {
     return (
-      (contrato.PipelsoftData.NombreUnidadMayor || '').toLowerCase().includes((filtros.value.nombreUnidadMayor || '').toLowerCase()) &&
       (contrato.PipelsoftData.NombreUnidadMenor || '').toLowerCase().includes((filtros.value.nombreUnidadMenor || '').toLowerCase()) &&
       (contrato.PipelsoftData.RunEmpleado || '').toLowerCase().includes((filtros.value.run || '').toLowerCase())
     );
