@@ -53,7 +53,7 @@
                           v-for="(bloque, idx) in bloquesPorDia(dia, index + 1)"
                           :key="bloque.nombre"
                           class="bloque"
-                          :style="{ backgroundColor: bloque.color, marginBottom: '10px' }"
+                         :style="{ backgroundColor: obtenerColorAsignatura(bloque.codigo_asignatura) }"
                         >
                           <label>
                             <input
@@ -75,7 +75,7 @@
                       v-for="(bloque, bloqueIndex) in bloquesPorDia(dia, index + 1)"
                       :key="`${bloque.nombre}-${bloqueIndex}`"
                       class="bloque"
-                      :style="{ backgroundColor: bloque.color }"
+                       :style="{ backgroundColor: obtenerColorAsignatura(bloque.codigo_asignatura) }"
                     >
                       <label>
                         <input
@@ -142,11 +142,10 @@
       <h2 class="sub-title">Horario Asignatura</h2>
       <div v-if="fichasAsignaturas.length > 0">
         <div
-          v-for="(p, index) in fichasAsignaturas"
+          v-for="(p, index, bloque) in fichasAsignaturas"
           :key="index"
           class="card"
           :style="{ backgroundColor: fichaSeleccionadaAsignatura === p ? '#B3E5FC' : coloresAsignaturas[index % coloresAsignaturas.length] }"
-          
         >
           <p><strong>Código de Asignatura:</strong> {{ p.codigo_asignatura }}</p>
           <p><strong>Nombre de Asignatura:</strong> {{ p.nombre_asignatura }}</p>
@@ -184,6 +183,12 @@ const cerrarTodosLosBloques = () => {
   });
 };
 
+const obtenerColorAsignatura = (codigoAsignatura: string) => {
+  const index = fichasAsignaturas.value.findIndex(
+    (asignatura) => asignatura.codigo_asignatura === codigoAsignatura
+  );
+  return coloresAsignaturas[index % coloresAsignaturas.length] || "#E0E0E0";
+};
 
 // Agregar y remover el evento global
 onMounted(() => {
@@ -225,11 +230,11 @@ const fichasPAFMatch = computed(() =>
 );
 
 const fichasAsignaturas = computed(() =>
-  persona1.value.filter((p) =>
+persona1.value.filter((p) =>
     !historialSeleccionado.value.some((historial) => {
       const codigosA = historial.CodigoA ? historial.CodigoA.split("/") : []; // Dividir CodigoA en un arreglo
       const semestres1 = historial.semestre1 ? historial.semestre1.split("/") : []; // Dividir semestre1 en un arreglo
-      
+
       // Verificar que ambos arreglos tengan la misma longitud
       if (codigosA.length !== semestres1.length) {
         return false;
@@ -317,7 +322,7 @@ interface Horario {
 
 const persona = ref<Persona[]>([])
 const persona1 = ref<Horario[]>([])
-const colores = ['#C8E6C9', '#A5D6A7', '#81C784', '#66BB6A', '#4CAF50']
+
 const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 const horarios = ref([
   { modulo: '08:15 - 09:35' },
@@ -365,7 +370,7 @@ const bloquesPorDia = (dia: string, modulo: number) => {
     .map((p) => ({
       nombre: p.nombre_asignatura,
       seccion: p.seccion,
-      color: colores[persona1.value.indexOf(p) % colores.length],
+      color: fichasAsignaturas.value.findIndex((f) => f.codigo_asignatura === p.codigo_asignatura) % coloresAsignaturas.length,
       ID: p.ID,
       cupo: p.Cupo,
       codigo_asignatura: p.codigo_asignatura,
@@ -520,8 +525,20 @@ const volver = () => {
 onMounted(() => {
   obtenerDatosPersona()
 })
-const coloresPAF = ['#FFCDD2', '#F8BBD0', '#E1BEE7', '#D1C4E9', '#C5CAE9'];
-const coloresAsignaturas = ['#C8E6C9', '#A5D6A7', '#81C784', '#66BB6A', '#4CAF50'];
+const coloresPAF = [
+  '#FFCDD2', '#F8BBD0', '#E1BEE7', '#D1C4E9', '#C5CAE9', // Tonos originales suaves
+  '#81D4FA', '#4FC3F7', '#29B6F6', '#0288D1', '#0277BD', // Tonos azules
+  '#DCE775', '#C0CA33', '#9CCC65', '#8BC34A', '#558B2F', // Tonos verdes y amarillos
+  '#FFC107', '#FF9800', '#FF7043', '#795548', '#607D8B'  // Tonos cálidos y neutros
+];
+
+const coloresAsignaturas = [
+  '#C8E6C9', '#A5D6A7', '#81C784', '#66BB6A', '#4CAF50', // Tonos verdes originales
+  '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722', // Tonos cálidos (amarillos y naranjas)
+  '#03A9F4', '#2196F3', '#3F51B5', '#673AB7', '#9C27B0', // Tonos fríos (azules y violetas)
+  '#E91E63', '#F44336', '#795548', '#9E9E9E', '#607D8B'  // Tonos cálidos oscuros y neutros
+];
+
 </script>
 
 <style scoped>
