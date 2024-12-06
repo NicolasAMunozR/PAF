@@ -43,12 +43,13 @@ type HistorialPafAceptadas struct {
 	DescripcionModificacion *string `gorm:"type:text;null" json:"descripcion_modificacion"`
 
 	// Información del Profesor
-	ProfesorRun              string `json:"run"`               // RUN (identificador único)
-	Semestre                 string `json:"semestre"`          // Semestre de la asignatura
-	Tipo                     string `json:"tipo"`              // tipo
-	ProfesorCodigoAsignatura string `json:"codigo_asignatura"` // codigo de la asignatura
-	Seccion                  string `json:"seccion"`           // Sección o grupo
-	Cupo                     int    `json:"cupo"`              // Capacidad del grupo
+	ProfesorRun              string    `json:"run"`               // RUN (identificador único)
+	Semestre                 string    `json:"semestre"`          // Semestre de la asignatura
+	Tipo                     string    `json:"tipo"`              // tipo
+	ProfesorCodigoAsignatura string    `json:"codigo_asignatura"` // codigo de la asignatura
+	Seccion                  string    `json:"seccion"`           // Sección o grupo
+	Cupo                     int       `json:"cupo"`              // Capacidad del grupo
+	UltimaModificacion       time.Time `gorm:"type:Date"`
 
 	// Bloques: Lista de objetos BloqueDTO almacenados como JSONB
 	Bloque json.RawMessage `gorm:"type:jsonb"`

@@ -88,6 +88,7 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 		DesEstado:               pipelsoft.DesEstado,
 		SemestrePaf:             pipelsoft.Semestre,
 		Jerarquia:               pipelsoft.Jerarquia,
+		UltimaModificacion:      pipelsoft.UltimaModificacion,
 		EstadoProceso:           pipelsoft.CodEstado, // Mantener el estado actual
 		Llave:                   pipelsoft.Llave,
 		CodigoModificacion:      0,
