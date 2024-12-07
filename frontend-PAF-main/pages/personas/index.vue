@@ -38,6 +38,8 @@ interface Persona {
   Id: number;
   SemestrePaf: string;
   DesEstado: string;
+  nombreUnidadMenor: string;
+  nombreUnidadMayor: string;
 }
 
 const personas = ref<Persona[]>([]);
@@ -53,6 +55,8 @@ const filtros = ref({
   fechaUltimaModificacionProceso: '',
   id: '',
   semestre: '',
+  nombreUnidadMenor: '',
+  nombreUnidadMayor: '',
 });
 const sortBy = ref('nombres');
 const sortOrder = ref('asc');
@@ -68,7 +72,9 @@ const filteredPersonas = computed(() => {
       persona.Run?.toLowerCase().includes(filtros.value.run.toLowerCase() || '') &&
       (filtros.value.jerarquia ? persona.Jerarquia === filtros.value.jerarquia : true) &&
       persona.FechaUltimaModificacionProceso?.toLowerCase().includes(filtros.value.fechaUltimaModificacionProceso.toLowerCase() || '') &&
-      persona.SemestrePaf?.toLowerCase().includes(filtros.value.semestre.toLowerCase() || '')
+      persona.SemestrePaf?.toLowerCase().includes(filtros.value.semestre.toLowerCase() || '') &&
+      persona.nombreUnidadMenor?.toLowerCase().includes(filtros.value.nombreUnidadMenor.toLowerCase() || '') &&
+      persona.nombreUnidadMayor?.toLowerCase().includes(filtros.value.nombreUnidadMayor.toLowerCase() || '')
     );
   });
 
@@ -115,6 +121,8 @@ onMounted(async () => {
       FechaUltimaModificacionProceso: item.PipelsoftData.UltimaModificacion,
       Id: item.PipelsoftData.Id,
       seccion,
+      nombreUnidadMayor: item.PipelsoftData.NombreUnidadMayor,
+      nombreUnidadMenor: item.PipelsoftData.NombreUnidadMenor,
     };
   });
   } catch (error) {

@@ -75,7 +75,7 @@ import Filtros from '../../components/Filtros.vue';
 const { $axios } = useNuxtApp() as unknown as { $axios: typeof import('axios').default };
 
 const route = useRoute();
-const run = ref<string>("");
+const UnidadMayor = ref<string>("");
 const contratos = ref<any[]>([]);
 const errorMessage = ref('');
 const filtros = ref({
@@ -143,11 +143,8 @@ const filteredPersonas = computed(() => {
 // Fetch inicial de datos
 const fetchContratos = async () => {
   try {
-    const response1 = await $axios.get(`/contratos/${run.value}`);
-    if (response1.data.unidadMayor == "RECTORIA" || response1.data.unidadMayor == "VR ACADEMICA") {
-      useRouter().push("/seguimientoPAF");
-    }
-    const response = await $axios.get(`/pipelsoft/contratos-nombreUnidadMayor/${response1.data.unidadMayor}`);
+    const response = await $axios.get(`/pipelsoft/contratos-nombreUnidadMayor/${UnidadMayor.value}`);
+    console.log(response.data);
     if (response.data && Array.isArray(response.data)) {
       contratos.value = response.data;
     } else {
@@ -160,9 +157,11 @@ const fetchContratos = async () => {
 };
 
 onMounted(() => {
-  const runFromQuery = route.query.run as string;
-  if (runFromQuery) {
-    run.value = runFromQuery;
+  const UnidadMayorFromQuery = route.query.UnidadMayor as string;
+  console.log('UnidadMayorFromQuery:', UnidadMayorFromQuery);
+  if (UnidadMayorFromQuery) {
+    UnidadMayor.value = UnidadMayorFromQuery;
+    console.log('UnidadMayor:', UnidadMayor.value);
     fetchContratos();
   }
 });

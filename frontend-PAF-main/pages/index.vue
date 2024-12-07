@@ -33,16 +33,6 @@
             required
           />
         </div>
-        <div class="form-group">
-          <label for="email">Correo Electrónico:</label>
-          <input
-            type="email"
-            id="email"
-            v-model="email"
-            placeholder="Ingresa tu correo"
-            required
-          />
-        </div>
         <p class="role-info">
           Iniciarás sesión como: <strong>{{ selectedRole }}</strong>
         </p>
@@ -55,18 +45,15 @@
 </template>
 
 <script>
-
 export default {
   layout: false,
   data() {
     return {
       run: "",
-      email: "",
       selectedRole: "",
       errorMessage: "",
       roleOptions: [
-        { value: "profesor", label: "Profesor" },
-        { value: "personal-dir", label: "Personal del Dir" },
+        { value: "personal-dei", label: "Personal del Dei" },
         { value: "encargado", label: "Encargado" },
       ],
     };
@@ -76,15 +63,35 @@ export default {
       this.selectedRole = role;
       this.errorMessage = "";
     },
-    handleLogin() {
-      if (this.run && this.email && this.selectedRole) {
-        sessionStorage.setItem('rut', this.run); // Guardar en sesión
-        if (this.selectedRole === "profesor") {
-          this.$router.push(`/profesorPAF?run=${this.run}`);
-        } else if (this.selectedRole === "personal-dir") {
-          this.$router.push("/personas");
-        } else if (this.selectedRole === "encargado") {
-          this.$router.push(`/unidadMayorPAF?run=${this.run}`);
+    async handleLogin() {
+      if (this.run && this.selectedRole) {
+        sessionStorage.setItem("rut", this.run); // Guardar en sesión
+        try {
+          // Accede a $axios desde el contexto del componente
+          const response = await this.$axios.get(`/usuario/rut/${this.run}`);
+          console.log(response.data);
+          if (!response.data) {
+            this.errorMessage = "Usuario no encontrado.";
+            return;
+          }
+          // Redirige según el rol
+          //if (response.data.rol === "profesor") {
+          //  this.$router.push(`/profesorPAF?run=${this.run}`);
+          //} else 
+          if (response.data.Rol === "encargado" && this.selectedRole === "encargado") {
+            if (response.data.UnidadMayor == "RECTORIA" || response.data.UnidadMayor == "VR ACADEMICA") {
+              this.$router.push("/seguimientoPAF");
+            } else {
+              this.$router.push(`/unidadMayorPAF?UnidadMayor=${response.data.UnidadMayor}`);
+            }
+          } else if (response.data.Rol === "personal-dei" && this.selectedRole === "personal-dei") {
+            this.$router.push("/personas");
+          } else {
+            this.errorMessage = "El rol seleccionado no coincide con el usuario.";
+          }
+        } catch (error) {
+          this.errorMessage = "Hubo un error al iniciar sesión.";
+          console.error(error);
         }
       } else {
         this.errorMessage = "Por favor, completa todos los campos.";

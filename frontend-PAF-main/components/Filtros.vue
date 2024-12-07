@@ -1,7 +1,7 @@
 <template>
   <div class="filters">
     <!-- Filtro Nombre Asignatura -->
-    <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF">
+    <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF && !isPaf">
       <label for="nombreAsignatura" class="label">Nombre Asignatura</label>
       <input
         v-model="filtros.nombreAsignatura"
@@ -12,7 +12,7 @@
     </div>
     
     <!-- Filtro Run -->
-    <div class="filter-item">
+    <div class="filter-item" v-if="!isPaf">
       <label for="run" class="label">Run</label>
       <input
         v-model="filtros.run"
@@ -23,7 +23,7 @@
     </div>
     
     <!-- Filtro Código de PAF -->
-    <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF">
+    <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF && !isPaf">
       <label for="codigoPAF" class="label">Código de PAF</label>
       <input
         v-model="filtros.codigoPAF"
@@ -34,13 +34,35 @@
     </div>
     
     <!-- Filtro Código de Asignatura -->
-    <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF">
+    <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF && !isPaf">
       <label for="codigoAsignatura" class="label">Código de Asignatura</label>
       <input
         v-model="filtros.codigoAsignatura"
         type="text"
         class="input"
         placeholder="Filtrar por código de asignatura"
+      />
+    </div>
+
+    <!-- Filtro Nombre Unidad Mayor (solo visible si es seguimientoPAF) -->
+    <div class="filter-item" v-if="!isUnidadMayorPAF && !isPaf">
+      <label for="nombreUnidadMayor" class="label">Nombre Unidad Mayor</label>
+      <input
+        v-model="filtros.nombreUnidadMayor"
+        type="text"
+        class="input"
+        placeholder="Filtrar por nombre de unidad mayor"
+      />
+    </div>
+    
+    <!-- Filtro Nombre Unidad Menor (solo visible si es seguimientoPAF o unidadMayorPAF) -->
+    <div class="filter-item" v-if="!isPaf">
+      <label for="nombreUnidadMenor" class="label">Nombre Unidad Menor</label>
+      <input
+        v-model="filtros.nombreUnidadMenor"
+        type="text"
+        class="input"
+        placeholder="Filtrar por nombre de unidad menor"
       />
     </div>
 
@@ -56,7 +78,7 @@
     </div>
     
     <!-- Filtro Estado de Proceso -->
-    <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF">
+    <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF && !isPaf">
       <label for="estadoProceso" class="label">Estado de Proceso</label>
       <select id="estadoProceso" v-model="filtros.estadoProceso" class="select">
         <option value="">Todos</option>
@@ -74,38 +96,16 @@
     </div>
     
     <!-- Filtro Categoría -->
-    <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF">
+    <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF && !isPaf">
       <label for="calidad" class="label">Categoria</label>
       <select id="calidad" v-model="filtros.calidad" class="select">
         <option value="">Todas</option>
         <option value="PROFESOR HORAS CLASES">Profesor por hora</option>
       </select>
     </div>
-
-    <!-- Filtro Nombre Unidad Mayor (solo visible si es seguimientoPAF) -->
-    <div class="filter-item" v-if="isSeguimientoPAF">
-      <label for="nombreUnidadMayor" class="label">Nombre Unidad Mayor</label>
-      <input
-        v-model="filtros.nombreUnidadMayor"
-        type="text"
-        class="input"
-        placeholder="Filtrar por nombre de unidad mayor"
-      />
-    </div>
-    
-    <!-- Filtro Nombre Unidad Menor (solo visible si es seguimientoPAF o unidadMayorPAF) -->
-    <div class="filter-item" v-if="isSeguimientoPAF || isUnidadMayorPAF">
-      <label for="nombreUnidadMenor" class="label">Nombre Unidad Menor</label>
-      <input
-        v-model="filtros.nombreUnidadMenor"
-        type="text"
-        class="input"
-        placeholder="Filtrar por nombre de unidad menor"
-      />
-    </div>
     
     <!-- Ordenar por (solo visible si es seguimientoPAF) -->
-    <div class="sort-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF">
+    <div class="sort-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF && !isPaf">
       <label for="sort" class="label">Ordenar por</label>
       <select v-model="sortBy" class="select">
         <option value="NombreAsignatura">Nombre de Asignatura</option>
@@ -122,19 +122,22 @@
     <div class="filter-item">
       <button @click="resetFilters" class="btn reset-btn">Resetear</button>
     </div>
+
+    <!-- Botón de confirmar filtros -->
+    <div class="filter-item">
+      <button @click="applyFilters" class="btn confirm-btn">Confirmar Filtros</button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, defineEmits, onMounted } from 'vue'
-import UnidadMayorPAF from '../pages/unidadMayorPAF/index.vue'
-import SeguimientoPAF from '../pages/seguimientoPAF/index.vue'
-import { useRoute } from 'vue-router'
+import { ref, defineEmits, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 
 const emit = defineEmits<{
-  (event: 'filter', filters: any): void
-  (event: 'sort', sortBy: string, order: string): void
-}>()
+  (event: 'filter', filters: any): void;
+  (event: 'sort', sortBy: string, order: string): void;
+}>();
 
 const filtros = ref({
   codigoPAF: '',
@@ -147,46 +150,54 @@ const filtros = ref({
   fechaUltimaModificacionProceso: '',
   nombreUnidadMenor: '',
   nombreUnidadMayor: '',
-})
+});
 
-const sortBy = ref('nombres')
-const sortOrder = ref('asc')
+const sortBy = ref('nombres');
+const sortOrder = ref('asc');
 
 const routes = [
-  { path: '/seguimientoPAF', name: 'seguimientoPAF', component: SeguimientoPAF },
-  { path: '/unidadMayorPAF', name: 'unidadMayorPAF', component: UnidadMayorPAF },
-  // otras rutas...
+  { path: '/seguimientoPAF', name: 'seguimientoPAF' },
+  { path: '/unidadMayorPAF', name: 'unidadMayorPAF' },
+  { path: '/paf', name: 'paf' },
 ];
 const route = useRoute();
 const isSeguimientoPAF = ref(false);
 const isUnidadMayorPAF = ref(false);
+const isPaf = ref(false);
 
 watchEffect(() => {
   const currentRoute = useRoute().name;
   isSeguimientoPAF.value = currentRoute === 'seguimientoPAF';
   isUnidadMayorPAF.value = currentRoute === 'unidadMayorPAF';
+  isPaf.value = currentRoute === 'paf';
 });
 
-
-watch(filtros, (newFilters) => {
-  let filtersToEmit: Partial<typeof filtros.value> = { ...newFilters };
+// Desacoplar emisión automática de orden de los filtros
+const applyFilters = () => {
+  let filtersToEmit: Partial<typeof filtros.value> = { ...filtros.value };
 
   // Filtra campos según las rutas
   if (isSeguimientoPAF.value) {
-    // Si es seguimientoPAF, emite todos los filtros
     emit('filter', filtersToEmit);
   } else if (isUnidadMayorPAF.value) {
-    // Si es UnidadMayorPAF, excluye 'nombreUnidadMenor'
     filtersToEmit = Object.fromEntries(
-      Object.entries(newFilters).filter(([key]) => key == 'nombreUnidadMenor' || key == 'run' || key == 'semestre')
+      Object.entries(filtros.value).filter(([key]) => key === 'nombreUnidadMenor' || key === 'run' || key === 'semestre')
+    );
+    emit('filter', filtersToEmit);
+  } else if (isPaf.value) {
+    filtersToEmit = Object.fromEntries(
+      Object.entries(filtros.value).filter(([key]) => key === 'semestre')
     );
     emit('filter', filtersToEmit);
   } else {
-    // En cualquier otro caso, emite los filtros sin cambios
     emit('filter', filtersToEmit);
   }
-}, { deep: true });
 
+  // Emitir ordenamiento solo cuando se confirma
+  emit('sort', sortBy.value, sortOrder.value);
+};
+
+// Resetear filtros
 const resetFilters = () => {
   filtros.value = {
     codigoPAF: '',
@@ -199,22 +210,31 @@ const resetFilters = () => {
     fechaUltimaModificacionProceso: '',
     nombreUnidadMenor: '',
     nombreUnidadMayor: '',
-  }
-  emit('filter', filtros.value)
-}
+  };
+  sortBy.value = 'nombres'; // Resetear ordenamiento
+  sortOrder.value = 'asc'; // Resetear dirección de ordenamiento
+  emit('filter', filtros.value);
+  emit('sort', sortBy.value, sortOrder.value);
+  applyFilters();
+};
 
+// Cambiar dirección de ordenamiento
 const toggleSortOrder = () => {
-  sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
-  emit('sort', sortBy.value, sortOrder.value)
-}
+  sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+};
 
-watch([sortBy, sortOrder], ([newSortBy, newSortOrder]) => {
-  emit('sort', newSortBy, newSortOrder)
-})
 </script>
 
-
 <style scoped>
+/* Estilos adicionales para el botón de confirmación */
+.confirm-btn {
+  background-color: var(--primary-color);
+  color: rgb(0, 0, 0);
+}
+
+.confirm-btn:hover {
+  background-color: #e57000;
+}
 
 /* Colores institucionales */
 :root {
