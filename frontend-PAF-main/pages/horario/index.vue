@@ -1,12 +1,21 @@
 <template>
-  <div class="flex" @click="cerrarTodosLosBloques">
-    <!-- Botón para volver -->
-    <div class="mt-4 ml-4">
-      <button @click="volver" class="volver-button">Volver</button>
-    </div>
-
+  <!-- Botón para volver -->
+  <div class="flex justify-between mt-4">
+  <!-- Botón Volver alineado a la izquierda -->
+  <button @click="volver" class="volver-button">Volver</button>
+  
+  <!-- Botón Enviar Selección alineado a la derecha, solo si hay una selección -->
+  <button
+    v-if="fichaSeleccionadaPAF && bloquesSeleccionados.length > 0"
+    @click="enviarSeleccion"
+    class="procesar-button"
+  >
+    Enviar Selección
+  </button>
+</div>
+  <div class="flex flex-wrap" @click="cerrarTodosLosBloques">
     <!-- Tabla de horarios -->
-    <div class="w-2/3 mt-12 relative">
+    <div class="w-full md:w-2/3 mt-12 relative">
       <h1 class="section-title">
         Horario para: {{ persona[0]?.Nombres }} {{ persona[0]?.PrimerApellido }} {{ persona[0]?.SegundoApellido }}
       </h1>
@@ -35,7 +44,6 @@
               <td>{{ horario.modulo }}</td>
               <td v-for="dia in dias" :key="dia" class="relative">
                 <div>
-                  <!-- Mostrar "Tope Horario" si hay más de 2 bloques -->
                   <div v-if="bloquesPorDia(dia, index + 1).length > 2">
                     <button
                       class="tope-horario-button"
@@ -69,13 +77,12 @@
                     </div>
                   </div>
 
-                  <!-- Mostrar bloques directamente si son 2 o menos -->
                   <div v-else>
                     <div
                       v-for="(bloque, bloqueIndex) in bloquesPorDia(dia, index + 1)"
                       :key="`${bloque.nombre}-${bloqueIndex}`"
                       class="bloque"
-                       :style="{ backgroundColor: obtenerColorAsignatura(bloque.codigo_asignatura || '', bloque.bloque || '', bloque.seccion || '') }"
+                      :style="{ backgroundColor: obtenerColorAsignatura(bloque.codigo_asignatura || '', bloque.bloque || '', bloque.seccion || '') }"
                     >
                       <label>
                         <input
@@ -101,16 +108,16 @@
     </div>
 
     <!-- Fichas y botón de envío -->
-    <div class="w-1/3 pl-4 mt-12">
+    <div class="w-full md:w-1/3 pl-4 mt-12">
       <h2 class="sub-title">Selecciona PAF y Asignatura</h2>
 
       <h2 class="sub-title">PAF con Asignatura</h2>
-      <div v-if="fichasPAFMatch.length > 0">
+      <div v-if="fichasPAFMatch.length > 0" class="flex flex-wrap">
         <div
           v-for="(p, index) in fichasPAFMatch"
           :key="index"
           class="card"
-          :style="{ backgroundColor: '#FFCC80' }"
+          :style="{ backgroundColor: '#FFCC80', margin: '8px', flex: '1 1 48%' }"
         >
           <p><strong>Código PAF:</strong> {{ p.CodigoPaf }}</p>
           <p><strong>Semestre PAF:</strong> {{ p.SemestrePaf }}</p>
@@ -121,31 +128,31 @@
           <p><strong>Sección:</strong> {{ p.seccion }}</p>
         </div>
       </div>
-      <!-- Fichas de PAF -->
+
       <h2 class="sub-title">PAF</h2>
-      <div v-if="fichasPAF.length > 0">
+      <div v-if="fichasPAF.length > 0" class="flex flex-wrap">
         <div
           v-for="(p, index) in fichasPAF"
           :key="index"
           class="card"
-          :style="{ backgroundColor: fichaSeleccionadaPAF === p ? '#B3E5FC' : coloresPAF[index % coloresPAF.length] }"
+          :style="{ backgroundColor: fichaSeleccionadaPAF === p ? '#B3E5FC' : coloresPAF[index % coloresPAF.length], margin: '8px', flex: '1 1 48%' }"
           @click="fichaSeleccionadaPAF = p"
         >
           <p><strong>Código PAF:</strong> {{ p.CodigoPaf }}</p>
           <p><strong>Unidad Menor:</strong> {{ p.NombreUnidadMenor }}</p>
           <p><strong>Codigo de Asignatura:</strong> {{ p.CodigoAsignatura }}</p>
           <p><strong>Nombre de Asignatura:</strong> {{ p.NombreAsignatura }}</p>
-
+          <p><strong>Cantidad de Horas PAF:</strong> {{ p.CantidadHorasPAF }}</p>
         </div>
       </div>
 
       <h2 class="sub-title">Horario Asignatura</h2>
-      <div v-if="fichasAsignaturas.length > 0">
+      <div v-if="fichasAsignaturas.length > 0" class="flex flex-wrap">
         <div
-          v-for="(p, index, bloque) in fichasAsignaturas"
+          v-for="(p, index) in fichasAsignaturas"
           :key="index"
           class="card"
-           :style="{ backgroundColor: fichaSeleccionadaAsignatura === p ? '#B3E5FC' : obtenerColorAsignatura(p.codigo_asignatura, p.bloque || '', p.seccion || '') }"
+          :style="{ backgroundColor: fichaSeleccionadaAsignatura === p ? '#B3E5FC' : obtenerColorAsignatura(p.codigo_asignatura, p.bloque || '', p.seccion || ''), margin: '8px', flex: '1 1 48%' }"
         >
           <p><strong>Código de Asignatura:</strong> {{ p.codigo_asignatura }}</p>
           <p><strong>Nombre de Asignatura:</strong> {{ p.nombre_asignatura }}</p>
@@ -154,16 +161,6 @@
           <p><strong>Cupo:</strong> {{ p.Cupo }}</p>
           <p><strong>Semestre:</strong> {{ p.semestre }}</p>
         </div>
-      </div>
-
-      <div class="flex justify-end mt-4">
-        <button
-          v-if="fichaSeleccionadaPAF && bloquesSeleccionados.length > 0"
-          @click="enviarSeleccion"
-          class="procesar-button"
-        >
-          Enviar Selección
-        </button>
       </div>
     </div>
   </div>
@@ -331,6 +328,7 @@ interface Persona {
   bloques: string;
   semestre1: string;
   SemestrePaf: string;
+  CantidadHorasPAF: number;
 }
 
 interface Horario {
@@ -434,6 +432,7 @@ const obtenerDatosPersona = async () => {
         SegundoApellido: item.PipelsoftData.SegundoApp,
         NombreUnidadMenor: item.PipelsoftData.NombreUnidadMenor,
         SemestrePaf: item.PipelsoftData.Semestre,
+        CantidadHorasPAF: item.PipelsoftData.CantidadHorasPaf,
         Bloque: response1.data.bloque,
         Cupo: response1.data.cupo,
         Seccion: response1.data.seccion,
@@ -554,8 +553,6 @@ const coloresPAF = [
   '#DCE775', '#C0CA33', '#9CCC65', '#8BC34A', '#558B2F', // Tonos verdes y amarillos
   '#FFC107', '#FF9800', '#FF7043', '#795548', '#607D8B'  // Tonos cálidos y neutros
 ];
-
-
 
 </script>
 
