@@ -6,4 +6,6 @@ type Usuarios struct {
 	Rol    string `gorm:"type:text"`
 	//se añadio este parametro
 	UnidadMayor string `gorm:"type:text"`
+	//se añadio este parametro
+	UnidadMenor string `gorm:"type:text"`
 }
