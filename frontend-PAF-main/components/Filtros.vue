@@ -131,7 +131,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits, onMounted } from 'vue';
+import { ref, defineEmits, onMounted, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
 
 const emit = defineEmits<{
@@ -170,6 +170,11 @@ watchEffect(() => {
   isSeguimientoPAF.value = currentRoute === 'seguimientoPAF';
   isUnidadMayorPAF.value = currentRoute === 'unidadMayorPAF';
   isPaf.value = currentRoute === 'paf';
+});
+
+// Resetear filtros al montar el componente
+onMounted(() => {
+  resetFilters();
 });
 
 // Desacoplar emisión automática de orden de los filtros
@@ -222,7 +227,6 @@ const resetFilters = () => {
 const toggleSortOrder = () => {
   sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
 };
-
 </script>
 
 <style scoped>
