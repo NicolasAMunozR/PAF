@@ -5,9 +5,10 @@
       <!-- Botón para mostrar/ocultar el menú -->
       <button
         @click="toggleMenu"
+        v-if="$route.path !== '/profesorPAF'" 
         class="menu-button"
       >
-        <!-- Icono de menú hamburguesa -->
+        <!-- Iconos de menú -->
         <svg
           v-if="!isMenuOpen"
           xmlns="http://www.w3.org/2000/svg"
@@ -16,7 +17,6 @@
         >
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
-        <!-- Icono de cerrar -->
         <svg
           v-else
           xmlns="http://www.w3.org/2000/svg"
@@ -40,9 +40,13 @@
       </button>
     </div>
 
-    <!-- Menú desplegable como barra lateral fija -->
+    <!-- Menú lateral -->
     <div
-      :class="{'translate-x-0': isMenuOpen, '-translate-x-full': !isMenuOpen}"
+      v-if="$route.path !== '/profesorPAF'"
+      :class="{
+        'translate-x-0': isMenuOpen,
+        '-translate-x-full': !isMenuOpen
+      }"
       class="side-menu"
     >
       <div class="menu-content">
@@ -57,7 +61,7 @@
     </div>
 
     <!-- Contenido principal -->
-    <div :class="{'ml-64': isMenuOpen, 'ml-0': !isMenuOpen}" class="content">
+    <div :class="{'ml-64': isMenuOpen && $route.path !== '/profesorPAF', 'ml-0': !isMenuOpen || $route.path === '/profesorPAF'}" class="content">
       <slot></slot>
     </div>
   </div>
@@ -86,6 +90,9 @@ export default {
   },
   methods: {
     toggleMenu() {
+      if (this.$route.path === "/profesorPAF") {
+        return; // Evitar que el menú se abra/cierre en ProfesorPAF
+      }
       this.isMenuOpen = !this.isMenuOpen;
     },
     logout() {
