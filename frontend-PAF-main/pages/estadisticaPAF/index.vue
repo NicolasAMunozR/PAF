@@ -396,7 +396,7 @@ const configurarGraficos = () => {
           const index = elements[0].index;
           const label = pafPorEstadoChartData.value.labels[index].replace(/--/g, '. ').replace(/-/g, ' ');
           const value = pafPorEstadoChartData.value.datasets[0].data[index];
-          console.log('Unidad seleccionada:', label, value);
+          console.log(label);
           if (!label || label.trim() === '') {
             throw new Error('El label está vacío. No se puede realizar la consulta.');
           }

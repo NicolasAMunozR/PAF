@@ -237,15 +237,16 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
           const response = await $axios.get(`/contratos/${rut}`)
           console.log('Unidad seleccionada:', response.data.unidadMayor, label);
 
-          const response1 = await $axios.get(`/estadisticas/${response.data.unidadMayor}/${label}`);
-
-          cantidadPersonasSai.value = response1.data.TotalProfesores;
-          cantidadPafUnicas.value = response1.data.TotalPipelsoftUnicos;
+          const response1 = await $axios.get(`/estadisticas/6/${response.data.unidadMayor}/${label}`);
+          console.log('Unidad seleccionada:', response1.data);
+          cantidadPersonasSai.value = response1.data.total_profesores;
+          cantidadPafUnicas.value = response1.data.total_pipelsoft_unicos;
           
           const response2 = await $axios.get(`/estadisticas/${response.data.unidadMayor}/${label}`);
+          console.log('Unidad seleccionada aaaaaaa:', response2.data);
           
-          cantidadPafActivas.value = response2.data.totalRUNs;
-          const estadoProcesoCount = response1.data.EstadoProcesoCount;
+          cantidadPafActivas.value = response2.data.total_pipelsoft_unicos;
+          const estadoProcesoCount = response1.data.estado_proceso_count;
 
           const normalizedEstadoProcesoCount = Object.fromEntries(
             Object.entries(estadoProcesoCount).map(([key, value]) => [
