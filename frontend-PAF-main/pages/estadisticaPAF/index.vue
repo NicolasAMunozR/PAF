@@ -116,7 +116,6 @@ const detalleUnidadSeleccionada = ref(null); // Detalles de la unidad selecciona
 // Las demás funciones para obtener datos y configurar gráficos son iguales.
 const fetchCantidadPersonasSai = async () => {
   try {
-    console.log('Obteniendo cantidad de personas del SAI...', unidadSeleccionada.value);
     const response = await $axios.get('/estadisticas');
     cantidadPersonasSai.value = response.data.total_profesores;
     cantidadPafUnicas.value = response.data.total_pipelsoft_unicos;
@@ -137,7 +136,6 @@ const fetchCantidadPafSai = async () => {
   try {
     
     const response = await $axios.get('/estadisticas/PafActivas');
-    console.log('Cantidad de PAF activas:', response.data);
     cantidadPafActivas.value = response.data.conteo;
   } catch (error) {
     console.error('Error al obtener la cantidad de personas del SAI:', error);
@@ -175,7 +173,6 @@ const fetchPafPorUnidadMayor = async () => {
           const index = elements[0].index;
           const label = pafPorUnidadMayorChartData.value.labels[index];
           const value = pafPorUnidadMayorChartData.value.datasets[0].data[index];
-          console.log('Unidad seleccionada:', label, value);
 
           if (!label || label.trim() === '') {
             throw new Error('El label está vacío. No se puede realizar la consulta.');
@@ -198,11 +195,9 @@ const fetchPafPorUnidadMayor = async () => {
           };
           mostrarModal.value = true;
           const response1 = await $axios.get(`/estadisticas/unidad-mayor/${label}`);
-          console.log('Cantidad de PAF por unidad mayor:', response1.data);
           cantidadPersonasSai.value = response1.data.total_profesores;
           cantidadPafUnicas.value = response1.data.total_pipelsoft_unicos;
           const response2 = await $axios.get(`/estadisticas/pafActivas/unidad-mayor/${label}`);
-          console.log('Cantidad de PAF activas aaaaaaaaaaa:', response2.data);
           cantidadPafActivas.value = response2.data.totalRUNs;
           const estadoProcesoCount = response1.data.estado_proceso_count;
 
@@ -250,7 +245,6 @@ const fetchPafPorUnidadMayor = async () => {
 const fetchCantidadPafPorEstado = async () => {
   try {
     const response = await $axios.get('/estadisticas');
-    console.log('Cantidad de PAF por estado:', response.data);
     const estadoProcesoCount = response.data.estado_proceso_count;
 
     const normalizedEstadoProcesoCount = Object.fromEntries(
@@ -335,7 +329,6 @@ const configurarGraficos = () => {
           const index = elements[0].index;
           const label = profesoresChartData.value.labels[index];
           const value = profesoresChartData.value.datasets[0].data[index];
-          console.log('Unidad seleccionada:', label, value);
           if (!label || label.trim() === '') {
             throw new Error('El label está vacío. No se puede realizar la consulta.');
           }
@@ -352,9 +345,7 @@ const configurarGraficos = () => {
             if (label === 'Profesores con PAF') {
             response = await $axios.get(`/estadistica/unidades-menores-con-profesores-activos/8_1/${unidadSeleccionada.value}`);
             } else if (label === 'Profesores sin PAF') {
-              // CAMBIAR AQUÍ
             response = await $axios.get(`/estadistica/unidades-menores-sin-profesores-8-2/${unidadSeleccionada.value}`);
-            console.log('Cantidad de PAF activas:', response.data);
             }
             unidadesData = response.data;
           }
@@ -396,21 +387,16 @@ const configurarGraficos = () => {
           const index = elements[0].index;
           const label = pafPorEstadoChartData.value.labels[index].replace(/--/g, '. ').replace(/-/g, ' ');
           const value = pafPorEstadoChartData.value.datasets[0].data[index];
-          console.log(label);
           if (!label || label.trim() === '') {
             throw new Error('El label está vacío. No se puede realizar la consulta.');
           }
           let response1 = null;
           if(unidadSeleccionada.value === null) {
-              // CAMBIAR AQUÍ
               response1 = await $axios.get(`/estadisticas/profesores/estado/${encodeURIComponent(label)}`);
           } else {
-              // CAMBIAR AQUÍ
               response1 = await $axios.get(`/estadistica/unidades-menores/${encodeURIComponent(label)}/${unidadSeleccionada.value}`);
           }
-          console.log('Cantidad de PAF activas:', response1.data);
           const unidadesData1 = response1.data;
-          console.log('Unidades data 1:', unidadesData1);
           graficoModalData.value = {
             labels: Object.keys(unidadesData1),
             datasets: [
@@ -452,7 +438,6 @@ const configurarGraficos = () => {
           const index = elements[0].index;
           const label = pafChartData.value.labels[index];
           const value = pafChartData.value.datasets[0].data[index];
-          console.log('Unidad seleccionada:', label, value);
           if (!label || label.trim() === '') {
             throw new Error('El label está vacío. No se puede realizar la consulta.');
           }
@@ -471,12 +456,12 @@ const configurarGraficos = () => {
             if (label === 'Profesores con PAF activas') {
 
             response2 = await $axios.get(`/estadistica/unidades-menores-sin-profesores/8_3/${unidadSeleccionada.value}`);
+            unidadesData2 = response2.data.unidades;
             } else if (label === 'Profesores sin PAF activas') {
 
             response2 = await $axios.get(`/estadistica/unidades-menores-con-profesores-paf-activos/8_4/${unidadSeleccionada.value}`);
-            }
-            console.log('Cantidad de PAF activas:aaaaaaaaaa', response2.data);
-            unidadesData2 = response2.data.unidades;
+            unidadesData2 = response2.data;
+          }
           }
           graficoModalData.value = {
             labels: Object.keys(unidadesData2),
