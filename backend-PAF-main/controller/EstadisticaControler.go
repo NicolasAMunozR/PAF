@@ -234,6 +234,7 @@ func (ctrl *EstadisticasController) ObtenerYCompararRunsHandler(c *gin.Context) 
 	})
 }
 
+// 1
 func (c *EstadisticasController) ObtenerUnidadesMayoresHandler(ctx *gin.Context) {
 	// Llamar al servicio para obtener los datos
 	unidades, err := c.Service.ObtenerUnidadesMayoresConProfesores()
@@ -250,6 +251,7 @@ func (c *EstadisticasController) ObtenerUnidadesMayoresHandler(ctx *gin.Context)
 	})
 }
 
+// 2
 func (c *EstadisticasController) ObtenerUnidadesMayoresSinProfesoresEnPipelsoftHandler(ctx *gin.Context) {
 	resultado, err := c.Service.ObtenerUnidadesMayoresSinProfesoresEnPipelsoft()
 	if err != nil {
@@ -262,6 +264,7 @@ func (c *EstadisticasController) ObtenerUnidadesMayoresSinProfesoresEnPipelsoftH
 	ctx.JSON(http.StatusOK, resultado)
 }
 
+// 3
 func (c *EstadisticasController) ObtenerUnidadesMayoresConProfesoresFiltradosHandler(ctx *gin.Context) {
 	resultado, err := c.Service.ObtenerUnidadesMayoresConProfesoresFiltrados()
 	if err != nil {
@@ -274,20 +277,24 @@ func (c *EstadisticasController) ObtenerUnidadesMayoresConProfesoresFiltradosHan
 	ctx.JSON(http.StatusOK, resultado)
 }
 
-// ObtenerUnidadesMayoresConProfesoresFiltrados maneja la solicitud HTTP para obtener unidades mayores con los profesores filtrados
-func (ctrl *EstadisticasController) ObtenerUnidadesMayoresConProfesoresFiltrados(c *gin.Context) {
-	// Llamar al servicio para obtener las unidades mayores con los profesores filtrados
-	resultado, err := ctrl.Service.ObtenerUnidadesMayoresConProfesoresFiltrados()
+// 4
+// ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivos obtiene las unidades mayores con profesores activos (PAF).
+func (c *EstadisticasController) ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivos(ctx *gin.Context) {
+	// Llamamos al servicio para obtener los datos
+	resultado, err := c.Service.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivos()
 	if err != nil {
-		log.Println("Error al obtener unidades mayores con profesores filtrados:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		// Si ocurre un error, devolvemos una respuesta 500 con el mensaje de error
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
-	// Retornar la respuesta en formato JSON
-	c.JSON(http.StatusOK, resultado)
+	// Si la operación fue exitosa, devolvemos los resultados en formato JSON
+	ctx.JSON(http.StatusOK, resultado)
 }
 
+// 5
 // ObtenerUnidadesMayoresSinProfesoresEnPipelsoft maneja la solicitud HTTP para obtener unidades mayores sin profesores en Pipelsoft
 func (ctrl *EstadisticasController) ObtenerUnidadesMayoresSinProfesoresEnPipelsoft(c *gin.Context) {
 	// Llamar al servicio para obtener las unidades mayores sin profesores en Pipelsoft
@@ -302,11 +309,12 @@ func (ctrl *EstadisticasController) ObtenerUnidadesMayoresSinProfesoresEnPipelso
 	c.JSON(http.StatusOK, resultado)
 }
 
+// 6
 // ObtenerEstadisticasPorUnidad maneja la solicitud HTTP para obtener estadísticas por unidad
 func (ctrl *EstadisticasController) ObtenerEstadisticasPorUnidad(c *gin.Context) {
-	// Obtener parámetros de la solicitud
-	unidadMayor := c.DefaultQuery("unidadMayor", "") // "unidadMayor" es requerido
-	unidadMenor := c.DefaultQuery("unidadMenor", "")
+	// Obtener parámetros de la ruta
+	unidadMayor := c.Param("unidadMayor") // Parámetro de la ruta
+	unidadMenor := c.Param("unidadMenor") // Parámetro de la ruta
 
 	// Validar los parámetros
 	if unidadMayor == "" {
@@ -316,6 +324,31 @@ func (ctrl *EstadisticasController) ObtenerEstadisticasPorUnidad(c *gin.Context)
 
 	// Llamar al servicio para obtener las estadísticas
 	resp, err := ctrl.Service.ObtenerEstadisticasPorUnidad(unidadMayor, unidadMenor)
+	if err != nil {
+		log.Println("Error al obtener estadísticas:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Retornar la respuesta en formato JSON
+	c.JSON(http.StatusOK, resp)
+}
+
+// 7
+// ObtenerEstadisticasPorUnidadTOTO maneja la solicitud HTTP para obtener estadísticas por unidad
+func (ctrl *EstadisticasController) ObtenerEstadisticasPorUnidadTOTO(c *gin.Context) {
+	// Obtener parámetros de la ruta
+	unidadMayor := c.Param("unidadMayor") // Parámetro de la ruta
+	unidadMenor := c.Param("unidadMenor") // Parámetro de la ruta (opcional)
+
+	// Validar que al menos 'unidadMayor' esté presente
+	if unidadMayor == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'unidadMayor' debe ser proporcionado"})
+		return
+	}
+
+	// Llamar al servicio para obtener las estadísticas
+	resp, err := ctrl.Service.ObtenerEstadisticasPorUnidadTOTO(unidadMayor, unidadMenor)
 	if err != nil {
 		log.Println("Error al obtener estadísticas:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
