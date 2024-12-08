@@ -472,7 +472,8 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
               // CAMBIAR AQUÍ
             response = await $axios.get(`estadistica/unidades-menores-con-profesores-paf-activos/8_4/${responseinicial.data.unidadMayor}`);
             }
-            unidadesData = response.data;
+            console.log('Unidad seleccionada:', response.data);
+            unidadesData = response.data.unidades;
           } else {
             if (label === 'Profesores con PAF activas') {
             // CAMBIAR AQUÍ
