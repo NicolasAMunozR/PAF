@@ -334,6 +334,7 @@ const configurarGraficos = () => {
           }
           let response = null;
           let unidadesData = null;
+          let labelNuevo = "";
           if(unidadSeleccionada.value === null) {
             if (label === 'Profesores con PAF') {
             response = await $axios.get(`/estadisticas/unidades-mayores/cant_profesores`);
@@ -341,6 +342,7 @@ const configurarGraficos = () => {
             response = await $axios.get(`/estadisticas/unidades-mayores/sin_profesores`);
             }
             unidadesData = response.data.unidadesMayores;
+            labelNuevo = 'Cantidad de PAF por Unidad Mayor';
           } else {
             if (label === 'Profesores con PAF') {
             response = await $axios.get(`/estadistica/unidades-menores-con-profesores-activos/8_1/${unidadSeleccionada.value}`);
@@ -348,12 +350,13 @@ const configurarGraficos = () => {
             response = await $axios.get(`/estadistica/unidades-menores-sin-profesores-8-2/${unidadSeleccionada.value}`);
             }
             unidadesData = response.data;
+            labelNuevo = 'Cantidad de PAF por Unidad Menor';
           }
           graficoModalData.value = {
             labels: Object.keys(unidadesData),
             datasets: [
               {
-                label: 'Cantidad de PAF por Unidad Mayor',
+                label: labelNuevo,
                 data: Object.values(unidadesData),
                 backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#AB47BC', '#EF5350', '#26C6DA', '#FFEE58', '#8D6E63', '#5C6BC0', '#EC407A', '#78909C', '#9CCC65'],
               },
@@ -437,12 +440,12 @@ const configurarGraficos = () => {
 
           const index = elements[0].index;
           const label = pafChartData.value.labels[index];
-          const value = pafChartData.value.datasets[0].data[index];
           if (!label || label.trim() === '') {
             throw new Error('El label está vacío. No se puede realizar la consulta.');
           }
           let response2 = null;
           let unidadesData2 = null;
+          let labelNuevo = "";
           if(unidadSeleccionada.value === null) {
             if (label === 'Profesores con PAF activas') {
 
@@ -452,6 +455,7 @@ const configurarGraficos = () => {
             response2 = await $axios.get(`/estadisticas/unidades-mayores/profesores-codestado`);
             }
             unidadesData2 = response2.data;
+            labelNuevo = 'Cantidad de PAF por Unidad Mayor';
           } else {
             if (label === 'Profesores con PAF activas') {
 
@@ -461,13 +465,14 @@ const configurarGraficos = () => {
 
             response2 = await $axios.get(`/estadistica/unidades-menores-con-profesores-paf-activos/8_4/${unidadSeleccionada.value}`);
             unidadesData2 = response2.data;
+            labelNuevo = 'Cantidad de PAF por Unidad Menor';
           }
           }
           graficoModalData.value = {
             labels: Object.keys(unidadesData2),
             datasets: [
               {
-                label: 'Cantidad de PAF por Unidad Mayor',
+                label: labelNuevo,
                 data: Object.values(unidadesData2),
                 backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#AB47BC', '#EF5350', '#26C6DA', '#FFEE58', '#8D6E63', '#5C6BC0', '#EC407A', '#78909C', '#9CCC65'],
               },
