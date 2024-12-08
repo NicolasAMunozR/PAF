@@ -69,6 +69,14 @@
         <h4 class="subtitulo">Cantidad de PAF por Unidad Mayor</h4>
         <Bar :data="pafPorUnidadMayorChartData" :options="pafPorUnidadMayorChartData.options" />
       </div>
+      <!-- Modal para el gráfico dinámico -->
+      <div v-if="mostrarModal" class="modal-overlay">
+      <div class="modal-content">
+        <h3 class="modal-title">Detalles de {{ unidadSeleccionada }}</h3>
+        <Bar v-if="graficoModalData" :data="graficoModalData" />
+        <button @click="cerrarModal" class="modal-close-button">Cerrar</button>
+      </div>
+    </div>
     </div>
   </template>
   
@@ -87,6 +95,8 @@
   
   ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale, ChartDataLabels, BarElement);
   
+  const mostrarModal = ref(false); // Controla si el modal está visible
+  const graficoModalData = ref(null); // Datos para el gráfico en el modal
   const cantidadPersonasSai = ref(0);
   const cantidadPafActivas = ref(0);
   const cantidadPafUnicas = ref(0);
@@ -276,7 +286,7 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
           totalPorcPaf.value = Object.values(cantidadPafPorEstado.value).map((value) =>
             ((value / totalPaf.value) * 100).toFixed(2)
           );
-          configurarGraficos();
+          configurarGraficos(rut);
         },
       },
     };
@@ -285,7 +295,7 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
     }
   };
   
-  const configurarGraficos = () => {
+  const configurarGraficos = (rut) => {
     const commonDatalabelsOptions = {
       formatter: (value) => (parseFloat(value) > 0 ? `${value}%` : ''), // Mostrar solo si el porcentaje es mayor que 0
       color: '#ffffff', // Color del texto
@@ -330,6 +340,8 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
           const responseinicial = await $axios.get(`/contratos/${rut}`)
 
           let response = null;
+          let unidadesData = null;
+          console.log('Unidad seleccionada:', responseinicial.data.unidadMayor, label);
           if(unidadSeleccionada.value === null) {
             if (label === 'Profesores con PAF') {
             // CAMBIAR AQUÍ
@@ -338,6 +350,9 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
               // CAMBIAR AQUÍ
             response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
             }
+            console.log('Unidad seleccionada:', response.data);
+            unidadesData = response.data;
+            console.log('Unidad seleccionada:', unidadesData);
           } else {
             if (label === 'Profesores con PAF') {
             // CAMBIAR AQUÍ
@@ -346,8 +361,8 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
               // CAMBIAR AQUÍ
             response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
             }
+            unidadesData = response.data;
           }
-          const unidadesData = response.data;
           graficoModalData.value = {
             labels: Object.keys(unidadesData),
             datasets: [
@@ -494,7 +509,7 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
       fetchPafPorUnidadMayor(rut.valueOf),
       fetchCantidadPafSai(rut.valueOf),
     ]);
-    configurarGraficos();
+    configurarGraficos(rut.valueOf);
   });
   </script>
   
@@ -560,7 +575,47 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
     max-width: 100%;  /* Aumenté el ancho para las barras */
   }
   
-  
+  .modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  max-width: 900px;
+  width: 90%;
+  text-align: center;
+}
+
+.modal-title {
+  font-size: 1.5em;
+  margin-bottom: 10px;
+}
+
+.modal-close-button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.modal-close-button:hover {
+  background: #d32f2f;
+}
+
   /* Estados */
   .estado-linea {
     display: flex;
