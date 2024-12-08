@@ -565,27 +565,25 @@ func (s *EstadisticasService) ObtenerUnidadesMayoresPorCodEstadoPAF(codEstadoPAF
 func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMenor string) (*EstadisticasResponse, error) {
 	var resp EstadisticasResponse
 
-	// Validar que 'unidadMayor' esté presente
+	// Validar que el parámetro 'unidadMayor' no esté vacío
 	if unidadMayor == "" {
-		return nil, fmt.Errorf("el parámetro 'unidadMayor' debe ser proporcionado")
+		return nil, fmt.Errorf("el parámetro 'unidadMayor' es obligatorio")
 	}
 
-	// Crear un query base para los filtros
-	query := s.DB.Model(&models.Pipelsoft{}).Where("nombre_unidad_mayor = ?", unidadMayor)
-
-	// Si 'unidadMenor' no está vacío, agregar el filtro correspondiente
-	if unidadMenor != "" {
-		query = query.Where("nombre_unidad_menor = ?", unidadMenor)
+	// Validar que el parámetro 'unidadMenor' no esté vacío si es necesario
+	if unidadMenor == "" {
+		return nil, fmt.Errorf("el parámetro 'unidadMenor' es obligatorio")
 	}
 
-	// Contar los registros en pipelsofts
-	if err := query.Count(&resp.TotalPipelsoft).Error; err != nil {
-		return nil, fmt.Errorf("error al contar los registros en pipelsofts: %w", err)
+	// Contar los registros en pipelsofts que coincidan con los filtros de unidad mayor y unidad menor
+	if err := s.DB.Model(&models.Pipelsoft{}).Where("nombre_unidad_mayor = ? AND nombre_unidad_menor = ?", unidadMayor, unidadMenor).Count(&resp.TotalPipelsoft).Error; err != nil {
+		return nil, fmt.Errorf("error al contar los registros en pipelsofts para la unidad mayor %s y unidad menor %s: %w", unidadMayor, unidadMenor, err)
 	}
 
-	// Contar los registros únicos de Run en la tabla pipelsofts
-	if err := query.Distinct("run_empleado").Count(&resp.TotalPipelsoftUnicos).Error; err != nil {
-		return nil, fmt.Errorf("error al contar los registros únicos de Run en pipelsofts: %w", err)
+	// Contar los registros únicos de Run en la tabla pipelsofts para la unidad mayor y unidad menor
+	if err := s.DB.Model(&models.Pipelsoft{}).Where("nombre_unidad_mayor = ? AND nombre_unidad_menor = ?", unidadMayor, unidadMenor).
+		Distinct("run_empleado").Count(&resp.TotalPipelsoftUnicos).Error; err != nil {
+		return nil, fmt.Errorf("error al contar los registros únicos de Run en pipelsofts para la unidad mayor %s y unidad menor %s: %w", unidadMayor, unidadMenor, err)
 	}
 
 	// Calcular el porcentaje de registros únicos en Pipelsoft
@@ -593,23 +591,23 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMe
 		resp.PorcentajeUnicos = float64(resp.TotalPipelsoftUnicos) / float64(resp.TotalPipelsoft) * 100
 	}
 
-	// Contar los registros en pipelsofts por cada EstadoProceso
+	// Contar los registros en pipelsofts por cada EstadoProceso filtrando por unidad mayor y unidad menor
 	resp.EstadoProcesoCount = make(map[string]int)
 	resp.EstadoProcesoPct = make(map[string]float64)
 
-	// Definir los estados
+	// Los códigos de estado definidos
 	estados := []string{
-		"Sin Solicitar", "Enviada al Interesado", "Enviada al Validador", "Aprobada por Validador",
-		"Rechazada por Validador", "Aprobada por Dir. Pregrado", "Rechazada por Dir. de Pregrado",
-		"Aprobada por RRHH", "Rechazada por RRHH", "Anulada",
+		"Sin Solicitar", "Enviada al Interesado", "Enviada al Validador", "Aprobada por Validador", "Rechazada por Validador",
+		"Aprobada por Dir. Pregrado", "Rechazada por Dir. de Pregrado", "Aprobada por RRHH", "Rechazada por RRHH", "Anulada",
 	}
 
 	// Contar registros por cada estado
 	for _, estado := range estados {
 		var count int64
-		queryEstado := query.Where("des_estado = ?", estado)
-		if err := queryEstado.Count(&count).Error; err != nil {
-			return nil, fmt.Errorf("error al contar los registros de pipelsofts con estado %s: %w", estado, err)
+		if err := s.DB.Model(&models.Pipelsoft{}).
+			Where("nombre_unidad_mayor = ? AND nombre_unidad_menor = ? AND des_estado = ?", unidadMayor, unidadMenor, estado).
+			Count(&count).Error; err != nil {
+			return nil, fmt.Errorf("error al contar los registros de pipelsofts con estado %s para la unidad mayor %s y unidad menor %s: %w", estado, unidadMayor, unidadMenor, err)
 		}
 		resp.EstadoProcesoCount[estado] = int(count)
 
@@ -619,57 +617,9 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMe
 		}
 	}
 
-	// Obtener las unidades menores asociadas a la 'unidadMayor'
-	var unidadesMenores []string
-	if err := query.Distinct("nombre_unidad_menor").Pluck("nombre_unidad_menor", &unidadesMenores).Error; err != nil {
-		return nil, fmt.Errorf("error al obtener las unidades menores filtradas: %w", err)
-	}
-
-	// Incluir las unidades menores en la respuesta
-	resp.UnidadesMenores = unidadesMenores
-
-	// Obtener los profesores asociados a cada unidad menor
-	unidadMenorProfesores := []UnidadMenorProfesores{}
-	for _, unidad := range unidadesMenores {
-		var profesores []string
-		if err := s.DB.Model(&models.Contrato{}).
-			Where("unidad_mayor = ?", unidadMayor).
-			Where("unidad_menor = ?", unidad).
-			Distinct("run_docente").
-			Pluck("run_docente", &profesores).Error; err != nil {
-			return nil, fmt.Errorf("error al obtener los profesores para la unidad menor %s: %w", unidad, err)
-		}
-		unidadMenorProfesores = append(unidadMenorProfesores, UnidadMenorProfesores{
-			UnidadMenor: unidad,
-			Profesores:  profesores,
-		})
-	}
-
-	// Incluir los profesores asociados a las unidades menores en la respuesta
-	resp.UnidadMenorProfesores = unidadMenorProfesores
-
-	// Contar los profesores en la tabla contratos que coincidan con los filtros
-	queryContratos := s.DB.Model(&models.Contrato{}).
-		Where("unidad_mayor = ?", unidadMayor)
-
-	if unidadMenor != "" {
-		queryContratos = queryContratos.Where("unidad_menor = ?", unidadMenor)
-	}
-
-	if err := queryContratos.Distinct("run_docente").Count(&resp.TotalProfesores).Error; err != nil {
-		return nil, fmt.Errorf("error al contar los profesores en la tabla contratos: %w", err)
-	}
-
-	// Contar los profesores que no están en Pipelsoft
-	var profesoresNoEnPipelsoft int64
-	if err := queryContratos.Where("run_docente NOT IN (SELECT run_empleado FROM pipelsofts)").Count(&profesoresNoEnPipelsoft).Error; err != nil {
-		return nil, fmt.Errorf("error al contar los profesores que no están en pipelsofts: %w", err)
-	}
-	resp.ProfesoresNoEnPipelsoft = profesoresNoEnPipelsoft
-
-	// Calcular porcentaje de profesores no en pipelsoft
-	if resp.TotalProfesores > 0 {
-		resp.ProfesoresNoEnPipelsoftPct = float64(profesoresNoEnPipelsoft) / float64(resp.TotalProfesores) * 100
+	// Contar la cantidad de profesores en la tabla contratos que tengan la misma unidad mayor y unidad menor
+	if err := s.DB.Model(&models.Contrato{}).Where("unidad_mayor = ? AND unidad_menor = ?", unidadMayor, unidadMenor).Count(&resp.TotalProfesores).Error; err != nil {
+		return nil, fmt.Errorf("error al contar los profesores en la tabla contratos para la unidad mayor %s y unidad menor %s: %w", unidadMayor, unidadMenor, err)
 	}
 
 	return &resp, nil
