@@ -1,4 +1,13 @@
 <template>
+  <!-- Detalles de la unidad seleccionada -->
+  <div v-if="unidadSeleccionada" class="unidad-seleccionada">
+      <h4 class="subtitulo">Unidad Seleccionada: {{ unidadSeleccionada }}</h4>
+      <p style="text-align: center;">Cantidad de PAF en esta unidad: <strong>{{ detalleUnidadSeleccionada }}</strong></p>
+      <!-- Botón para recargar los datos -->
+      <button @click="recargarPagina" class="btn-recargar">Recargar Datos Iniciales</button>
+    </div>
+    <br />
+    <br />
     <div>
       <h1 class="titulo-principal">Datos SAI y PAF</h1>
   
@@ -40,25 +49,25 @@
       <div v-if="profesoresChartData && pafChartData" class="grafico-container">
         <div class="pie-chart">
           <h4 class="subtitulo">Profesores con y sin PAF</h4>
-          <Pie :data="profesoresChartData" />
+          <Pie :data="profesoresChartData" :options="profesoresChartData.options" />
         </div>
         <div class="pie-chart">
           <h4 class="subtitulo">Profesores con PAF y Profesores con PAF activas</h4>
-          <Pie :data="pafChartData" />
+          <Pie :data="pafChartData" :options="pafChartData.options" />
         </div>
 
       </div>
       <div class="grafico">
       <div v-if="pafPorEstadoChartData" class="pie-chart1">
       <h4 class="subtitulo">Cantidad de PAF por Estado</h4>
-      <Pie :data="pafPorEstadoChartData" />
+      <Pie :data="pafPorEstadoChartData" :options="pafPorEstadoChartData.options" />
     </div>
     </div>
       <br />
       <br />
       <div v-if="pafPorUnidadMayorChartData" class="bar-chart">
         <h4 class="subtitulo">Cantidad de PAF por Unidad Mayor</h4>
-        <Bar :data="pafPorUnidadMayorChartData" />
+        <Bar :data="pafPorUnidadMayorChartData" :options="pafPorUnidadMayorChartData.options" />
       </div>
     </div>
   </template>
@@ -90,6 +99,8 @@
   const totalPaf = ref(0);
   const pafPorUnidadMayorChartData = ref(null);
   const totalPorcPaf = ref([]);
+  const unidadSeleccionada = ref(null); // Unidad seleccionada
+  const detalleUnidadSeleccionada = ref(null); // Detalles de la unidad seleccionada
   
   const fetchCantidadPersonasSai = async (rut) => {
     try {
@@ -102,13 +113,21 @@
       console.error('Error al obtener la cantidad de personas del SAI:', error);
     }
   };
-  
+
+const recargarPagina = () => {
+  window.location.reload(); // Recarga la página completa
+};
+
+const cerrarModal = () => {
+  mostrarModal.value = false;
+  graficoModalData.value = null; // Limpiar datos del gráfico
+};
+
   const fetchCantidadPafSai = async (rut) => {
     try {
       const response1 = await $axios.get(`/contratos/${rut}`)
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
       const response = await $axios.get(`/estadisticas/pafActivas/unidad-mayor/${response1.data.unidadMayor}`);
-      console.log(response.data);
       cantidadPafActivas.value = response.data.totalRUNs;
     } catch (error) {
       console.error('Error al obtener la cantidad de personas del SAI:', error);
@@ -118,9 +137,10 @@
   const fetchCantidadPafPorEstado = async (rut) => {
     try {
       const response1 = await $axios.get(`/contratos/${rut}`)
+      // Guardar la unidad mayor en localStorage
+      localStorage.setItem('/unidadMayorPAF', response1.data.unidadMayor);
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
       const response = await $axios.get(`/estadisticas/unidad-mayor/${response1.data.unidadMayor}`);
-      console.log(response.data);
       // Ordenar el objeto EstadoProcesoCount para que Sin Solicitar sea el último
       const estadoProcesoCount = response.data.EstadoProcesoCount;
 
@@ -192,7 +212,72 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
             backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#AB47BC', '#EF5350'], // Colores de las barras
           },
         ],
-      };
+        options: {
+        responsive: true,
+        plugins: {
+          tooltip: {
+            enabled: true,
+          },
+        },
+        onClick: async (event, elements) => {
+          if (elements.length === 0) return;
+
+          const index = elements[0].index;
+          const label = pafPorUnidadMayorChartData.value.labels[index];
+          const value = pafPorUnidadMayorChartData.value.datasets[0].data[index];
+          console.log('Unidad seleccionada:', label, value);
+
+          if (!label || label.trim() === '') {
+            throw new Error('El label está vacío. No se puede realizar la consulta.');
+          }
+
+          unidadSeleccionada.value = label;
+          detalleUnidadSeleccionada.value = value;
+
+          // CAMBIAR AQUI
+          const response1 = await $axios.get(`/estadisticas/unidad-mayor/${label}`);
+
+          cantidadPersonasSai.value = response1.data.TotalProfesores;
+          cantidadPafUnicas.value = response1.data.TotalPipelsoftUnicos;
+          
+          // CAMBIAR AQUI
+          const response2 = await $axios.get(`/estadisticas/pafActivas/unidad-mayor/${label}`);
+          
+          cantidadPafActivas.value = response2.data.totalRUNs;
+          const estadoProcesoCount = response1.data.EstadoProcesoCount;
+
+          const normalizedEstadoProcesoCount = Object.fromEntries(
+            Object.entries(estadoProcesoCount).map(([key, value]) => [
+              key.replace(/\s+/g, '-').replace(/\./g, '-'),
+              value
+            ])
+          );
+
+          const ordenCorrecto = [
+            'Sin-Solicitar',
+            'Enviada-al-Interesado',
+            'Enviada-al-Validador',
+            'Aprobada-por-Validador',
+            'Rechazada-por-Validador',
+            'Aprobada-por-Dir--Pregrado',
+            'Rechazada-por-Dir--de-Pregrado',
+            'Aprobada-por-RRHH',
+            'Rechazada-por-RRHH',
+            'Anulada'
+          ];
+
+          cantidadPafPorEstado.value = Object.fromEntries(
+            ordenCorrecto.map(key => [key, normalizedEstadoProcesoCount[key]])
+          );
+
+          totalPaf.value = Object.values(cantidadPafPorEstado.value).reduce((a, b) => a + b, 0);
+          totalPorcPaf.value = Object.values(cantidadPafPorEstado.value).map((value) =>
+            ((value / totalPaf.value) * 100).toFixed(2)
+          );
+          configurarGraficos();
+        },
+      },
+    };
     } catch (error) {
       console.error('Error al obtener la cantidad de PAF por unidad mayor:', error);
     }
@@ -214,7 +299,7 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
       labels: ['Profesores con PAF', 'Profesores sin PAF'],
       datasets: [
         {
-          label: 'Cantidad',
+          label: 'Porcentaje de PAF',
           data: [
             ((cantidadPafUnicas.value / cantidadPersonasSai.value) * 100).toFixed(2),
             ((cantidadPersonasSai.value - cantidadPafUnicas.value) / cantidadPersonasSai.value * 100).toFixed(2),
@@ -222,8 +307,54 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
           backgroundColor: ['#42A5F5', '#EF5350'],
         },
       ],
-      plugins: {
-        datalabels: commonDatalabelsOptions,
+      options: {
+        responsive: true,
+        plugins: {
+          datalabels: commonDatalabelsOptions,
+          tooltip: {
+            enabled: true,
+          },
+        },
+        onClick: async (event, elements) => {
+          if (elements.length === 0) return;
+
+          const index = elements[0].index;
+          const label = profesoresChartData.value.labels[index];
+          const value = profesoresChartData.value.datasets[0].data[index];
+          console.log('Unidad seleccionada:', label, value);
+          if (!label || label.trim() === '') {
+            throw new Error('El label está vacío. No se puede realizar la consulta.');
+          }
+          if(unidadSeleccionada.value === null) {
+            if (label === 'Profesores con PAF') {
+            // CAMBIAR AQUÍ
+            const response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+            } else if (label === 'Profesores sin PAF') {
+              // CAMBIAR AQUÍ
+            const response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+            }
+          } else {
+            if (label === 'Profesores con PAF') {
+            // CAMBIAR AQUÍ
+            const response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+            } else if (label === 'Profesores sin PAF') {
+              // CAMBIAR AQUÍ
+            const response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+            }
+          }
+          const unidadesData = response.data;
+          graficoModalData.value = {
+            labels: Object.keys(unidadesData),
+            datasets: [
+              {
+                label: 'Cantidad de PAF por Unidad Mayor',
+                data: Object.values(unidadesData),
+                backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#AB47BC', '#EF5350', '#26C6DA', '#FFEE58', '#8D6E63', '#5C6BC0', '#EC407A', '#78909C', '#9CCC65'],
+              },
+            ],
+          };
+          mostrarModal.value = true;
+        },
       },
     };
   
@@ -237,8 +368,46 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
           backgroundColor: ['#66BB6A', '#FFA726', '#AB47BC', '#EA7600', '#C8102E', '#42A5F5', '#0db58b', '#6d8a0c', '#76095b', '#394049'],
         },
       ],
-      plugins: {
-        datalabels: commonDatalabelsOptions,
+      options: {
+        responsive: true,
+        plugins: {
+          datalabels: commonDatalabelsOptions,
+          tooltip: {
+            enabled: true,
+          },
+        },
+        onClick: async (event, elements) => {
+          if (elements.length === 0) return;
+
+          const index = elements[0].index;
+          const label = pafPorEstadoChartData.value.labels[index].replace(/--/g, '. ').replace(/-/g, ' ');
+          const value = pafPorEstadoChartData.value.datasets[0].data[index];
+          console.log('Unidad seleccionada:', label, value);
+          if (!label || label.trim() === '') {
+            throw new Error('El label está vacío. No se puede realizar la consulta.');
+          }
+  
+          if(unidadSeleccionada.value === null) {
+              // CAMBIAR AQUÍ
+              const response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+          } else {
+              // CAMBIAR AQUÍ
+              const response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+          }
+
+          const unidadesData = response.data;
+          graficoModalData.value = {
+            labels: Object.keys(unidadesData),
+            datasets: [
+              {
+                label: 'Cantidad de PAF por Unidad Mayor',
+                data: Object.values(unidadesData),
+                backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#AB47BC', '#EF5350', '#26C6DA', '#FFEE58', '#8D6E63', '#5C6BC0', '#EC407A', '#78909C', '#9CCC65'],
+              },
+            ],
+          };
+          mostrarModal.value = true;
+        },
       },
     };
   
@@ -246,7 +415,7 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
       labels: ['Profesores con PAF activas', 'Profesores sin PAF activas'],
       datasets: [
         {
-          label: 'Cantidad',
+          label: 'Porcentaje de PAF',
           data: [
             ((cantidadPafActivas.value / cantidadPersonasSai.value) * 100).toFixed(2),
             ((cantidadPersonasSai.value - cantidadPafActivas.value) / cantidadPersonasSai.value * 100).toFixed(2),
@@ -254,8 +423,54 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
           backgroundColor: ['#42A5F5', '#EF5350'],
         },
       ],
-      plugins: {
-        datalabels: commonDatalabelsOptions,
+      options: {
+        responsive: true,
+        plugins: {
+          datalabels: commonDatalabelsOptions,
+          tooltip: {
+            enabled: true,
+          },
+        },
+        onClick: async (event, elements) => {
+          if (elements.length === 0) return;
+
+          const index = elements[0].index;
+          const label = pafChartData.value.labels[index];
+          const value = pafChartData.value.datasets[0].data[index];
+          console.log('Unidad seleccionada:', label, value);
+          if (!label || label.trim() === '') {
+            throw new Error('El label está vacío. No se puede realizar la consulta.');
+          }
+          if(unidadSeleccionada.value === null) {
+            if (label === 'Profesores con PAF activas') {
+            // CAMBIAR AQUÍ
+            const response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+            } else if (label === 'Profesores sin PAF activas') {
+              // CAMBIAR AQUÍ
+            const response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+            }
+          } else {
+            if (label === 'Profesores con PAF activas') {
+            // CAMBIAR AQUÍ
+            const response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+            } else if (label === 'Profesores sin PAF activas') {
+              // CAMBIAR AQUÍ
+            const response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+            }
+          }
+          const unidadesData = response.data;
+          graficoModalData.value = {
+            labels: Object.keys(unidadesData),
+            datasets: [
+              {
+                label: 'Cantidad de PAF por Unidad Mayor',
+                data: Object.values(unidadesData),
+                backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#AB47BC', '#EF5350', '#26C6DA', '#FFEE58', '#8D6E63', '#5C6BC0', '#EC407A', '#78909C', '#9CCC65'],
+              },
+            ],
+          };
+          mostrarModal.value = true;
+        },
       },
     };
   };
@@ -412,10 +627,31 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
   }
   
   .estado-flecha {
-    margin: 0 1rem;
-    font-size: 1.5rem;
-    color: #394049;
-    align-self: center;
+  margin: 0 0rem;
+  font-size: 1rem;
+  color: #394049;
+  align-self: center;
   }
-  </style>
-  
+
+  .btn-recargar {
+    background-color: #f07115;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 20px;
+    border-radius: 5px;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .btn-recargar:hover {
+    background-color: #e51e1e;
+  }
+
+.unidad-seleccionada{
+  justify-content: center;
+  text-align: center;
+}
+</style>  

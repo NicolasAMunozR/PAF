@@ -409,7 +409,6 @@ const bloquesPorDia = (dia: string, modulo: number) => {
 const obtenerDatosPersona = async () => {
   try {
     const response = await $axios.get(`/pipelsoft/contratos-run/${run.value}`);
-    console.log('response:', response.data);
     const response1 = await $axios.get(`/profesorDB/${run.value}`);
     persona1.value = response1.data;
 

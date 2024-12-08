@@ -105,7 +105,6 @@ const obtenerDatosPaf = async () => {
   try {
     if (!codigoPaf.value) return;
     const response = await $axios.get(`/contratos/codigo_paf/${codigoPaf.value}`);
-    console.log('response:', response.data);
     if (response.data) {
       paf.value = response.data.map((item: any) => {
         const bloquesArray = item.HistorialPafData.Bloque || []; // Asegurar que Bloque sea un arreglo (vacío si es null o undefined)
@@ -135,7 +134,6 @@ const obtenerDatosPaf = async () => {
         SemestrePaf: item.PipelsoftData.Semestre,
       };
     });
-    console.log('paf:', paf.value);
     }
   } catch (error) {
     console.error('Error al obtener los datos de la PAF:', error);

@@ -69,7 +69,6 @@ export default {
         try {
           // Accede a $axios desde el contexto del componente
           const response = await this.$axios.get(`/usuario/rut/${this.run}`);
-          console.log(response.data);
           if (!response.data) {
             this.errorMessage = "Usuario no encontrado.";
             return;
