@@ -249,7 +249,7 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
           cantidadPafUnicas.value = response1.data.total_pipelsoft_unicos;
           console.log(response1.data);
           const response2 = await $axios.get(`/estadisticas/${response.data.unidadMayor}/${label}`);
-          console.log(response2.data);
+          console.log(response2.data); 
           cantidadPafActivas.value = response2.data.total_pipelsoft_unicos;
           const estadoProcesoCount = response1.data.estado_proceso_count;
 
