@@ -938,8 +938,11 @@ func (s *EstadisticasService) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3
 }
 
 // 8.4
-func (s *EstadisticasService) ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos(unidadMayor string) ([]UnidadMenorConProfesores, error) {
-	var resultado []UnidadMenorConProfesores
+func (s *EstadisticasService) ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos(unidadMayor string) (map[string]int, error) {
+	var resultados []struct {
+		NombreUnidadMenor string
+		TotalProfesores   int
+	}
 
 	// Validar que el parámetro 'unidadMayor' esté presente
 	if unidadMayor == "" {
@@ -961,11 +964,17 @@ func (s *EstadisticasService) ObtenerUnidadesMenoresConProfesoresFiltradosPAFAct
 		Where("cod_estado IN ?", []string{"F1", "F9", "A9"}). // CodEstado filtrado (activos)
 		Where("nombre_unidad_mayor = ?", unidadMayor).        // Filtro por 'unidadMayor'
 		Group("nombre_unidad_menor").                         // Agrupar por unidad menor
-		Scan(&resultado).Error; err != nil {
+		Scan(&resultados).Error; err != nil {
 		return nil, fmt.Errorf("error al obtener unidades menores con PAF activos: %w", err)
 	}
 
-	return resultado, nil
+	// Convertir los resultados a un mapa
+	unidadesMenores := make(map[string]int)
+	for _, resultado := range resultados {
+		unidadesMenores[resultado.NombreUnidadMenor] = resultado.TotalProfesores
+	}
+
+	return unidadesMenores, nil
 }
 
 // 8.5
@@ -988,8 +997,8 @@ func (s *EstadisticasService) ObtenerUnidadesMenoresPorCodEstadoPAF(codEstadoPAF
 	// Consulta a la base de datos filtrando por codEstadoPAF y unidadMayor
 	if err := s.DB.Model(&models.Pipelsoft{}).
 		Select("nombre_unidad_menor, COUNT(DISTINCT run_empleado) as total_profesores").
-		Where("cod_estado = ?", codEstadoPAF).
-		Where("unidad_mayor = ?", unidadMayor). // Filtro adicional por unidadMayor
+		Where("des_estado = ?", codEstadoPAF).
+		Where("nombre_unidad_mayor = ?", unidadMayor). // Filtro adicional por unidadMayor
 		Group("nombre_unidad_menor").
 		Scan(&resultados).Error; err != nil {
 		return nil, fmt.Errorf("error al obtener unidades menores por codEstadoPAF y unidadMayor: %w", err)
