@@ -295,17 +295,18 @@ func (c *EstadisticasController) ObtenerUnidadesMayoresConProfesoresFiltradosPAF
 }
 
 // 5
-// ObtenerUnidadesMayoresSinProfesoresEnPipelsoft maneja la solicitud HTTP para obtener unidades mayores sin profesores en Pipelsoft
-func (ctrl *EstadisticasController) ObtenerUnidadesMayoresSinProfesoresEnPipelsoft(c *gin.Context) {
-	// Llamar al servicio para obtener las unidades mayores sin profesores en Pipelsoft
-	resultado, err := ctrl.Service.ObtenerUnidadesMayoresSinProfesoresEnPipelsoft()
+func (h *EstadisticasController) ObtenerUnidadesMayoresPorCodEstadoPAF(c *gin.Context) {
+	// Obtener el parámetro codEstadoPAF desde la URL
+	codEstadoPAF := c.Param("codEstadoPAF")
+
+	// Llamar al servicio
+	resultado, err := h.Service.ObtenerUnidadesMayoresPorCodEstadoPAF(codEstadoPAF)
 	if err != nil {
-		log.Println("Error al obtener unidades mayores sin profesores en Pipelsoft:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Retornar la respuesta en formato JSON
+	// Responder con los datos en formato JSON
 	c.JSON(http.StatusOK, resultado)
 }
 
@@ -425,4 +426,20 @@ func (c *EstadisticasController) ObtenerUnidadesMenoresConProfesoresFiltradosPAF
 
 	// Si la operación es exitosa, devolver los resultados en formato JSON.
 	ctx.JSON(http.StatusOK, resultado)
+}
+
+// 8.5
+func (h *EstadisticasController) ObtenerUnidadesMenoresPorCodEstadoPAF(c *gin.Context) {
+	// Obtener el parámetro codEstadoPAF desde la URL
+	codEstadoPAF := c.Param("codEstadoPAF")
+
+	// Llamar al servicio
+	resultado, err := h.Service.ObtenerUnidadesMenoresPorCodEstadoPAF(codEstadoPAF)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Responder con los datos en formato JSON
+	c.JSON(http.StatusOK, resultado)
 }

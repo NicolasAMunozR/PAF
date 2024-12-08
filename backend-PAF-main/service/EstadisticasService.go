@@ -542,6 +542,36 @@ func (s *EstadisticasService) ObtenerUnidadesMayoresConProfesoresFiltradosPAFAct
 }
 
 // 5
+func (s *EstadisticasService) ObtenerUnidadesMayoresPorCodEstadoPAF(codEstadoPAF string) (map[string]int, error) {
+	var resultados []struct {
+		NombreUnidadMayor string
+		TotalProfesores   int
+	}
+
+	// Validar que codEstadoPAF no esté vacío
+	if codEstadoPAF == "" {
+		return nil, fmt.Errorf("el parámetro codEstadoPAF no puede estar vacío")
+	}
+
+	// Consulta a la base de datos
+	if err := s.DB.Model(&models.Pipelsoft{}).
+		Select("nombre_unidad_mayor, COUNT(DISTINCT run_empleado) as total_profesores").
+		Where("cod_estado = ?", codEstadoPAF).
+		Group("nombre_unidad_mayor").
+		Scan(&resultados).Error; err != nil {
+		return nil, fmt.Errorf("error al obtener unidades mayores por codEstadoPAF: %w", err)
+	}
+
+	// Convertir los resultados a un mapa
+	unidadesMayores := make(map[string]int)
+	for _, resultado := range resultados {
+		unidadesMayores[resultado.NombreUnidadMayor] = resultado.TotalProfesores
+	}
+
+	return unidadesMayores, nil
+}
+
+// 6
 
 func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMenor string) (*EstadisticasResponse, error) {
 	var resp EstadisticasResponse
@@ -899,4 +929,34 @@ func (s *EstadisticasService) ObtenerUnidadesMenoresConProfesoresFiltradosPAFAct
 	}
 
 	return resultado, nil
+}
+
+// 8.5
+func (s *EstadisticasService) ObtenerUnidadesMenoresPorCodEstadoPAF(codEstadoPAF string) (map[string]int, error) {
+	var resultados []struct {
+		NombreUnidadMenor string
+		TotalProfesores   int
+	}
+
+	// Validar que codEstadoPAF no esté vacío
+	if codEstadoPAF == "" {
+		return nil, fmt.Errorf("el parámetro codEstadoPAF no puede estar vacío")
+	}
+
+	// Consulta a la base de datos
+	if err := s.DB.Model(&models.Pipelsoft{}).
+		Select("nombre_unidad_menor, COUNT(DISTINCT run_empleado) as total_profesores").
+		Where("cod_estado = ?", codEstadoPAF).
+		Group("nombre_unidad_menor").
+		Scan(&resultados).Error; err != nil {
+		return nil, fmt.Errorf("error al obtener unidades menores por codEstadoPAF: %w", err)
+	}
+
+	// Convertir los resultados a un mapa
+	unidadesMenores := make(map[string]int)
+	for _, resultado := range resultados {
+		unidadesMenores[resultado.NombreUnidadMenor] = resultado.TotalProfesores
+	}
+
+	return unidadesMenores, nil
 }
