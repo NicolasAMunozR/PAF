@@ -457,26 +457,27 @@ const configurarGraficos = () => {
             throw new Error('El label está vacío. No se puede realizar la consulta.');
           }
           let response2 = null;
+          let unidadesData2 = null;
           if(unidadSeleccionada.value === null) {
             if (label === 'Profesores con PAF activas') {
-            // CAMBIAR AQUÍ
+
             response2 = await $axios.get(`/estadisticas/unidades-mayores/profesores-filtrados`);
             } else if (label === 'Profesores sin PAF activas') {
-              // CAMBIAR AQUÍ
+
             response2 = await $axios.get(`/estadisticas/unidades-mayores/profesores-codestado`);
             }
+            unidadesData2 = response2.data;
           } else {
             if (label === 'Profesores con PAF activas') {
-            // CAMBIAR AQUÍ
+
             response2 = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
             } else if (label === 'Profesores sin PAF activas') {
-              // CAMBIAR AQUÍ
-            response2 = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+
+            response2 = await $axios.get(`/estadistica/unidades-menores-con-profesores-paf-activos/8_4/${unidadSeleccionada.value}`);
             }
+            console.log('Cantidad de PAF activas:aaaaaaaaaa', response2.data);
+            unidadesData2 = response2.data;
           }
-          console.log('Cantidad de PAF activas:', response2.data);
-          const unidadesData2 = response2.data;
-          console.log('Unidades data 2:', unidadesData2);
           graficoModalData.value = {
             labels: Object.keys(unidadesData2),
             datasets: [
