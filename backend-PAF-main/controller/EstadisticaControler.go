@@ -233,3 +233,95 @@ func (ctrl *EstadisticasController) ObtenerYCompararRunsHandler(c *gin.Context) 
 		"cantidad":      cantidad,
 	})
 }
+
+func (c *EstadisticasController) ObtenerUnidadesMayoresHandler(ctx *gin.Context) {
+	// Llamar al servicio para obtener los datos
+	unidades, err := c.Service.ObtenerUnidadesMayoresConProfesores()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// Responder con los resultados
+	ctx.JSON(http.StatusOK, gin.H{
+		"unidadesMayores": unidades,
+	})
+}
+
+func (c *EstadisticasController) ObtenerUnidadesMayoresSinProfesoresEnPipelsoftHandler(ctx *gin.Context) {
+	resultado, err := c.Service.ObtenerUnidadesMayoresSinProfesoresEnPipelsoft()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, resultado)
+}
+
+func (c *EstadisticasController) ObtenerUnidadesMayoresConProfesoresFiltradosHandler(ctx *gin.Context) {
+	resultado, err := c.Service.ObtenerUnidadesMayoresConProfesoresFiltrados()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, resultado)
+}
+
+// ObtenerUnidadesMayoresConProfesoresFiltrados maneja la solicitud HTTP para obtener unidades mayores con los profesores filtrados
+func (ctrl *EstadisticasController) ObtenerUnidadesMayoresConProfesoresFiltrados(c *gin.Context) {
+	// Llamar al servicio para obtener las unidades mayores con los profesores filtrados
+	resultado, err := ctrl.Service.ObtenerUnidadesMayoresConProfesoresFiltrados()
+	if err != nil {
+		log.Println("Error al obtener unidades mayores con profesores filtrados:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Retornar la respuesta en formato JSON
+	c.JSON(http.StatusOK, resultado)
+}
+
+// ObtenerUnidadesMayoresSinProfesoresEnPipelsoft maneja la solicitud HTTP para obtener unidades mayores sin profesores en Pipelsoft
+func (ctrl *EstadisticasController) ObtenerUnidadesMayoresSinProfesoresEnPipelsoft(c *gin.Context) {
+	// Llamar al servicio para obtener las unidades mayores sin profesores en Pipelsoft
+	resultado, err := ctrl.Service.ObtenerUnidadesMayoresSinProfesoresEnPipelsoft()
+	if err != nil {
+		log.Println("Error al obtener unidades mayores sin profesores en Pipelsoft:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Retornar la respuesta en formato JSON
+	c.JSON(http.StatusOK, resultado)
+}
+
+// ObtenerEstadisticasPorUnidad maneja la solicitud HTTP para obtener estadísticas por unidad
+func (ctrl *EstadisticasController) ObtenerEstadisticasPorUnidad(c *gin.Context) {
+	// Obtener parámetros de la solicitud
+	unidadMayor := c.DefaultQuery("unidadMayor", "") // "unidadMayor" es requerido
+	unidadMenor := c.DefaultQuery("unidadMenor", "")
+
+	// Validar los parámetros
+	if unidadMayor == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'unidadMayor' es obligatorio"})
+		return
+	}
+
+	// Llamar al servicio para obtener las estadísticas
+	resp, err := ctrl.Service.ObtenerEstadisticasPorUnidad(unidadMayor, unidadMenor)
+	if err != nil {
+		log.Println("Error al obtener estadísticas:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Retornar la respuesta en formato JSON
+	c.JSON(http.StatusOK, resp)
+}

@@ -109,6 +109,16 @@ func main() {
 
 	//controlador para obtener los profesores que no poseen paf
 	r.GET("/estadisticas/obtener-y-comparar-runs", estadisticasController.ObtenerYCompararRunsHandler)
+	// 1
+	r.GET("/estadisticas/unidades-mayores/cant_profesores", estadisticasController.ObtenerUnidadesMayoresHandler)
+	// 2
+	r.GET("/estadisticas/unidades-mayores/sin_profesores", estadisticasController.ObtenerUnidadesMayoresSinProfesoresEnPipelsoftHandler)
+	// 3
+	r.GET("/estadisticas/unidades-mayores/profesores-filtrados", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosHandler)
+	// 4
+	r.GET("/estadisticas/unidades-mayores/profesores-codestado", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltrados)
+	// 5
+	r.GET("/estadisticas/profesores/estado/:estado", estadisticasController.ObtenerUnidadesMayoresSinProfesoresEnPipelsoft)
 
 	// Iniciar el cron job para actualización periódica
 	// de acuerdo al sai profes sin paf y sin contrato sin contar profesores repetidos, desde pipelsoft estan los ruts con un 0 al inicio y con digito verificador
