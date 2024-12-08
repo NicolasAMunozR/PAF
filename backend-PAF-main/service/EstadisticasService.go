@@ -626,120 +626,39 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMe
 }
 
 // 7
-func (s *EstadisticasService) ObtenerEstadisticasPorUnidadTOTO(unidadMayor, unidadMenor string) (*EstadisticasResponse, error) {
-	var resp EstadisticasResponse
+// ContarRegistrosPorUnidadMayorYUnidadMenor cuenta los registros en Pipelsoft filtrados por RUNs de ProfesorDB,
+// y adicionalmente por unidad mayor y unidad menor.
+func (s *EstadisticasService) ContarRegistrosPorUnidadMayorYUnidadMenor(unidadMayor, unidadMenor string) (int64, int64, error) {
+	var count int64     // Conteo de registros finales en Pipelsoft
+	var totalRUNs int64 // Conteo de RUNs únicos
 
-	// Validar que al menos 'unidadMayor' esté presente
-	if unidadMayor == "" {
-		return nil, fmt.Errorf("el parámetro 'unidadMayor' debe ser proporcionado")
+	// Paso 1: Obtener RUNs únicos de ProfesorDB
+	var runsProfesorDB []string
+	if err := s.DB.Model(&models.ProfesorDB{}).
+		Distinct("RUN"). // Nombre del campo en el modelo de backend
+		Pluck("RUN", &runsProfesorDB).Error; err != nil {
+		return 0, 0, fmt.Errorf("error al obtener RUNs de ProfesorDB: %w", err)
 	}
 
-	// Crear un query base para los filtros
-	query := s.DB.Model(&models.Pipelsoft{})
-	// Filtrar por 'unidadMayor' y 'cod_estado'
-	query = query.Where("nombre_unidad_mayor = ?", unidadMayor)
-	query = query.Where("cod_estado NOT IN (?, ?, ?)", "F1", "F9", "A9")
-
-	// Si 'unidadMenor' está especificado, agregar el filtro
-	if unidadMenor != "" {
-		query = query.Where("nombre_unidad_menor = ?", unidadMenor)
-	}
-
-	// Obtener estadísticas generales de Pipelsoft
-	if err := query.Count(&resp.TotalPipelsoft).Error; err != nil {
-		return nil, fmt.Errorf("error al contar los registros en pipelsofts: %w", err)
-	}
-
-	// Obtener registros únicos de 'run_empleado' de Pipelsoft
-	if err := query.Distinct("run_empleado").Count(&resp.TotalPipelsoftUnicos).Error; err != nil {
-		return nil, fmt.Errorf("error al contar los registros únicos de Run en pipelsofts: %w", err)
-	}
-
-	if resp.TotalPipelsoft > 0 {
-		resp.PorcentajeUnicos = float64(resp.TotalPipelsoftUnicos) / float64(resp.TotalPipelsoft) * 100
-	}
-
-	// Obtener los estados de proceso
-	estados := []string{
-		"Sin Solicitar", "Enviada al Interesado", "Enviada al Validador", "Aprobada por Validador", "Rechazada por Validador",
-		"Aprobada por Dir. Pregrado", "Rechazada por Dir. de Pregrado", "Aprobada por RRHH", "Rechazada por RRHH", "Anulada",
-	}
-
-	resp.EstadoProcesoCount = make(map[string]int)
-	resp.EstadoProcesoPct = make(map[string]float64)
-
-	for _, estado := range estados {
-		var count int64
-		// Filtrar por estado también
-		if err := query.Where("des_estado = ?", estado).Count(&count).Error; err != nil {
-			return nil, fmt.Errorf("error al contar los registros de pipelsofts con estado %s: %w", estado, err)
-		}
-		resp.EstadoProcesoCount[estado] = int(count)
-		if resp.TotalPipelsoft > 0 {
-			resp.EstadoProcesoPct[estado] = float64(count) / float64(resp.TotalPipelsoft) * 100
-		}
-	}
-
-	// Obtener las unidades menores asociadas a la 'unidadMayor'
-	var unidadesMenores []string
-	// Aplicar los mismos filtros al obtener las unidades menores
+	// Paso 2: Filtrar Pipelsoft por RUNs coincidentes, unidad mayor y unidad menor
 	if err := s.DB.Model(&models.Pipelsoft{}).
-		Where("nombre_unidad_mayor = ?", unidadMayor).
-		Where("cod_estado NOT IN (?, ?, ?)", "F1", "F9", "A9").
-		Distinct("nombre_unidad_menor").
-		Pluck("nombre_unidad_menor", &unidadesMenores).Error; err != nil {
-		return nil, fmt.Errorf("error al obtener las unidades menores: %w", err)
+		Where("run_empleado IN ?", runsProfesorDB).               // Filtrar por RUNs coincidentes
+		Where("cod_estado NOT IN ?", []string{"F1", "F9", "A9"}). // Filtrar por estados
+		Where("nombre_unidad_mayor = ?", unidadMayor).            // Filtrar por unidad mayor
+		Where("nombre_unidad_menor = ?", unidadMenor).            // Filtrar por unidad menor
+		Count(&count).Error; err != nil {
+		return 0, 0, fmt.Errorf("error al contar registros filtrados de Pipelsoft: %w", err)
 	}
 
-	resp.UnidadesMenores = unidadesMenores
-
-	// Obtener los profesores asociados a cada unidad menor
-	unidadMenorProfesores := []UnidadMenorProfesores{}
-	for _, unidad := range unidadesMenores {
-		var profesores []string
-		// Filtrar los profesores según la unidad menor
-		if err := s.DB.Model(&models.Contrato{}).
-			Where("unidad_menor = ?", unidad).
-			Distinct("run_docente").
-			Pluck("run_docente", &profesores).Error; err != nil {
-			return nil, fmt.Errorf("error al obtener los profesores para la unidad menor %s: %w", unidad, err)
-		}
-		unidadMenorProfesores = append(unidadMenorProfesores, UnidadMenorProfesores{
-			UnidadMenor: unidad,
-			Profesores:  profesores,
-		})
+	// Paso 3: Contar los RUNs únicos coincidentes entre ProfesorDB y Pipelsoft
+	if err := s.DB.Model(&models.Pipelsoft{}).
+		Where("run_empleado IN ?", runsProfesorDB). // Filtrar por RUNs coincidentes
+		Distinct("run_empleado").                   // Contar RUNs únicos
+		Count(&totalRUNs).Error; err != nil {
+		return 0, 0, fmt.Errorf("error al contar RUNs únicos en Pipelsoft: %w", err)
 	}
 
-	resp.UnidadMenorProfesores = unidadMenorProfesores
-
-	// Contar los profesores en la tabla contratos que coincidan con los filtros
-	queryContratos := s.DB.Model(&models.Contrato{})
-	// Filtrar por 'unidadMayor' y 'unidadMenor' en los contratos también
-	if unidadMayor != "" {
-		queryContratos = queryContratos.Where("unidad_mayor = ?", unidadMayor)
-	}
-	if unidadMenor != "" {
-		queryContratos = queryContratos.Where("unidad_menor = ?", unidadMenor)
-	}
-
-	// Contar los profesores en contratos
-	if err := queryContratos.Distinct("run_docente").Count(&resp.TotalProfesores).Error; err != nil {
-		return nil, fmt.Errorf("error al contar los profesores en la tabla contratos: %w", err)
-	}
-
-	// Contar los profesores que no están en Pipelsoft
-	var profesoresNoEnPipelsoft int64
-	// Asegurarse de filtrar los profesores que no estén en los estados especificados
-	if err := queryContratos.Where("run_docente NOT IN (SELECT run_empleado FROM pipelsofts WHERE cod_estado NOT IN (?, ?, ?))", "F1", "F9", "A9").Count(&profesoresNoEnPipelsoft).Error; err != nil {
-		return nil, fmt.Errorf("error al contar los profesores que no están en pipelsofts: %w", err)
-	}
-	resp.ProfesoresNoEnPipelsoft = profesoresNoEnPipelsoft
-
-	if resp.TotalProfesores > 0 {
-		resp.ProfesoresNoEnPipelsoftPct = float64(profesoresNoEnPipelsoft) / float64(resp.TotalProfesores) * 100
-	}
-
-	return &resp, nil
+	return count, totalRUNs, nil
 }
 
 type UnidadMenorConProfesores struct {

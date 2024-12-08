@@ -123,7 +123,7 @@ func main() {
 	// 6 arreglar
 	r.GET("/estadisticas/6/:unidadMayor/:unidadMenor", estadisticasController.ObtenerEstadisticasPorUnidad)
 	// 7 arreglar
-	r.GET("/estadisticas/:unidadMayor/:unidadMenor", estadisticasController.ObtenerEstadisticasPorUnidadTOTO)
+	r.GET("/estadisticas/:unidadMayor/:unidadMenor", estadisticasController.ContarRegistrosPorUnidadMayorYUnidadMenor)
 
 	// Ruta para obtener las unidades menores con profesores filtrados (PAF activos)
 	// 8.1

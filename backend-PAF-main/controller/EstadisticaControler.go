@@ -337,27 +337,29 @@ func (ctrl *EstadisticasController) ObtenerEstadisticasPorUnidad(c *gin.Context)
 
 // 7
 // ObtenerEstadisticasPorUnidadTOTO maneja la solicitud HTTP para obtener estadísticas por unidad
-func (ctrl *EstadisticasController) ObtenerEstadisticasPorUnidadTOTO(c *gin.Context) {
-	// Obtener parámetros de la ruta
-	unidadMayor := c.Param("unidadMayor") // Parámetro de la ruta
-	unidadMenor := c.Param("unidadMenor") // Parámetro de la ruta (opcional)
+func (ctrl *EstadisticasController) ContarRegistrosPorUnidadMayorYUnidadMenor(c *gin.Context) {
+	// Obtener los parámetros de la URL
+	unidadMayor := c.Param("unidadMayor")
+	unidadMenor := c.Param("unidadMenor")
 
-	// Validar que al menos 'unidadMayor' esté presente
-	if unidadMayor == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'unidadMayor' debe ser proporcionado"})
+	// Validar que ambos parámetros no estén vacíos
+	if unidadMayor == "" || unidadMenor == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Los parámetros 'unidadMayor' y 'unidadMenor' son obligatorios"})
 		return
 	}
 
-	// Llamar al servicio para obtener las estadísticas
-	resp, err := ctrl.Service.ObtenerEstadisticasPorUnidadTOTO(unidadMayor, unidadMenor)
+	// Llamar al servicio para obtener los conteos
+	count, totalRUNs, err := ctrl.Service.ContarRegistrosPorUnidadMayorYUnidadMenor(unidadMayor, unidadMenor)
 	if err != nil {
-		log.Println("Error al obtener estadísticas:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Retornar la respuesta en formato JSON
-	c.JSON(http.StatusOK, resp)
+	// Retornar la respuesta
+	c.JSON(http.StatusOK, gin.H{
+		"totalRegistros": count,
+		"totalRUNs":      totalRUNs,
+	})
 }
 
 // 8.1
