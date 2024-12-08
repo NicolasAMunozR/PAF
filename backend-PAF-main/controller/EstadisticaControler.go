@@ -443,11 +443,12 @@ func (c *EstadisticasController) ObtenerUnidadesMenoresConProfesoresFiltradosPAF
 
 // 8.5
 func (h *EstadisticasController) ObtenerUnidadesMenoresPorCodEstadoPAF(c *gin.Context) {
-	// Obtener el parámetro codEstadoPAF desde la URL
+	// Obtener los parámetros codEstadoPAF y unidadMayor desde la URL
 	codEstadoPAF := c.Param("codEstadoPAF")
+	unidadMayor := c.Param("unidadMayor")
 
-	// Llamar al servicio
-	resultado, err := h.Service.ObtenerUnidadesMenoresPorCodEstadoPAF(codEstadoPAF)
+	// Llamar al servicio con los parámetros obtenidos
+	resultado, err := h.Service.ObtenerUnidadesMenoresPorCodEstadoPAF(codEstadoPAF, unidadMayor)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

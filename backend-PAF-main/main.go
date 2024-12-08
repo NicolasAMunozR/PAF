@@ -139,7 +139,7 @@ func main() {
 	r.GET("/estadistica/unidades-menores-con-profesores-paf-activos/8_4/:unidadMayor", estadisticasController.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos)
 
 	// 8.5
-	r.GET("/estadistica/unidades-menores/8-5/:codEstadoPAF", estadisticasController.ObtenerUnidadesMenoresPorCodEstadoPAF)
+	r.GET("/estadistica/unidades-menores/:codEstadoPAF/:unidadMayor", estadisticasController.ObtenerUnidadesMenoresPorCodEstadoPAF)
 
 	// Iniciar el cron job para actualización periódica
 	// de acuerdo al sai profes sin paf y sin contrato sin contar profesores repetidos, desde pipelsoft estan los ruts con un 0 al inicio y con digito verificador

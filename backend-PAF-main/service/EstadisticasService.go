@@ -969,7 +969,7 @@ func (s *EstadisticasService) ObtenerUnidadesMenoresConProfesoresFiltradosPAFAct
 }
 
 // 8.5
-func (s *EstadisticasService) ObtenerUnidadesMenoresPorCodEstadoPAF(codEstadoPAF string) (map[string]int, error) {
+func (s *EstadisticasService) ObtenerUnidadesMenoresPorCodEstadoPAF(codEstadoPAF, unidadMayor string) (map[string]int, error) {
 	var resultados []struct {
 		NombreUnidadMenor string
 		TotalProfesores   int
@@ -980,13 +980,19 @@ func (s *EstadisticasService) ObtenerUnidadesMenoresPorCodEstadoPAF(codEstadoPAF
 		return nil, fmt.Errorf("el parámetro codEstadoPAF no puede estar vacío")
 	}
 
-	// Consulta a la base de datos
+	// Validar que unidadMayor no esté vacío
+	if unidadMayor == "" {
+		return nil, fmt.Errorf("el parámetro unidadMayor no puede estar vacío")
+	}
+
+	// Consulta a la base de datos filtrando por codEstadoPAF y unidadMayor
 	if err := s.DB.Model(&models.Pipelsoft{}).
 		Select("nombre_unidad_menor, COUNT(DISTINCT run_empleado) as total_profesores").
 		Where("cod_estado = ?", codEstadoPAF).
+		Where("unidad_mayor = ?", unidadMayor). // Filtro adicional por unidadMayor
 		Group("nombre_unidad_menor").
 		Scan(&resultados).Error; err != nil {
-		return nil, fmt.Errorf("error al obtener unidades menores por codEstadoPAF: %w", err)
+		return nil, fmt.Errorf("error al obtener unidades menores por codEstadoPAF y unidadMayor: %w", err)
 	}
 
 	// Convertir los resultados a un mapa
