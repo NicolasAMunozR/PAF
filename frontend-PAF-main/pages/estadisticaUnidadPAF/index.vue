@@ -107,8 +107,8 @@
       const response1 = await $axios.get(`/contratos/${rut}`)
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
       const response = await $axios.get(`/estadisticas/unidad-mayor/${response1.data.unidadMayor}`);
-      cantidadPersonasSai.value = response.data.TotalProfesores;
-      cantidadPafUnicas.value = response.data.TotalPipelsoftUnicos;
+      cantidadPersonasSai.value = response.data.total_profesores;
+      cantidadPafUnicas.value = response.data.total_pipelsoft_unicos;
     } catch (error) {
       console.error('Error al obtener la cantidad de personas del SAI:', error);
     }
@@ -142,7 +142,7 @@ const cerrarModal = () => {
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
       const response = await $axios.get(`/estadisticas/unidad-mayor/${response1.data.unidadMayor}`);
       // Ordenar el objeto EstadoProcesoCount para que Sin Solicitar sea el último
-      const estadoProcesoCount = response.data.EstadoProcesoCount;
+      const estadoProcesoCount = response.data.estado_proceso_count;
 
 // Normalizar las claves
 const normalizedEstadoProcesoCount = Object.fromEntries(
@@ -234,14 +234,15 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
           unidadSeleccionada.value = label;
           detalleUnidadSeleccionada.value = value;
 
-          // CAMBIAR AQUI
-          const response1 = await $axios.get(`/estadisticas/unidad-mayor/${label}`);
+          const response = await $axios.get(`/contratos/${rut}`)
+          console.log('Unidad seleccionada:', response.data.unidadMayor, label);
+
+          const response1 = await $axios.get(`/estadisticas/${response.data.unidadMayor}/${label}`);
 
           cantidadPersonasSai.value = response1.data.TotalProfesores;
           cantidadPafUnicas.value = response1.data.TotalPipelsoftUnicos;
           
-          // CAMBIAR AQUI
-          const response2 = await $axios.get(`/estadisticas/pafActivas/unidad-mayor/${label}`);
+          const response2 = await $axios.get(`/estadisticas/${response.data.unidadMayor}/${label}`);
           
           cantidadPafActivas.value = response2.data.totalRUNs;
           const estadoProcesoCount = response1.data.EstadoProcesoCount;
