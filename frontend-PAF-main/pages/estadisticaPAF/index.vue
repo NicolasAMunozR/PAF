@@ -470,7 +470,7 @@ const configurarGraficos = () => {
           } else {
             if (label === 'Profesores con PAF activas') {
 
-            response2 = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+            response2 = await $axios.get(`/estadistica/unidades-menores-sin-profesores/8_3/${unidadSeleccionada.value}`);
             } else if (label === 'Profesores sin PAF activas') {
 
             response2 = await $axios.get(`/estadistica/unidades-menores-con-profesores-paf-activos/8_4/${unidadSeleccionada.value}`);
