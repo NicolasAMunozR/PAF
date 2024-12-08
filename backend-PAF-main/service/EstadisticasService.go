@@ -565,18 +565,15 @@ func (s *EstadisticasService) ObtenerUnidadesMayoresPorCodEstadoPAF(codEstadoPAF
 func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMenor string) (*EstadisticasResponse, error) {
 	var resp EstadisticasResponse
 
-	// Validar que al menos 'unidadMayor' esté presente
+	// Validar que 'unidadMayor' esté presente
 	if unidadMayor == "" {
 		return nil, fmt.Errorf("el parámetro 'unidadMayor' debe ser proporcionado")
 	}
 
 	// Crear un query base para los filtros
-	query := s.DB.Model(&models.Pipelsoft{})
+	query := s.DB.Model(&models.Pipelsoft{}).Where("nombre_unidad_mayor = ?", unidadMayor)
 
-	// Filtrar por 'unidadMayor'
-	query = query.Where("nombre_unidad_mayor = ?", unidadMayor)
-
-	// Si 'unidadMenor' está vacío, obtenemos las unidades menores asociadas a la 'unidadMayor'
+	// Si 'unidadMenor' no está vacío, agregar el filtro correspondiente
 	if unidadMenor != "" {
 		query = query.Where("nombre_unidad_menor = ?", unidadMenor)
 	}
@@ -600,6 +597,7 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMe
 	resp.EstadoProcesoCount = make(map[string]int)
 	resp.EstadoProcesoPct = make(map[string]float64)
 
+	// Definir los estados
 	estados := []string{
 		"Sin Solicitar", "Enviada al Interesado", "Enviada al Validador", "Aprobada por Validador",
 		"Rechazada por Validador", "Aprobada por Dir. Pregrado", "Rechazada por Dir. de Pregrado",
@@ -609,8 +607,7 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMe
 	// Contar registros por cada estado
 	for _, estado := range estados {
 		var count int64
-		// Aplicar los filtros previos (unidadMayor y unidadMenor) más el filtro del estado
-		queryEstado := query.Where("des_estado = ?", estado) // Filtrar por estado
+		queryEstado := query.Where("des_estado = ?", estado)
 		if err := queryEstado.Count(&count).Error; err != nil {
 			return nil, fmt.Errorf("error al contar los registros de pipelsofts con estado %s: %w", estado, err)
 		}
@@ -622,7 +619,7 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMe
 		}
 	}
 
-	// Obtener las unidades menores asociadas a la 'unidadMayor' filtrada
+	// Obtener las unidades menores asociadas a la 'unidadMayor'
 	var unidadesMenores []string
 	if err := query.Distinct("nombre_unidad_menor").Pluck("nombre_unidad_menor", &unidadesMenores).Error; err != nil {
 		return nil, fmt.Errorf("error al obtener las unidades menores filtradas: %w", err)
@@ -631,7 +628,7 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMe
 	// Incluir las unidades menores en la respuesta
 	resp.UnidadesMenores = unidadesMenores
 
-	// Obtener los profesores asociados a cada unidad menor, filtrando por las mismas condiciones
+	// Obtener los profesores asociados a cada unidad menor
 	unidadMenorProfesores := []UnidadMenorProfesores{}
 	for _, unidad := range unidadesMenores {
 		var profesores []string
