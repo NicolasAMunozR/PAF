@@ -888,8 +888,11 @@ func (s *EstadisticasService) ObtenerUnidadesMayoresConProfesoresFiltradosPAFAct
 
 // 8.2
 // 8.2
-func (s *EstadisticasService) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3(unidadMayor string) ([]UnidadMenorConProfesores, error) {
-	var resultado []UnidadMenorConProfesores
+func (s *EstadisticasService) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3(unidadMayor string) (map[string]int, error) {
+	var resultados []struct {
+		UnidadMenor     string
+		TotalProfesores int
+	}
 
 	// Validar que el parámetro 'unidadMayor' esté presente
 	if unidadMayor == "" {
@@ -921,11 +924,17 @@ func (s *EstadisticasService) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3
 		Where("run_docente IN ?", runsUnicosSinPipelsoft).
 		Where("unidad_mayor = ?", unidadMayor). // Filtro por 'unidadMayor'
 		Group("unidad_menor").
-		Scan(&resultado).Error; err != nil {
+		Scan(&resultados).Error; err != nil {
 		return nil, fmt.Errorf("error al obtener unidades menores sin profesores en Pipelsoft: %w", err)
 	}
 
-	return resultado, nil
+	// Convertir los resultados a un mapa
+	unidadesSinProfesores := make(map[string]int)
+	for _, resultado := range resultados {
+		unidadesSinProfesores[resultado.UnidadMenor] = resultado.TotalProfesores
+	}
+
+	return unidadesSinProfesores, nil
 }
 
 // 8.4

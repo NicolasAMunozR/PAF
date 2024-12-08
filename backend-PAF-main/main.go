@@ -130,6 +130,7 @@ func main() {
 	r.GET("/estadistica/unidades-menores-con-profesores-activos/8_1/:unidadMayor", estadisticasController.ObtenerUnidadesMenoresConProfesoresPorUnidadMayor)
 	// 8.3
 	r.GET("/estadistica/unidades-menores-sin-profesores/8_3/:unidadMayor", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayor)
+
 	// 8.2
 	// Ruta para obtener unidades menores sin profesores en Pipelsoft (8.3)
 	r.GET("/estadistica/unidades-menores-sin-profesores-8-2/:unidadMayor", estadisticasController.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3)

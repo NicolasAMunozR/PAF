@@ -380,8 +380,8 @@ func (h *EstadisticasController) ObtenerUnidadesMenoresConProfesoresPorUnidadMay
 // 8.3
 // ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayor obtiene unidades mayores filtradas por 'unidadMayor' y profesores activos
 func (ctrl *EstadisticasController) ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayor(c *gin.Context) {
-	// Obtener el parámetro 'unidadMayor' desde la URL o como parámetro de consulta
-	unidadMayor := c.DefaultQuery("unidadMayor", "")
+	// Obtener el parámetro 'unidadMayor' desde la URL
+	unidadMayor := c.Param("unidadMayor")
 
 	// Validar que se haya recibido el parámetro 'unidadMayor'
 	if unidadMayor == "" {
