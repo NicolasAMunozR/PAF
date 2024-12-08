@@ -397,8 +397,11 @@ func (c *EstadisticasController) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft(
 // 8.3
 // ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3 maneja la solicitud para obtener unidades menores sin profesores en Pipelsoft (versión 8.3).
 func (c *EstadisticasController) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3(ctx *gin.Context) {
-	// Llamamos al servicio para obtener los datos
-	resultado, err := c.Service.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3()
+	// Recuperamos el parámetro 'unidadMayor' desde la ruta
+	unidadMayor := ctx.Param("unidadMayor")
+
+	// Llamamos al servicio para obtener los datos, pasando el parámetro 'unidadMayor' que se ha obtenido de la ruta
+	resultado, err := c.Service.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3(unidadMayor)
 	if err != nil {
 		// Si ocurre un error, devolvemos una respuesta 500 con el mensaje de error
 		ctx.JSON(http.StatusInternalServerError, gin.H{

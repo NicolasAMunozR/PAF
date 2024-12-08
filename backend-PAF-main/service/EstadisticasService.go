@@ -891,8 +891,14 @@ func (s *EstadisticasService) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft() (
 }
 
 // 8.3
-func (s *EstadisticasService) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3() ([]UnidadMenorConProfesores, error) {
+// 8.3
+func (s *EstadisticasService) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3(unidadMayor string) ([]UnidadMenorConProfesores, error) {
 	var resultado []UnidadMenorConProfesores
+
+	// Validar que el parámetro 'unidadMayor' esté presente
+	if unidadMayor == "" {
+		return nil, fmt.Errorf("el parámetro 'unidadMayor' debe ser proporcionado")
+	}
 
 	// Paso 1: Obtener todos los RUNs únicos de la tabla Contrato
 	var runDocentes []string
@@ -913,10 +919,11 @@ func (s *EstadisticasService) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3
 	// Paso 3: Filtrar RUNs que están en Contrato pero no en Pipelsoft
 	runsUnicosSinPipelsoft := diferenciaDeSlices(runDocentes, runPipelsoft)
 
-	// Paso 4: Contar RUNs únicos por unidad menor en Contrato
+	// Paso 4: Contar RUNs únicos por unidad menor en Contrato, filtrando por 'unidadMayor'
 	if err := s.DB.Model(&models.Contrato{}).
 		Select("unidad_menor, COUNT(DISTINCT run_docente) as total_profesores").
 		Where("run_docente IN ?", runsUnicosSinPipelsoft).
+		Where("unidad_mayor = ?", unidadMayor). // Filtro por 'unidadMayor'
 		Group("unidad_menor").
 		Scan(&resultado).Error; err != nil {
 		return nil, fmt.Errorf("error al obtener unidades menores sin profesores en Pipelsoft: %w", err)
