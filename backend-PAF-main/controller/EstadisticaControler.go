@@ -523,3 +523,48 @@ func (h *EstadisticasController) ObtenerUnidadesMayoresConProfesoresFiltradosPAF
 	// Responder con los datos en formato JSON
 	c.JSON(http.StatusOK, resultado)
 }
+
+func (h *EstadisticasController) ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivosPorUnidadMayorYUnidadMenor9_4(c *gin.Context) {
+	// Obtener los parámetros desde la URL
+	unidadMayor := c.Param("unidadMayor") // Parámetro de la unidad mayor
+	unidadMenor := c.Param("unidadMenor") // Parámetro de la unidad menor
+
+	// Validar que ambos parámetros no estén vacíos
+	if unidadMayor == "" || unidadMenor == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Ambos parámetros 'unidadMayor' y 'unidadMenor' son obligatorios"})
+		return
+	}
+
+	// Llamar al servicio con los parámetros obtenidos
+	resultado, err := h.Service.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivosPorUnidadMayorYUnidadMenor9_4(unidadMayor, unidadMenor)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Responder con los datos en formato JSON
+	c.JSON(http.StatusOK, resultado)
+}
+
+func (h *EstadisticasController) ObtenerUnidadesMenoresPorCodEstadoPAFPorCodEstadoYUnidadMayorYUnidadMenor9_5(c *gin.Context) {
+	// Obtener los parámetros desde la URL
+	codEstadoPAF := c.Param("codEstadoPAF") // Parámetro del estado del PAF
+	unidadMayor := c.Param("unidadMayor")   // Parámetro de la unidad mayor
+	unidadMenor := c.Param("unidadMenor")   // Parámetro de la unidad menor
+
+	// Validar que todos los parámetros no estén vacíos
+	if codEstadoPAF == "" || unidadMayor == "" || unidadMenor == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Los parámetros 'codEstadoPAF', 'unidadMayor' y 'unidadMenor' son obligatorios"})
+		return
+	}
+
+	// Llamar al servicio con los parámetros obtenidos
+	resultado, err := h.Service.ObtenerUnidadesMenoresPorCodEstadoPAFPorCodEstadoYUnidadMayorYUnidadMenor9_5(codEstadoPAF, unidadMayor, unidadMenor)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Responder con los datos en formato JSON
+	c.JSON(http.StatusOK, resultado)
+}
