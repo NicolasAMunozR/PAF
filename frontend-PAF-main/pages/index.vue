@@ -100,6 +100,7 @@ export default {
 };
 </script>
 
+
 <style scoped>
 /* Página principal */
 .login-page {
