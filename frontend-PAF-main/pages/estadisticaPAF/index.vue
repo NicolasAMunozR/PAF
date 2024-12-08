@@ -406,7 +406,7 @@ const configurarGraficos = () => {
               response1 = await $axios.get(`/estadisticas/profesores/estado/${encodeURIComponent(label)}`);
           } else {
               // CAMBIAR AQUÍ
-              response1 = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+              response1 = await $axios.get(`/estadistica/unidades-menores/${encodeURIComponent(label)}/${unidadSeleccionada.value}`);
           }
           console.log('Cantidad de PAF activas:', response1.data);
           const unidadesData1 = response1.data;
