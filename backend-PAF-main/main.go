@@ -127,7 +127,7 @@ func main() {
 
 	// Ruta para obtener las unidades menores con profesores filtrados (PAF activos)
 	// 8.1
-	r.GET("/estadistica/unidades-menores-con-profesores-activos/8_1", estadisticasController.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos)
+	r.GET("/estadistica/unidades-menores-con-profesores-activos/8_1/:unidadMayor", estadisticasController.ObtenerUnidadesMenoresConProfesoresPorUnidadMayor)
 	// 8.2
 	r.GET("/estadistica/unidades-menores-sin-profesores/8_2", estadisticasController.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft)
 	// 8.3
