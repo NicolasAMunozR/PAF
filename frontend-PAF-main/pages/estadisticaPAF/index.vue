@@ -118,8 +118,8 @@ const fetchCantidadPersonasSai = async () => {
   try {
     console.log('Obteniendo cantidad de personas del SAI...', unidadSeleccionada.value);
     const response = await $axios.get('/estadisticas');
-    cantidadPersonasSai.value = response.data.TotalProfesores;
-    cantidadPafUnicas.value = response.data.TotalPipelsoftUnicos;
+    cantidadPersonasSai.value = response.data.total_profesores;
+    cantidadPafUnicas.value = response.data.total_pipelsoft_unicos;
   } catch (error) {
     console.error('Error al obtener la cantidad de personas del SAI:', error);
   }
@@ -137,6 +137,7 @@ const fetchCantidadPafSai = async () => {
   try {
     
     const response = await $axios.get('/estadisticas/PafActivas');
+    console.log('Cantidad de PAF activas:', response.data);
     cantidadPafActivas.value = response.data.conteo;
   } catch (error) {
     console.error('Error al obtener la cantidad de personas del SAI:', error);
@@ -197,9 +198,10 @@ const fetchPafPorUnidadMayor = async () => {
           };
           mostrarModal.value = true;
           const response1 = await $axios.get(`/estadisticas/unidad-mayor/${label}`);
-          cantidadPersonasSai.value = response1.data.TotalProfesores;
-          cantidadPafUnicas.value = response1.data.TotalPipelsoftUnicos;
+          cantidadPersonasSai.value = response1.data.total_profesores;
+          cantidadPafUnicas.value = response1.data.total_pipelsoft_unicos;
           const response2 = await $axios.get(`/estadisticas/pafActivas/unidad-mayor/${label}`);
+          console.log('Cantidad de PAF activas:', response2.data.totalRUNs);
           cantidadPafActivas.value = response2.data.totalRUNs;
           const estadoProcesoCount = response1.data.EstadoProcesoCount;
 
@@ -247,7 +249,8 @@ const fetchPafPorUnidadMayor = async () => {
 const fetchCantidadPafPorEstado = async () => {
   try {
     const response = await $axios.get('/estadisticas');
-    const estadoProcesoCount = response.data.EstadoProcesoCount;
+    console.log('Cantidad de PAF por estado:', response.data);
+    const estadoProcesoCount = response.data.estado_proceso_count;
 
     const normalizedEstadoProcesoCount = Object.fromEntries(
       Object.entries(estadoProcesoCount).map(([key, value]) => [
@@ -335,24 +338,26 @@ const configurarGraficos = () => {
           if (!label || label.trim() === '') {
             throw new Error('El label está vacío. No se puede realizar la consulta.');
           }
+          let response = null;
           if(unidadSeleccionada.value === null) {
             if (label === 'Profesores con PAF') {
             // CAMBIAR AQUÍ
-            const response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+            response = await $axios.get(`/estadisticas/unidades-mayores/cant_profesores`);
             } else if (label === 'Profesores sin PAF') {
               // CAMBIAR AQUÍ
-            const response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+            response = await $axios.get(`/estadisticas/unidades-mayores/sin_profesores`);
             }
           } else {
             if (label === 'Profesores con PAF') {
             // CAMBIAR AQUÍ
-            const response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+            response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
             } else if (label === 'Profesores sin PAF') {
               // CAMBIAR AQUÍ
-            const response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+            response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
             }
           }
           const unidadesData = response.data;
+          console.log('Unidades data:', unidadesData);
           graficoModalData.value = {
             labels: Object.keys(unidadesData),
             datasets: [
@@ -395,16 +400,17 @@ const configurarGraficos = () => {
           if (!label || label.trim() === '') {
             throw new Error('El label está vacío. No se puede realizar la consulta.');
           }
-  
+          let response = null;
           if(unidadSeleccionada.value === null) {
               // CAMBIAR AQUÍ
-              const response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+              response = await $axios.get(`/estadisticas/profesores/estado/${label}`);
           } else {
               // CAMBIAR AQUÍ
-              const response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+              response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
           }
 
           const unidadesData = response.data;
+          console.log('Unidades data:', unidadesData);
           graficoModalData.value = {
             labels: Object.keys(unidadesData),
             datasets: [
@@ -450,24 +456,26 @@ const configurarGraficos = () => {
           if (!label || label.trim() === '') {
             throw new Error('El label está vacío. No se puede realizar la consulta.');
           }
+          let response = null;
           if(unidadSeleccionada.value === null) {
             if (label === 'Profesores con PAF activas') {
             // CAMBIAR AQUÍ
-            const response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+            response = await $axios.get(`/estadisticas/unidades-mayores/profesores-filtrados`);
             } else if (label === 'Profesores sin PAF activas') {
               // CAMBIAR AQUÍ
-            const response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+            response = await $axios.get(`/estadisticas/unidades-mayores/profesores-codestado`);
             }
           } else {
             if (label === 'Profesores con PAF activas') {
             // CAMBIAR AQUÍ
-            const response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+            response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
             } else if (label === 'Profesores sin PAF activas') {
               // CAMBIAR AQUÍ
-            const response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+            response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
             }
           }
           const unidadesData = response.data;
+          console.log('Unidades data:', unidadesData);
           graficoModalData.value = {
             labels: Object.keys(unidadesData),
             datasets: [
