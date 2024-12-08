@@ -140,6 +140,12 @@ func main() {
 
 	// 8.5
 	r.GET("/estadistica/unidades-menores/:codEstadoPAF/:unidadMayor", estadisticasController.ObtenerUnidadesMenoresPorCodEstadoPAF)
+	// 9.1
+	r.GET("/unidadesmenores/profesores/:unidadMayor/:unidadMenor", estadisticasController.ObtenerUnidadesMenoresConProfesoresPorUnidadMayor9_1)
+	// 9.2
+	r.GET("/unidadesmenores/sinprofesores/:unidadMayor/:unidadMenor", estadisticasController.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_9_2)
+	// 9.3
+	r.GET("/unidadesmayores/filtradospafactivos/:unidadMayor/:unidadMenor", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayorYUnidadMenor9_3)
 
 	// Iniciar el cron job para actualización periódica
 	// de acuerdo al sai profes sin paf y sin contrato sin contar profesores repetidos, desde pipelsoft estan los ruts con un 0 al inicio y con digito verificador

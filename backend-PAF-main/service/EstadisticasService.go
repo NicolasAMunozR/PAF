@@ -1012,3 +1012,156 @@ func (s *EstadisticasService) ObtenerUnidadesMenoresPorCodEstadoPAF(codEstadoPAF
 
 	return unidadesMenores, nil
 }
+
+// 9.1
+func (s *EstadisticasService) ObtenerUnidadesMenoresConProfesoresPorUnidadMayor9_1(unidadMayor, unidadMenor string) (map[string]int, error) {
+	var resultados []struct {
+		NombreUnidadMenor string
+		TotalProfesores   int
+	}
+
+	// Validar que unidadMayor no esté vacío
+	if unidadMayor == "" {
+		return nil, fmt.Errorf("el parámetro unidadMayor no puede estar vacío")
+	}
+
+	// Paso 1: Obtener todos los RUNs únicos de la tabla Contrato para la unidad mayor proporcionada
+	var runDocentes []string
+	if err := s.DB.Model(&models.Contrato{}).
+		Where("unidad_mayor = ?", unidadMayor).
+		Distinct("run_docente").
+		Pluck("run_docente", &runDocentes).Error; err != nil {
+		return nil, fmt.Errorf("error al obtener RUNs únicos de la tabla Contrato: %w", err)
+	}
+
+	// Paso 2: Filtrar los RUNs que estén presentes en la tabla Pipelsoft
+	var runFiltrados []string
+	if err := s.DB.Model(&models.Pipelsoft{}).
+		Where("run_empleado IN ?", runDocentes).
+		Distinct("run_empleado").
+		Pluck("run_empleado", &runFiltrados).Error; err != nil {
+		return nil, fmt.Errorf("error al filtrar RUNs presentes en Pipelsoft: %w", err)
+	}
+
+	// Paso 3: Consultar las unidades menores y contar RUNs únicos de los filtrados
+	query := s.DB.Model(&models.Pipelsoft{}).
+		Select("nombre_unidad_menor, COUNT(DISTINCT run_empleado) as total_profesores").
+		Where("run_empleado IN ?", runFiltrados).
+		Group("nombre_unidad_menor")
+
+	// Si se proporciona el parámetro unidadMenor, agregarlo a la consulta
+	if unidadMenor != "" {
+		query = query.Where("nombre_unidad_menor = ?", unidadMenor)
+	}
+
+	// Ejecutar la consulta
+	if err := query.Scan(&resultados).Error; err != nil {
+		return nil, fmt.Errorf("error al obtener unidades menores con profesores: %w", err)
+	}
+
+	// Convertir los resultados a un mapa
+	unidadesMenoresConProfesores := make(map[string]int)
+	for _, resultado := range resultados {
+		unidadesMenoresConProfesores[resultado.NombreUnidadMenor] = resultado.TotalProfesores
+	}
+
+	return unidadesMenoresConProfesores, nil
+}
+
+// 9.2
+func (s *EstadisticasService) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_9_2(unidadMayor, unidadMenor string) (map[string]int, error) {
+	var resultados []struct {
+		UnidadMenor     string
+		TotalProfesores int
+	}
+
+	// Validar que los parámetros 'unidadMayor' y 'unidadMenor' estén presentes
+	if unidadMayor == "" {
+		return nil, fmt.Errorf("el parámetro 'unidadMayor' debe ser proporcionado")
+	}
+	if unidadMenor == "" {
+		return nil, fmt.Errorf("el parámetro 'unidadMenor' debe ser proporcionado")
+	}
+
+	// Paso 1: Obtener todos los RUNs únicos de la tabla Contrato
+	var runDocentes []string
+	if err := s.DB.Model(&models.Contrato{}).
+		Distinct("run_docente").
+		Pluck("run_docente", &runDocentes).Error; err != nil {
+		return nil, fmt.Errorf("error al obtener RUNs únicos de la tabla Contrato: %w", err)
+	}
+
+	// Paso 2: Obtener RUNs únicos de la tabla Pipelsoft
+	var runPipelsoft []string
+	if err := s.DB.Model(&models.Pipelsoft{}).
+		Distinct("run_empleado").
+		Pluck("run_empleado", &runPipelsoft).Error; err != nil {
+		return nil, fmt.Errorf("error al obtener RUNs únicos de la tabla Pipelsoft: %w", err)
+	}
+
+	// Paso 3: Filtrar RUNs que están en Contrato pero no en Pipelsoft
+	runsUnicosSinPipelsoft := diferenciaDeSlices(runDocentes, runPipelsoft)
+
+	// Paso 4: Consultar unidades menores sin profesores en Pipelsoft
+	if err := s.DB.Model(&models.Contrato{}).
+		Select("unidad_menor, COUNT(DISTINCT run_docente) as total_profesores").
+		Where("run_docente IN ?", runsUnicosSinPipelsoft).
+		Where("unidad_mayor = ?", unidadMayor). // Filtro por 'unidadMayor'
+		Where("unidad_menor = ?", unidadMenor). // Filtro por 'unidadMenor'
+		Group("unidad_menor").
+		Scan(&resultados).Error; err != nil {
+		return nil, fmt.Errorf("error al obtener unidades menores sin profesores en Pipelsoft: %w", err)
+	}
+
+	// Convertir los resultados a un mapa
+	unidadesSinProfesores := make(map[string]int)
+	for _, resultado := range resultados {
+		unidadesSinProfesores[resultado.UnidadMenor] = resultado.TotalProfesores
+	}
+
+	return unidadesSinProfesores, nil
+}
+
+func (s *EstadisticasService) ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayorYUnidadMenor9_3(unidadMayor, unidadMenor string) (map[string]int, error) {
+	var resultados []struct {
+		NombreUnidadMayor string
+		TotalProfesores   int
+	}
+
+	// Validar que los parámetros 'unidadMayor' y 'unidadMenor' estén presentes
+	if unidadMayor == "" {
+		return nil, fmt.Errorf("el parámetro 'unidadMayor' debe ser proporcionado")
+	}
+	if unidadMenor == "" {
+		return nil, fmt.Errorf("el parámetro 'unidadMenor' debe ser proporcionado")
+	}
+
+	// Paso 1: Obtener los RUNs únicos de la tabla Contrato
+	var runsContrato []string
+	if err := s.DB.Model(&models.Contrato{}).
+		Distinct("run_docente").
+		Pluck("run_docente", &runsContrato).Error; err != nil {
+		return nil, fmt.Errorf("error al obtener RUNs únicos de Contrato: %w", err)
+	}
+
+	// Paso 2: Filtrar registros en Pipelsoft donde CodEstado no sea "F1", "F9" o "A9" y los RUNs obtenidos
+	// También se filtra por 'unidadMayor' y 'unidadMenor'
+	if err := s.DB.Model(&models.Pipelsoft{}).
+		Select("nombre_unidad_mayor, COUNT(DISTINCT run_empleado) as total_profesores").
+		Where("run_empleado IN ?", runsContrato).                 // RUNs coincidentes
+		Where("cod_estado NOT IN ?", []string{"F1", "F9", "A9"}). // CodEstado que no sean F1, F9 o A9 (inactivos)
+		Where("nombre_unidad_mayor = ?", unidadMayor).            // Filtrar por 'unidadMayor'
+		Where("nombre_unidad_menor = ?", unidadMenor).            // Filtrar por 'unidadMenor'
+		Group("nombre_unidad_mayor").                             // Agrupar por unidad mayor
+		Scan(&resultados).Error; err != nil {
+		return nil, fmt.Errorf("error al obtener unidades mayores con PAF inactivos filtrados por unidad mayor y unidad menor: %w", err)
+	}
+
+	// Convertir resultados a un mapa
+	unidadesConPAFInactivos := make(map[string]int)
+	for _, resultado := range resultados {
+		unidadesConPAFInactivos[resultado.NombreUnidadMayor] = resultado.TotalProfesores
+	}
+
+	return unidadesConPAFInactivos, nil
+}
