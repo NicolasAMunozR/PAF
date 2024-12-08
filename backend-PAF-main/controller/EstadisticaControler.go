@@ -266,7 +266,7 @@ func (c *EstadisticasController) ObtenerUnidadesMayoresSinProfesoresEnPipelsoftH
 
 // 3
 func (c *EstadisticasController) ObtenerUnidadesMayoresConProfesoresFiltradosHandler(ctx *gin.Context) {
-	resultado, err := c.Service.ObtenerUnidadesMayoresConProfesoresFiltrados()
+	resultado, err := c.Service.ObtenerUnidadesMayoresSinProfesoresEnPipelsoft_3()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -357,4 +357,72 @@ func (ctrl *EstadisticasController) ObtenerEstadisticasPorUnidadTOTO(c *gin.Cont
 
 	// Retornar la respuesta en formato JSON
 	c.JSON(http.StatusOK, resp)
+}
+
+// 8.1
+// ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos obtiene las unidades menores con profesores activos (PAF).
+func (c *EstadisticasController) ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos(ctx *gin.Context) {
+	// Llamamos al servicio para obtener los datos
+	resultado, err := c.Service.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos()
+	if err != nil {
+		// Si ocurre un error, devolvemos una respuesta 500 con el mensaje de error
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// Si la operación fue exitosa, devolvemos los resultados en formato JSON
+	ctx.JSON(http.StatusOK, resultado)
+}
+
+// 8.2
+// ObtenerUnidadesMenoresSinProfesoresEnPipelsoft maneja la solicitud para obtener unidades menores sin profesores en Pipelsoft.
+func (c *EstadisticasController) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft(ctx *gin.Context) {
+	// Llamamos al servicio para obtener los datos
+	resultado, err := c.Service.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft()
+	if err != nil {
+		// Si ocurre un error, devolvemos una respuesta 500 con el mensaje de error
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// Si la operación fue exitosa, devolvemos los resultados en formato JSON
+	ctx.JSON(http.StatusOK, resultado)
+}
+
+// 8.3
+// ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3 maneja la solicitud para obtener unidades menores sin profesores en Pipelsoft (versión 8.3).
+func (c *EstadisticasController) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3(ctx *gin.Context) {
+	// Llamamos al servicio para obtener los datos
+	resultado, err := c.Service.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3()
+	if err != nil {
+		// Si ocurre un error, devolvemos una respuesta 500 con el mensaje de error
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// Si la operación fue exitosa, devolvemos los resultados en formato JSON
+	ctx.JSON(http.StatusOK, resultado)
+}
+
+// 8.4
+// ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos maneja la solicitud para obtener unidades menores con profesores filtrados por PAF activos.
+func (c *EstadisticasController) ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos8_4(ctx *gin.Context) {
+	// Llamar al servicio para obtener los datos.
+	resultado, err := c.Service.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos()
+	if err != nil {
+		// Si ocurre un error, devolver una respuesta 500 con el mensaje de error.
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// Si la operación es exitosa, devolver los resultados en formato JSON.
+	ctx.JSON(http.StatusOK, resultado)
 }
