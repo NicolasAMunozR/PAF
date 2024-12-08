@@ -465,8 +465,8 @@ const configurarGraficos = () => {
 
             response2 = await $axios.get(`/estadistica/unidades-menores-con-profesores-paf-activos/8_4/${unidadSeleccionada.value}`);
             unidadesData2 = response2.data;
-            labelNuevo = 'Cantidad de PAF por Unidad Menor';
           }
+          labelNuevo = 'Cantidad de PAF por Unidad Menor';
           }
           graficoModalData.value = {
             labels: Object.keys(unidadesData2),

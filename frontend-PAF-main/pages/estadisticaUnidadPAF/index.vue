@@ -403,15 +403,14 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
               response = await $axios.get(`/estadistica/unidades-menores/${encodeURIComponent(label)}/${responseinicial.data.unidadMayor}`);
           } else {
               // CAMBIAR AQUÍ
-              response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+              response = await $axios.get(`/unidadesmenores/porcodestadopaf/${encodeURIComponent(label)}/${responseinicial.data.unidadMayor}/${unidadSeleccionada.value}`);
           }
-
           unidadesData = response.data;
           graficoModalData.value = {
             labels: Object.keys(unidadesData),
             datasets: [
               {
-                label: 'Cantidad de PAF por Unidad Mayor',
+                label: 'Cantidad de PAF por Unidad Estado',
                 data: Object.values(unidadesData),
                 backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#AB47BC', '#EF5350', '#26C6DA', '#FFEE58', '#8D6E63', '#5C6BC0', '#EC407A', '#78909C', '#9CCC65'],
               },
@@ -463,15 +462,15 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
             } else if (label === 'Profesores sin PAF activas') {
             response = await $axios.get(`estadistica/unidades-menores-con-profesores-paf-activos/8_4/${responseinicial.data.unidadMayor}`);
             unidadesData = response.data;
-            labelNuevo = "Cantidad de PAF por Unidad Menor";
             } 
+            labelNuevo = "Cantidad de PAF por Unidad Menor";
           } else {
             if (label === 'Profesores con PAF activas') {
             // CAMBIAR AQUÍ
             response = await $axios.get(`/unidadesmayores/filtradospafactivos/${responseinicial.data.unidadMayor}/${unidadSeleccionada.value}`);
             } else if (label === 'Profesores sin PAF activas') {
               // CAMBIAR AQUÍ
-            response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+            response = await $axios.get(`/unidadesmenores/filtradospafactivos/${responseinicial.data.unidadMayor}/${unidadSeleccionada.value}`);
             }
             unidadesData = response.data;
             labelNuevo = "Cantidad de PAF por Unidad Mayor y Menor";
