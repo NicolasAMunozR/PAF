@@ -950,8 +950,8 @@ func (s *EstadisticasService) ObtenerUnidadesMenoresConProfesoresFiltradosPAFAct
 		Select("nombre_unidad_menor, COUNT(DISTINCT run_empleado) as total_profesores").
 		Where("run_empleado IN ?", runsContrato).             // RUNs coincidentes
 		Where("cod_estado IN ?", []string{"F1", "F9", "A9"}). // CodEstado filtrado (activos)
-		Where("nombre_unidad_menor = ?", unidadMayor).        // Filtro por 'unidadMayor'
-		Group("nombre_unidad_menor").                         // Agrupar por unidad menor
+		Where("nombre_unidad_mayor = ?", unidadMayor).        // Filtro por 'unidadMayor'
+		Group("nombre_unidad_mayor").                         // Agrupar por unidad menor
 		Scan(&resultado).Error; err != nil {
 		return nil, fmt.Errorf("error al obtener unidades menores con PAF activos: %w", err)
 	}
