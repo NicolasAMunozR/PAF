@@ -356,7 +356,7 @@ const configurarGraficos = () => {
             response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
             }
           }
-          const unidadesData = response.data;
+          const unidadesData = response.data.unidadesMayores;
           console.log('Unidades data:', unidadesData);
           graficoModalData.value = {
             labels: Object.keys(unidadesData),
@@ -400,23 +400,23 @@ const configurarGraficos = () => {
           if (!label || label.trim() === '') {
             throw new Error('El label está vacío. No se puede realizar la consulta.');
           }
-          let response = null;
+          let response1 = null;
           if(unidadSeleccionada.value === null) {
               // CAMBIAR AQUÍ
-              response = await $axios.get(`/estadisticas/profesores/estado/${label}`);
+              response1 = await $axios.get(`/estadisticas/profesores/estado/${label}`);
           } else {
               // CAMBIAR AQUÍ
-              response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+              response1 = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
           }
-
-          const unidadesData = response.data;
-          console.log('Unidades data:', unidadesData);
+          console.log('Cantidad de PAF activas:', response1.data);
+          const unidadesData1 = response1.data;
+          console.log('Unidades data 1:', unidadesData1);
           graficoModalData.value = {
-            labels: Object.keys(unidadesData),
+            labels: Object.keys(unidadesData1),
             datasets: [
               {
-                label: 'Cantidad de PAF por Unidad Mayor',
-                data: Object.values(unidadesData),
+                label: 'Cantidad de PAF por Unidad Estado',
+                data: Object.values(unidadesData1),
                 backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#AB47BC', '#EF5350', '#26C6DA', '#FFEE58', '#8D6E63', '#5C6BC0', '#EC407A', '#78909C', '#9CCC65'],
               },
             ],
@@ -456,32 +456,33 @@ const configurarGraficos = () => {
           if (!label || label.trim() === '') {
             throw new Error('El label está vacío. No se puede realizar la consulta.');
           }
-          let response = null;
+          let response2 = null;
           if(unidadSeleccionada.value === null) {
             if (label === 'Profesores con PAF activas') {
             // CAMBIAR AQUÍ
-            response = await $axios.get(`/estadisticas/unidades-mayores/profesores-filtrados`);
+            response2 = await $axios.get(`/estadisticas/unidades-mayores/profesores-filtrados`);
             } else if (label === 'Profesores sin PAF activas') {
               // CAMBIAR AQUÍ
-            response = await $axios.get(`/estadisticas/unidades-mayores/profesores-codestado`);
+            response2 = await $axios.get(`/estadisticas/unidades-mayores/profesores-codestado`);
             }
           } else {
             if (label === 'Profesores con PAF activas') {
             // CAMBIAR AQUÍ
-            response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+            response2 = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
             } else if (label === 'Profesores sin PAF activas') {
               // CAMBIAR AQUÍ
-            response = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
+            response2 = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
             }
           }
-          const unidadesData = response.data;
-          console.log('Unidades data:', unidadesData);
+          console.log('Cantidad de PAF activas:', response2.data);
+          const unidadesData2 = response2.data;
+          console.log('Unidades data 2:', unidadesData2);
           graficoModalData.value = {
-            labels: Object.keys(unidadesData),
+            labels: Object.keys(unidadesData2),
             datasets: [
               {
                 label: 'Cantidad de PAF por Unidad Mayor',
-                data: Object.values(unidadesData),
+                data: Object.values(unidadesData2),
                 backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#AB47BC', '#EF5350', '#26C6DA', '#FFEE58', '#8D6E63', '#5C6BC0', '#EC407A', '#78909C', '#9CCC65'],
               },
             ],
