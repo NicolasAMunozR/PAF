@@ -362,19 +362,19 @@ func (ctrl *EstadisticasController) ObtenerEstadisticasPorUnidadTOTO(c *gin.Cont
 
 // 8.1
 // ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos obtiene las unidades menores con profesores activos (PAF).
-func (c *EstadisticasController) ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos(ctx *gin.Context) {
-	// Llamamos al servicio para obtener los datos
-	resultado, err := c.Service.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos()
+func (h *EstadisticasController) ObtenerUnidadesMenoresConProfesoresPorUnidadMayor(c *gin.Context) {
+	// Obtener el parámetro unidadMayor desde la URL
+	unidadMayor := c.Param("unidadMayor")
+
+	// Llamar al servicio
+	resultado, err := h.Service.ObtenerUnidadesMenoresConProfesoresPorUnidadMayor(unidadMayor)
 	if err != nil {
-		// Si ocurre un error, devolvemos una respuesta 500 con el mensaje de error
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Si la operación fue exitosa, devolvemos los resultados en formato JSON
-	ctx.JSON(http.StatusOK, resultado)
+	// Responder con los datos en formato JSON
+	c.JSON(http.StatusOK, resultado)
 }
 
 // 8.2

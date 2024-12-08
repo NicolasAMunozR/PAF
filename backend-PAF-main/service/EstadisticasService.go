@@ -571,8 +571,6 @@ func (s *EstadisticasService) ObtenerUnidadesMayoresPorCodEstadoPAF(codEstadoPAF
 	return unidadesMayores, nil
 }
 
-// 6
-
 func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMenor string) (*EstadisticasResponse, error) {
 	var resp EstadisticasResponse
 
@@ -612,7 +610,9 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMe
 	resp.EstadoProcesoPct = make(map[string]float64)
 
 	estados := []string{
-		"Sin Solicitar", "Enviada al Interesado", "Enviada al Validador", "Aprobada por Validador", "Rechazada por Validador", "Aprobada por Dir. Pregrado", "Rechazada por Dir. de Pregrado", "Aprobada por RRHH", "Rechazada por RRHH", "Anulada",
+		"Sin Solicitar", "Enviada al Interesado", "Enviada al Validador", "Aprobada por Validador",
+		"Rechazada por Validador", "Aprobada por Dir. Pregrado", "Rechazada por Dir. de Pregrado",
+		"Aprobada por RRHH", "Rechazada por RRHH", "Anulada",
 	}
 
 	// Contar registros por cada estado
@@ -629,23 +629,21 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMe
 		}
 	}
 
-	// Obtener las unidades menores asociadas a la 'unidadMayor'
+	// Obtener las unidades menores asociadas a la 'unidadMayor' filtrada
 	var unidadesMenores []string
-	if err := s.DB.Model(&models.Pipelsoft{}).
-		Where("nombre_unidad_mayor = ?", unidadMayor).
-		Distinct("nombre_unidad_menor").
-		Pluck("nombre_unidad_menor", &unidadesMenores).Error; err != nil {
-		return nil, fmt.Errorf("error al obtener las unidades menores: %w", err)
+	if err := query.Distinct("nombre_unidad_menor").Pluck("nombre_unidad_menor", &unidadesMenores).Error; err != nil {
+		return nil, fmt.Errorf("error al obtener las unidades menores filtradas: %w", err)
 	}
 
 	// Incluir las unidades menores en la respuesta
 	resp.UnidadesMenores = unidadesMenores
 
-	// Obtener los profesores asociados a cada unidad menor
+	// Obtener los profesores asociados a cada unidad menor, filtrando por las mismas condiciones
 	unidadMenorProfesores := []UnidadMenorProfesores{}
 	for _, unidad := range unidadesMenores {
 		var profesores []string
 		if err := s.DB.Model(&models.Contrato{}).
+			Where("unidad_mayor = ?", unidadMayor).
 			Where("unidad_menor = ?", unidad).
 			Distinct("run_docente").
 			Pluck("run_docente", &profesores).Error; err != nil {
@@ -661,13 +659,13 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMe
 	resp.UnidadMenorProfesores = unidadMenorProfesores
 
 	// Contar los profesores en la tabla contratos que coincidan con los filtros
-	queryContratos := s.DB.Model(&models.Contrato{})
-	if unidadMayor != "" {
-		queryContratos = queryContratos.Where("unidad_mayor = ?", unidadMayor)
-	}
+	queryContratos := s.DB.Model(&models.Contrato{}).
+		Where("unidad_mayor = ?", unidadMayor)
+
 	if unidadMenor != "" {
 		queryContratos = queryContratos.Where("unidad_menor = ?", unidadMenor)
 	}
+
 	if err := queryContratos.Distinct("run_docente").Count(&resp.TotalProfesores).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los profesores en la tabla contratos: %w", err)
 	}
@@ -687,8 +685,7 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMe
 	return &resp, nil
 }
 
-//6
-
+// 7
 func (s *EstadisticasService) ObtenerEstadisticasPorUnidadTOTO(unidadMayor, unidadMenor string) (*EstadisticasResponse, error) {
 	var resp EstadisticasResponse
 
@@ -699,6 +696,7 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidadTOTO(unidadMayor, unid
 
 	// Crear un query base para los filtros
 	query := s.DB.Model(&models.Pipelsoft{})
+	// Filtrar por 'unidadMayor' y 'cod_estado'
 	query = query.Where("nombre_unidad_mayor = ?", unidadMayor)
 	query = query.Where("cod_estado NOT IN (?, ?, ?)", "F1", "F9", "A9")
 
@@ -732,6 +730,7 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidadTOTO(unidadMayor, unid
 
 	for _, estado := range estados {
 		var count int64
+		// Filtrar por estado también
 		if err := query.Where("des_estado = ?", estado).Count(&count).Error; err != nil {
 			return nil, fmt.Errorf("error al contar los registros de pipelsofts con estado %s: %w", estado, err)
 		}
@@ -743,6 +742,7 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidadTOTO(unidadMayor, unid
 
 	// Obtener las unidades menores asociadas a la 'unidadMayor'
 	var unidadesMenores []string
+	// Aplicar los mismos filtros al obtener las unidades menores
 	if err := s.DB.Model(&models.Pipelsoft{}).
 		Where("nombre_unidad_mayor = ?", unidadMayor).
 		Where("cod_estado NOT IN (?, ?, ?)", "F1", "F9", "A9").
@@ -757,6 +757,7 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidadTOTO(unidadMayor, unid
 	unidadMenorProfesores := []UnidadMenorProfesores{}
 	for _, unidad := range unidadesMenores {
 		var profesores []string
+		// Filtrar los profesores según la unidad menor
 		if err := s.DB.Model(&models.Contrato{}).
 			Where("unidad_menor = ?", unidad).
 			Distinct("run_docente").
@@ -773,18 +774,22 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidadTOTO(unidadMayor, unid
 
 	// Contar los profesores en la tabla contratos que coincidan con los filtros
 	queryContratos := s.DB.Model(&models.Contrato{})
+	// Filtrar por 'unidadMayor' y 'unidadMenor' en los contratos también
 	if unidadMayor != "" {
 		queryContratos = queryContratos.Where("unidad_mayor = ?", unidadMayor)
 	}
 	if unidadMenor != "" {
 		queryContratos = queryContratos.Where("unidad_menor = ?", unidadMenor)
 	}
+
+	// Contar los profesores en contratos
 	if err := queryContratos.Distinct("run_docente").Count(&resp.TotalProfesores).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los profesores en la tabla contratos: %w", err)
 	}
 
 	// Contar los profesores que no están en Pipelsoft
 	var profesoresNoEnPipelsoft int64
+	// Asegurarse de filtrar los profesores que no estén en los estados especificados
 	if err := queryContratos.Where("run_docente NOT IN (SELECT run_empleado FROM pipelsofts WHERE cod_estado NOT IN (?, ?, ?))", "F1", "F9", "A9").Count(&profesoresNoEnPipelsoft).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los profesores que no están en pipelsofts: %w", err)
 	}
@@ -803,9 +808,16 @@ type UnidadMenorConProfesores struct {
 }
 
 // 8.1
+func (s *EstadisticasService) ObtenerUnidadesMenoresConProfesoresPorUnidadMayor(unidadMayor string) (map[string]int, error) {
+	var resultados []struct {
+		NombreUnidadMenor string
+		TotalProfesores   int
+	}
 
-func (s *EstadisticasService) ObtenerUnidadesMenoresConProfesoresPorUnidadMayor(unidadMayor string) ([]UnidadMenorConProfesores, error) {
-	var resultado []UnidadMenorConProfesores
+	// Validar que unidadMayor no esté vacío
+	if unidadMayor == "" {
+		return nil, fmt.Errorf("el parámetro unidadMayor no puede estar vacío")
+	}
 
 	// Paso 1: Obtener todos los RUNs únicos de la tabla Contrato para la unidad mayor proporcionada
 	var runDocentes []string
@@ -830,11 +842,17 @@ func (s *EstadisticasService) ObtenerUnidadesMenoresConProfesoresPorUnidadMayor(
 		Select("nombre_unidad_menor, COUNT(DISTINCT run_empleado) as total_profesores").
 		Where("run_empleado IN ?", runFiltrados).
 		Group("nombre_unidad_menor").
-		Scan(&resultado).Error; err != nil {
+		Scan(&resultados).Error; err != nil {
 		return nil, fmt.Errorf("error al obtener unidades menores con profesores: %w", err)
 	}
 
-	return resultado, nil
+	// Convertir los resultados a un mapa
+	unidadesMenoresConProfesores := make(map[string]int)
+	for _, resultado := range resultados {
+		unidadesMenoresConProfesores[resultado.NombreUnidadMenor] = resultado.TotalProfesores
+	}
+
+	return unidadesMenoresConProfesores, nil
 }
 
 // 8.2
