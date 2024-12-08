@@ -403,7 +403,7 @@ const configurarGraficos = () => {
           let response1 = null;
           if(unidadSeleccionada.value === null) {
               // CAMBIAR AQUÍ
-              response1 = await $axios.get(`/estadisticas/profesores/estado/${label}`);
+              response1 = await $axios.get(`/estadisticas/profesores/estado/${encodeURIComponent(label)}`);
           } else {
               // CAMBIAR AQUÍ
               response1 = await $axios.get(`/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}`);
