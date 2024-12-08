@@ -401,7 +401,7 @@ func (ctrl *EstadisticasController) ObtenerUnidadesMayoresConProfesoresFiltrados
 	c.JSON(http.StatusOK, gin.H{"unidades": unidadesInactivas})
 }
 
-// 8.3
+// 8.2
 // ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3 maneja la solicitud para obtener unidades menores sin profesores en Pipelsoft (versión 8.3).
 func (c *EstadisticasController) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3(ctx *gin.Context) {
 	// Recuperamos el parámetro 'unidadMayor' desde la ruta
