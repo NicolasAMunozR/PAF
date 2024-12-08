@@ -198,7 +198,7 @@ const fetchPafPorUnidadMayor = async () => {
           cantidadPersonasSai.value = response1.data.total_profesores;
           cantidadPafUnicas.value = response1.data.total_pipelsoft_unicos;
           const response2 = await $axios.get(`/estadisticas/pafActivas/unidad-mayor/${label}`);
-          cantidadPafActivas.value = response2.data.totalRUNs;
+          cantidadPafActivas.value = response2.data.totalRegistros;
           const estadoProcesoCount = response1.data.estado_proceso_count;
 
           const normalizedEstadoProcesoCount = Object.fromEntries(

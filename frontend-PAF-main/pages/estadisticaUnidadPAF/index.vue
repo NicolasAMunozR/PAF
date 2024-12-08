@@ -138,7 +138,7 @@ const cerrarModal = () => {
       const response1 = await $axios.get(`/contratos/${rut}`)
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
       const response = await $axios.get(`/estadisticas/pafActivas/unidad-mayor/${response1.data.unidadMayor}`);
-      cantidadPafActivas.value = response.data.totalRUNs;
+      cantidadPafActivas.value = response.data.totalRegistros;
     } catch (error) {
       console.error('Error al obtener la cantidad de personas del SAI:', error);
     }
@@ -247,10 +247,8 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
           const response1 = await $axios.get(`/estadisticas/6/${response.data.unidadMayor}/${label}`);
           cantidadPersonasSai.value = response1.data.total_profesores;
           cantidadPafUnicas.value = response1.data.total_pipelsoft_unicos;
-          console.log(response1.data);
           const response2 = await $axios.get(`/estadisticas/${response.data.unidadMayor}/${label}`);
-          console.log(response2.data); 
-          cantidadPafActivas.value = response2.data.total_pipelsoft_unicos;
+          cantidadPafActivas.value = response2.data.totalRegistros;
           const estadoProcesoCount = response1.data.estado_proceso_count;
 
           const normalizedEstadoProcesoCount = Object.fromEntries(
