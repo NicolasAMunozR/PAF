@@ -119,7 +119,7 @@ func main() {
 	// 4
 	r.GET("/estadisticas/unidades-mayores/profesores-codestado", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivos)
 	// 5
-	r.GET("/estadisticas/profesores/estado/:codEstadoPaf", estadisticasController.ObtenerUnidadesMayoresPorCodEstadoPAF)
+	r.GET("/estadisticas/profesores/estado/:codEstadoPAF", estadisticasController.ObtenerUnidadesMayoresPorCodEstadoPAF)
 	// 6 arreglar
 	r.GET("/estadisticas/6/:unidadMayor/:unidadMenor", estadisticasController.ObtenerEstadisticasPorUnidad)
 	// 7 arreglar
@@ -128,14 +128,14 @@ func main() {
 	// Ruta para obtener las unidades menores con profesores filtrados (PAF activos)
 	// 8.1
 	r.GET("/estadistica/unidades-menores-con-profesores-activos/8_1/:unidadMayor", estadisticasController.ObtenerUnidadesMenoresConProfesoresPorUnidadMayor)
-	// 8.2
-	r.GET("/estadistica/unidades-menores-sin-profesores/8_2", estadisticasController.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft)
 	// 8.3
+	r.GET("/estadistica/unidades-menores-sin-profesores/8_3", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayor)
+	// 8.2
 	// Ruta para obtener unidades menores sin profesores en Pipelsoft (8.3)
-	r.GET("/estadistica/unidades-menores-sin-profesores-8-3/:unidadMayor", estadisticasController.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3)
+	r.GET("/estadistica/unidades-menores-sin-profesores-8-2/:unidadMayor", estadisticasController.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3)
 
 	// 8.4
-	r.GET("/estadistica/unidades-menores-con-profesores-paf-activos/8_4", estadisticasController.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos8_4)
+	r.GET("/estadistica/unidades-menores-con-profesores-paf-activos/8_4/:unidadMayor", estadisticasController.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos)
 
 	// 8.5
 	r.GET("/estadistica/unidades-menores/8-5/:codEstadoPAF", estadisticasController.ObtenerUnidadesMenoresPorCodEstadoPAF)

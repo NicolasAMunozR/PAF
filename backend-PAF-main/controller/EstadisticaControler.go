@@ -266,7 +266,7 @@ func (c *EstadisticasController) ObtenerUnidadesMayoresSinProfesoresEnPipelsoftH
 
 // 3
 func (c *EstadisticasController) ObtenerUnidadesMayoresConProfesoresFiltradosHandler(ctx *gin.Context) {
-	resultado, err := c.Service.ObtenerUnidadesMayoresSinProfesoresEnPipelsoft_3()
+	resultado, err := c.Service.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivas()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -377,21 +377,28 @@ func (h *EstadisticasController) ObtenerUnidadesMenoresConProfesoresPorUnidadMay
 	c.JSON(http.StatusOK, resultado)
 }
 
-// 8.2
-// ObtenerUnidadesMenoresSinProfesoresEnPipelsoft maneja la solicitud para obtener unidades menores sin profesores en Pipelsoft.
-func (c *EstadisticasController) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft(ctx *gin.Context) {
-	// Llamamos al servicio para obtener los datos
-	resultado, err := c.Service.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft()
-	if err != nil {
-		// Si ocurre un error, devolvemos una respuesta 500 con el mensaje de error
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+// 8.3
+// ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayor obtiene unidades mayores filtradas por 'unidadMayor' y profesores activos
+func (ctrl *EstadisticasController) ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayor(c *gin.Context) {
+	// Obtener el parámetro 'unidadMayor' desde la URL o como parámetro de consulta
+	unidadMayor := c.DefaultQuery("unidadMayor", "")
+
+	// Validar que se haya recibido el parámetro 'unidadMayor'
+	if unidadMayor == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'unidadMayor' es obligatorio"})
 		return
 	}
 
-	// Si la operación fue exitosa, devolvemos los resultados en formato JSON
-	ctx.JSON(http.StatusOK, resultado)
+	// Llamar al servicio para obtener las unidades mayores con profesores activos filtrados por 'unidadMayor'
+	unidadesInactivas, err := ctrl.Service.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayor(unidadMayor)
+	if err != nil {
+		// Si hubo un error, devolver una respuesta con el mensaje de error
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Devolver la respuesta con el mapa de unidades mayores y el total de profesores
+	c.JSON(http.StatusOK, gin.H{"unidades": unidadesInactivas})
 }
 
 // 8.3
@@ -416,18 +423,21 @@ func (c *EstadisticasController) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_
 
 // 8.4
 // ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos maneja la solicitud para obtener unidades menores con profesores filtrados por PAF activos.
-func (c *EstadisticasController) ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos8_4(ctx *gin.Context) {
-	// Llamar al servicio para obtener los datos.
-	resultado, err := c.Service.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos()
+func (c *EstadisticasController) ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos(ctx *gin.Context) {
+	// Recuperamos el parámetro 'unidadMayor' desde la ruta
+	unidadMayor := ctx.Param("unidadMayor")
+
+	// Llamamos al servicio para obtener los datos, pasando el parámetro 'unidadMayor' que se ha obtenido de la ruta
+	resultado, err := c.Service.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos(unidadMayor)
 	if err != nil {
-		// Si ocurre un error, devolver una respuesta 500 con el mensaje de error.
+		// Si ocurre un error, devolvemos una respuesta 500 con el mensaje de error
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	// Si la operación es exitosa, devolver los resultados en formato JSON.
+	// Si la operación fue exitosa, devolvemos los resultados en formato JSON
 	ctx.JSON(http.StatusOK, resultado)
 }
 
