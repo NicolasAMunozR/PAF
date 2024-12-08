@@ -556,7 +556,7 @@ func (s *EstadisticasService) ObtenerUnidadesMayoresPorCodEstadoPAF(codEstadoPAF
 	// Consulta a la base de datos
 	if err := s.DB.Model(&models.Pipelsoft{}).
 		Select("nombre_unidad_mayor, COUNT(DISTINCT run_empleado) as total_profesores").
-		Where("cod_estado = ?", codEstadoPAF).
+		Where("des_estado = ?", codEstadoPAF).
 		Group("nombre_unidad_mayor").
 		Scan(&resultados).Error; err != nil {
 		return nil, fmt.Errorf("error al obtener unidades mayores por codEstadoPAF: %w", err)
@@ -804,12 +804,13 @@ type UnidadMenorConProfesores struct {
 
 // 8.1
 
-func (s *EstadisticasService) ObtenerUnidadesMenoresConProfesores() ([]UnidadMenorConProfesores, error) {
+func (s *EstadisticasService) ObtenerUnidadesMenoresConProfesoresPorUnidadMayor(unidadMayor string) ([]UnidadMenorConProfesores, error) {
 	var resultado []UnidadMenorConProfesores
 
-	// Paso 1: Obtener todos los RUNs únicos de la tabla Contrato
+	// Paso 1: Obtener todos los RUNs únicos de la tabla Contrato para la unidad mayor proporcionada
 	var runDocentes []string
 	if err := s.DB.Model(&models.Contrato{}).
+		Where("unidad_mayor = ?", unidadMayor).
 		Distinct("run_docente").
 		Pluck("run_docente", &runDocentes).Error; err != nil {
 		return nil, fmt.Errorf("error al obtener RUNs únicos de la tabla Contrato: %w", err)
