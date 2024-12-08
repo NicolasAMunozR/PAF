@@ -561,6 +561,7 @@ func (s *EstadisticasService) ObtenerUnidadesMayoresPorCodEstadoPAF(codEstadoPAF
 	return unidadesMayores, nil
 }
 
+// 6
 func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMenor string) (*EstadisticasResponse, error) {
 	var resp EstadisticasResponse
 
@@ -608,7 +609,9 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMe
 	// Contar registros por cada estado
 	for _, estado := range estados {
 		var count int64
-		if err := query.Where("des_estado = ?", estado).Count(&count).Error; err != nil {
+		// Aplicar los filtros previos (unidadMayor y unidadMenor) más el filtro del estado
+		queryEstado := query.Where("des_estado = ?", estado) // Filtrar por estado
+		if err := queryEstado.Count(&count).Error; err != nil {
 			return nil, fmt.Errorf("error al contar los registros de pipelsofts con estado %s: %w", estado, err)
 		}
 		resp.EstadoProcesoCount[estado] = int(count)
