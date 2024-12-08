@@ -113,7 +113,6 @@ const handleRowStatusChanged = (persona: Persona) => {
 onMounted(async () => {
   try {
     const response = await $axios.get('/historial');
-    console.log('Personas:', response.data);
     personas.value = response.data;
   } catch (error) {
     console.error('Error al obtener personas:', error);

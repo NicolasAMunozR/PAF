@@ -94,7 +94,6 @@ const filteredPersonas = computed(() => {
 onMounted(async () => {
   try {
     const response = await $axios.get('/pipelsoft/contratos');
-    console.log('response:', response);
     personas.value = response.data.map((item: any) => {
       const bloquesArray = item.HistorialPafData.Bloque || []; // Asegurar que Bloque sea un arreglo (vacío si es null o undefined)
 

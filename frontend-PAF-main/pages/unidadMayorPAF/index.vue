@@ -74,6 +74,7 @@ import { ref, computed, onMounted } from 'vue';
 import Filtros from '../../components/Filtros.vue';
 const { $axios } = useNuxtApp() as unknown as { $axios: typeof import('axios').default };
 
+const rut = ref('');
 const route = useRoute();
 const UnidadMayor = ref<string>("");
 const contratos = ref<any[]>([]);
@@ -144,7 +145,6 @@ const filteredPersonas = computed(() => {
 const fetchContratos = async () => {
   try {
     const response = await $axios.get(`/pipelsoft/contratos-nombreUnidadMayor/${UnidadMayor.value}`);
-    console.log(response.data);
     if (response.data && Array.isArray(response.data)) {
       contratos.value = response.data;
     } else {
@@ -156,12 +156,15 @@ const fetchContratos = async () => {
   }
 };
 
-onMounted(() => {
-  const UnidadMayorFromQuery = route.query.UnidadMayor as string;
-  console.log('UnidadMayorFromQuery:', UnidadMayorFromQuery);
+onMounted(async () => {
+  let UnidadMayorFromQuery = route.query.UnidadMayor as string;
+  if (!UnidadMayorFromQuery) {
+    rut.value = sessionStorage.getItem('rut') || '';
+    const response = await $axios.get(`/usuario/rut/${rut.value}`);
+    UnidadMayorFromQuery = response.data.UnidadMayor;
+  }
   if (UnidadMayorFromQuery) {
     UnidadMayor.value = UnidadMayorFromQuery;
-    console.log('UnidadMayor:', UnidadMayor.value);
     fetchContratos();
   }
 });
