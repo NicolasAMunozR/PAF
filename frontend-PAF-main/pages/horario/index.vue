@@ -361,7 +361,16 @@ const horarios = ref([
 ])
 
 const semestreSeleccionado = ref('')
-const semestres = computed(() => [...new Set(persona1.value.map(p => p.semestre))])
+const semestres = computed(() => {
+  // Ordenar los semestres y eliminar duplicados
+  const semestresOrdenados = [...new Set(persona1.value.map(p => p.semestre))]
+    .sort((a, b) => (a || '').localeCompare(b || '')); // Comparación lexicográfica adecuada para "AAAA-MM"
+
+  // Seleccionar solo el último semestre
+  const ultimoSemestre = semestresOrdenados[semestresOrdenados.length - 1];
+
+  return semestresOrdenados; // O retorna [ultimoSemestre] si solo necesitas el último
+});
 const personaFiltrada = computed(() => persona1.value.filter(p => p.semestre === semestreSeleccionado.value))
 const bloquesPorDia = (dia: string, modulo: number) => {
   const inicialDia: { [key: string]: string } = {
