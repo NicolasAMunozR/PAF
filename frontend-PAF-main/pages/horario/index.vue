@@ -230,7 +230,7 @@ const fichasPAF = computed(() =>
 
     // Comparamos los semestres y los años
     return !historialSeleccionado.value.some(h => 
-      h.codigo == p.CodigoAsignatura || h.paf === p.CodigoPaf
+      h.codigo == p.CodigoAsignatura && h.paf === p.CodigoPaf
     ) && semestrePafAño === añoSeleccionado && semestrePafNumber === semestreSeleccionadoNumber;
   })
 );
