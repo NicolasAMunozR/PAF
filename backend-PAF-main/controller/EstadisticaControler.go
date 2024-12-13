@@ -236,8 +236,17 @@ func (ctrl *EstadisticasController) ObtenerYCompararRunsHandler(c *gin.Context) 
 
 // 1
 func (c *EstadisticasController) ObtenerUnidadesMayoresHandler(ctx *gin.Context) {
+	// Obtener el parámetro codEstadoPAF desde la URL
+	semestre := ctx.Param("semestre")
+	if semestre == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "El parámetro 'codEstadoPAF' es obligatorio",
+		})
+		return
+	}
+
 	// Llamar al servicio para obtener los datos
-	unidades, err := c.Service.ObtenerUnidadesMayoresConProfesores()
+	unidades, err := c.Service.ObtenerUnidadesMayoresConProfesores(semestre)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -253,7 +262,17 @@ func (c *EstadisticasController) ObtenerUnidadesMayoresHandler(ctx *gin.Context)
 
 // 2
 func (c *EstadisticasController) ObtenerUnidadesMayoresSinProfesoresEnPipelsoftHandler(ctx *gin.Context) {
-	resultado, err := c.Service.ObtenerUnidadesMayoresSinProfesoresEnPipelsoft()
+	// Obtener el parámetro codEstadoPAF desde la URL
+	semestre := ctx.Param("semestre")
+	if semestre == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "El parámetro 'semestre' es obligatorio",
+		})
+		return
+	}
+
+	// Llamar al servicio con el filtro de semestre
+	resultado, err := c.Service.ObtenerUnidadesMayoresSinProfesoresEnPipelsoftPorSemestre(semestre)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -266,7 +285,17 @@ func (c *EstadisticasController) ObtenerUnidadesMayoresSinProfesoresEnPipelsoftH
 
 // 3
 func (c *EstadisticasController) ObtenerUnidadesMayoresConProfesoresFiltradosHandler(ctx *gin.Context) {
-	resultado, err := c.Service.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivas()
+	// Obtener el parámetro semestre desde la URL
+	semestre := ctx.Param("semestre")
+	if semestre == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "El parámetro 'semestre' es obligatorio",
+		})
+		return
+	}
+
+	// Llamar al servicio con el filtro de semestre
+	resultado, err := c.Service.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorSemestre(semestre)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -280,53 +309,77 @@ func (c *EstadisticasController) ObtenerUnidadesMayoresConProfesoresFiltradosHan
 // 4
 // ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivos obtiene las unidades mayores con profesores activos (PAF).
 func (c *EstadisticasController) ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivos(ctx *gin.Context) {
-	// Llamamos al servicio para obtener los datos
-	resultado, err := c.Service.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivos()
+	// Obtener el parámetro semestre desde la URL
+	semestre := ctx.Param("semestre")
+	if semestre == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "El parámetro 'semestre' es obligatorio",
+		})
+		return
+	}
+
+	// Llamar al servicio con el filtro de semestre
+	resultado, err := c.Service.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivosPorSemestre(semestre)
 	if err != nil {
-		// Si ocurre un error, devolvemos una respuesta 500 con el mensaje de error
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	// Si la operación fue exitosa, devolvemos los resultados en formato JSON
 	ctx.JSON(http.StatusOK, resultado)
 }
 
 // 5
-func (h *EstadisticasController) ObtenerUnidadesMayoresPorCodEstadoPAF(c *gin.Context) {
-	// Obtener el parámetro codEstadoPAF desde la URL
-	codEstadoPAF := c.Param("codEstadoPAF")
+func (c *EstadisticasController) ObtenerUnidadesMayoresPorCodEstadoPAF(ctx *gin.Context) {
+	// Obtener los parámetros codEstadoPAF y semestre desde la URL
+	codEstadoPAF := ctx.Param("codEstadoPAF")
+	semestre := ctx.Param("semestre")
 
-	// Llamar al servicio
-	resultado, err := h.Service.ObtenerUnidadesMayoresPorCodEstadoPAF(codEstadoPAF)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// Validar parámetros
+	if codEstadoPAF == "" || semestre == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "Los parámetros 'codEstadoPAF' y 'semestre' son obligatorios",
+		})
 		return
 	}
 
-	// Responder con los datos en formato JSON
-	c.JSON(http.StatusOK, resultado)
+	// Llamar al servicio
+	resultado, err := c.Service.ObtenerUnidadesMayoresPorCodEstadoPAF(codEstadoPAF, semestre)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, resultado)
 }
 
 // 6
 // ObtenerEstadisticasPorUnidad maneja la solicitud HTTP para obtener estadísticas por unidad
 func (ctrl *EstadisticasController) ObtenerEstadisticasPorUnidad(c *gin.Context) {
 	// Obtener parámetros de la ruta
-	unidadMayor := c.Param("unidadMayor") // Parámetro de la ruta
-	unidadMenor := c.Param("unidadMenor") // Parámetro de la ruta
+	unidadMayor := c.Param("unidadMayor")
+	unidadMenor := c.Param("unidadMenor")
 
-	// Validar los parámetros
+	// Obtener el parámetro 'semestre' como query parameter
+	semestre := c.Query("semestre")
+
+	// Validar los parámetros obligatorios
 	if unidadMayor == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'unidadMayor' es obligatorio"})
 		return
 	}
+	if unidadMenor == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'unidadMenor' es obligatorio"})
+		return
+	}
 
 	// Llamar al servicio para obtener las estadísticas
-	resp, err := ctrl.Service.ObtenerEstadisticasPorUnidad(unidadMayor, unidadMenor)
+	resp, err := ctrl.Service.ObtenerEstadisticasPorUnidad(unidadMayor, unidadMenor, semestre)
 	if err != nil {
-		log.Println("Error al obtener estadísticas:", err)
+		log.Printf("Error al obtener estadísticas: %v\n", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -341,15 +394,16 @@ func (ctrl *EstadisticasController) ContarRegistrosPorUnidadMayorYUnidadMenor(c 
 	// Obtener los parámetros de la URL
 	unidadMayor := c.Param("unidadMayor")
 	unidadMenor := c.Param("unidadMenor")
+	semestre := c.Param("semestre") // Capturar el parámetro semestre
 
-	// Validar que ambos parámetros no estén vacíos
-	if unidadMayor == "" || unidadMenor == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Los parámetros 'unidadMayor' y 'unidadMenor' son obligatorios"})
+	// Validar que todos los parámetros no estén vacíos
+	if unidadMayor == "" || unidadMenor == "" || semestre == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Los parámetros 'unidadMayor', 'unidadMenor' y 'semestre' son obligatorios"})
 		return
 	}
 
 	// Llamar al servicio para obtener los conteos
-	count, totalRUNs, err := ctrl.Service.ContarRegistrosPorUnidadMayorYUnidadMenor(unidadMayor, unidadMenor)
+	count, totalRUNs, err := ctrl.Service.ContarRegistrosPorUnidadMayorYUnidadMenor(unidadMayor, unidadMenor, semestre)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -365,11 +419,18 @@ func (ctrl *EstadisticasController) ContarRegistrosPorUnidadMayorYUnidadMenor(c 
 // 8.1
 // ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos obtiene las unidades menores con profesores activos (PAF).
 func (h *EstadisticasController) ObtenerUnidadesMenoresConProfesoresPorUnidadMayor(c *gin.Context) {
-	// Obtener el parámetro unidadMayor desde la URL
+	// Obtener el parámetro unidadMayor y semestre desde la URL
 	unidadMayor := c.Param("unidadMayor")
+	semestre := c.Param("semestre") // Capturar el parámetro semestre
+
+	// Validar que ambos parámetros no estén vacíos
+	if unidadMayor == "" || semestre == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Los parámetros 'unidadMayor' y 'semestre' son obligatorios"})
+		return
+	}
 
 	// Llamar al servicio
-	resultado, err := h.Service.ObtenerUnidadesMenoresConProfesoresPorUnidadMayor(unidadMayor)
+	resultado, err := h.Service.ObtenerUnidadesMenoresConProfesoresPorUnidadMayor(unidadMayor, semestre)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -382,17 +443,18 @@ func (h *EstadisticasController) ObtenerUnidadesMenoresConProfesoresPorUnidadMay
 // 8.3
 // ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayor obtiene unidades mayores filtradas por 'unidadMayor' y profesores activos
 func (ctrl *EstadisticasController) ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayor(c *gin.Context) {
-	// Obtener el parámetro 'unidadMayor' desde la URL
+	// Obtener los parámetros 'unidadMayor' y 'semestre' desde la URL
 	unidadMayor := c.Param("unidadMayor")
+	semestre := c.Param("semestre")
 
-	// Validar que se haya recibido el parámetro 'unidadMayor'
-	if unidadMayor == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'unidadMayor' es obligatorio"})
+	// Validar que se hayan recibido ambos parámetros
+	if unidadMayor == "" || semestre == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Los parámetros 'unidadMayor' y 'semestre' son obligatorios"})
 		return
 	}
 
-	// Llamar al servicio para obtener las unidades mayores con profesores activos filtrados por 'unidadMayor'
-	unidadesInactivas, err := ctrl.Service.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayor(unidadMayor)
+	// Llamar al servicio para obtener las unidades mayores con profesores activos filtrados por 'unidadMayor' y 'semestre'
+	unidadesInactivas, err := ctrl.Service.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayor(unidadMayor, semestre)
 	if err != nil {
 		// Si hubo un error, devolver una respuesta con el mensaje de error
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -405,32 +467,44 @@ func (ctrl *EstadisticasController) ObtenerUnidadesMayoresConProfesoresFiltrados
 
 // 8.2
 // ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3 maneja la solicitud para obtener unidades menores sin profesores en Pipelsoft (versión 8.3).
-func (c *EstadisticasController) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3(ctx *gin.Context) {
-	// Recuperamos el parámetro 'unidadMayor' desde la ruta
-	unidadMayor := ctx.Param("unidadMayor")
+func (ctrl *EstadisticasController) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3(c *gin.Context) {
+	// Obtener los parámetros 'unidadMayor' y 'semestre' desde la URL
+	unidadMayor := c.Param("unidadMayor")
+	semestre := c.Param("semestre")
 
-	// Llamamos al servicio para obtener los datos, pasando el parámetro 'unidadMayor' que se ha obtenido de la ruta
-	resultado, err := c.Service.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3(unidadMayor)
-	if err != nil {
-		// Si ocurre un error, devolvemos una respuesta 500 con el mensaje de error
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+	// Validar que se hayan recibido ambos parámetros
+	if unidadMayor == "" || semestre == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Los parámetros 'unidadMayor' y 'semestre' son obligatorios"})
 		return
 	}
 
-	// Si la operación fue exitosa, devolvemos los resultados en formato JSON
-	ctx.JSON(http.StatusOK, resultado)
+	// Llamar al servicio para obtener las unidades menores sin profesores en Pipelsoft, filtrados por 'unidadMayor' y 'semestre'
+	unidadesSinProfesores, err := ctrl.Service.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3(unidadMayor, semestre)
+	if err != nil {
+		// Si hubo un error, devolver una respuesta con el mensaje de error
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Devolver la respuesta con el mapa de unidades menores y el total de profesores
+	c.JSON(http.StatusOK, gin.H{"unidades": unidadesSinProfesores})
 }
 
 // 8.4
 // ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos maneja la solicitud para obtener unidades menores con profesores filtrados por PAF activos.
 func (c *EstadisticasController) ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos(ctx *gin.Context) {
-	// Recuperamos el parámetro 'unidadMayor' desde la ruta
+	// Recuperamos los parámetros 'unidadMayor' y 'semestre' desde la ruta
 	unidadMayor := ctx.Param("unidadMayor")
+	semestre := ctx.Param("semestre")
 
-	// Llamamos al servicio para obtener los datos, pasando el parámetro 'unidadMayor' que se ha obtenido de la ruta
-	resultado, err := c.Service.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos(unidadMayor)
+	// Validar que se hayan recibido ambos parámetros
+	if unidadMayor == "" || semestre == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Los parámetros 'unidadMayor' y 'semestre' son obligatorios"})
+		return
+	}
+
+	// Llamamos al servicio para obtener los datos, pasando los parámetros 'unidadMayor' y 'semestre'
+	resultado, err := c.Service.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos(unidadMayor, semestre)
 	if err != nil {
 		// Si ocurre un error, devolvemos una respuesta 500 con el mensaje de error
 		ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -445,14 +519,22 @@ func (c *EstadisticasController) ObtenerUnidadesMenoresConProfesoresFiltradosPAF
 
 // 8.5
 func (h *EstadisticasController) ObtenerUnidadesMenoresPorCodEstadoPAF(c *gin.Context) {
-	// Obtener los parámetros codEstadoPAF y unidadMayor desde la URL
+	// Obtener los parámetros codEstadoPAF, unidadMayor y semestre desde la URL
 	codEstadoPAF := c.Param("codEstadoPAF")
 	unidadMayor := c.Param("unidadMayor")
+	semestre := c.Param("semestre")
+
+	// Validar que se hayan recibido todos los parámetros
+	if codEstadoPAF == "" || unidadMayor == "" || semestre == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Los parámetros codEstadoPAF, unidadMayor y semestre son obligatorios"})
+		return
+	}
 
 	// Llamar al servicio con los parámetros obtenidos
-	resultado, err := h.Service.ObtenerUnidadesMenoresPorCodEstadoPAF(codEstadoPAF, unidadMayor)
+	resultado, err := h.Service.ObtenerUnidadesMenoresPorCodEstadoPAF(codEstadoPAF, unidadMayor, semestre)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		// Si ocurre un error, devolvemos una respuesta 400 con el mensaje de error
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -464,15 +546,16 @@ func (h *EstadisticasController) ObtenerUnidadesMenoresConProfesoresPorUnidadMay
 	// Obtener los parámetros desde la URL
 	unidadMayor := c.Param("unidadMayor") // Parámetro de la unidad mayor
 	unidadMenor := c.Param("unidadMenor") // Parámetro de la unidad menor (opcional)
+	semestre := c.Param("semestre")       // Parámetro del semestre
 
-	// Validar que el parámetro unidadMayor no esté vacío
-	if unidadMayor == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro unidadMayor es obligatorio"})
+	// Validar que el parámetro unidadMayor y semestre no estén vacíos
+	if unidadMayor == "" || semestre == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Los parámetros unidadMayor y semestre son obligatorios"})
 		return
 	}
 
 	// Llamar al servicio para obtener las unidades menores con profesores
-	unidadesMenores, err := h.Service.ObtenerUnidadesMenoresConProfesoresPorUnidadMayor9_1(unidadMayor, unidadMenor)
+	unidadesMenores, err := h.Service.ObtenerUnidadesMenoresConProfesoresPorUnidadMayor9_1(unidadMayor, unidadMenor, semestre)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -482,19 +565,21 @@ func (h *EstadisticasController) ObtenerUnidadesMenoresConProfesoresPorUnidadMay
 	c.JSON(http.StatusOK, unidadesMenores)
 }
 
+// 9.2
 func (h *EstadisticasController) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_9_2(c *gin.Context) {
 	// Obtener los parámetros desde la URL
 	unidadMayor := c.Param("unidadMayor") // Parámetro de la unidad mayor
 	unidadMenor := c.Param("unidadMenor") // Parámetro de la unidad menor
+	semestre := c.Param("semestre")       // Parámetro del semestre
 
 	// Validar que ambos parámetros no estén vacíos
-	if unidadMayor == "" || unidadMenor == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Ambos parámetros 'unidadMayor' y 'unidadMenor' son obligatorios"})
+	if unidadMayor == "" || unidadMenor == "" || semestre == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Los parámetros 'unidadMayor', 'unidadMenor' y 'semestre' son obligatorios"})
 		return
 	}
 
 	// Llamar al servicio con los parámetros obtenidos
-	resultado, err := h.Service.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_9_2(unidadMayor, unidadMenor)
+	resultado, err := h.Service.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_9_2(unidadMayor, unidadMenor, semestre)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -504,19 +589,21 @@ func (h *EstadisticasController) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_
 	c.JSON(http.StatusOK, resultado)
 }
 
+// 9.3
 func (h *EstadisticasController) ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayorYUnidadMenor9_3(c *gin.Context) {
 	// Obtener los parámetros desde la URL
 	unidadMayor := c.Param("unidadMayor") // Parámetro de la unidad mayor
 	unidadMenor := c.Param("unidadMenor") // Parámetro de la unidad menor
+	semestre := c.Param("semestre")       // Parámetro del semestre
 
-	// Validar que ambos parámetros no estén vacíos
-	if unidadMayor == "" || unidadMenor == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Ambos parámetros 'unidadMayor' y 'unidadMenor' son obligatorios"})
+	// Validar que los parámetros no estén vacíos
+	if unidadMayor == "" || unidadMenor == "" || semestre == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Los parámetros 'unidadMayor', 'unidadMenor' y 'semestre' son obligatorios"})
 		return
 	}
 
 	// Llamar al servicio con los parámetros obtenidos
-	resultado, err := h.Service.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayorYUnidadMenor9_3(unidadMayor, unidadMenor)
+	resultado, err := h.Service.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayorYUnidadMenor9_3(unidadMayor, unidadMenor, semestre)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -526,19 +613,21 @@ func (h *EstadisticasController) ObtenerUnidadesMayoresConProfesoresFiltradosPAF
 	c.JSON(http.StatusOK, resultado)
 }
 
+// 9.4
 func (h *EstadisticasController) ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivosPorUnidadMayorYUnidadMenor9_4(c *gin.Context) {
 	// Obtener los parámetros desde la URL
 	unidadMayor := c.Param("unidadMayor") // Parámetro de la unidad mayor
 	unidadMenor := c.Param("unidadMenor") // Parámetro de la unidad menor
+	semestre := c.Param("semestre")       // Parámetro del semestre
 
-	// Validar que ambos parámetros no estén vacíos
-	if unidadMayor == "" || unidadMenor == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Ambos parámetros 'unidadMayor' y 'unidadMenor' son obligatorios"})
+	// Validar que los parámetros no estén vacíos
+	if unidadMayor == "" || unidadMenor == "" || semestre == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Los parámetros 'unidadMayor', 'unidadMenor' y 'semestre' son obligatorios"})
 		return
 	}
 
 	// Llamar al servicio con los parámetros obtenidos
-	resultado, err := h.Service.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivosPorUnidadMayorYUnidadMenor9_4(unidadMayor, unidadMenor)
+	resultado, err := h.Service.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivosPorUnidadMayorYUnidadMenor9_4(unidadMayor, unidadMenor, semestre)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -548,20 +637,22 @@ func (h *EstadisticasController) ObtenerUnidadesMenoresConProfesoresFiltradosPAF
 	c.JSON(http.StatusOK, resultado)
 }
 
+// 9.5
 func (h *EstadisticasController) ObtenerUnidadesMenoresPorCodEstadoPAFPorCodEstadoYUnidadMayorYUnidadMenor9_5(c *gin.Context) {
 	// Obtener los parámetros desde la URL
 	codEstadoPAF := c.Param("codEstadoPAF") // Parámetro del estado del PAF
 	unidadMayor := c.Param("unidadMayor")   // Parámetro de la unidad mayor
 	unidadMenor := c.Param("unidadMenor")   // Parámetro de la unidad menor
+	semestre := c.Param("semestre")         // Parámetro del semestre
 
 	// Validar que todos los parámetros no estén vacíos
-	if codEstadoPAF == "" || unidadMayor == "" || unidadMenor == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Los parámetros 'codEstadoPAF', 'unidadMayor' y 'unidadMenor' son obligatorios"})
+	if codEstadoPAF == "" || unidadMayor == "" || unidadMenor == "" || semestre == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Los parámetros 'codEstadoPAF', 'unidadMayor', 'unidadMenor' y 'semestre' son obligatorios"})
 		return
 	}
 
 	// Llamar al servicio con los parámetros obtenidos
-	resultado, err := h.Service.ObtenerUnidadesMenoresPorCodEstadoPAFPorCodEstadoYUnidadMayorYUnidadMenor9_5(codEstadoPAF, unidadMayor, unidadMenor)
+	resultado, err := h.Service.ObtenerUnidadesMenoresPorCodEstadoPAFPorCodEstadoYUnidadMayorYUnidadMenor9_5(codEstadoPAF, unidadMayor, unidadMenor, semestre)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -111,45 +111,45 @@ func main() {
 	r.GET("/estadisticas/obtener-y-comparar-runs", estadisticasController.ObtenerYCompararRunsHandler)
 
 	// 1
-	r.GET("/estadisticas/unidades-mayores/cant_profesores", estadisticasController.ObtenerUnidadesMayoresHandler)
+	r.GET("/estadisticas/unidades-mayores/cant_profesores/:semestre", estadisticasController.ObtenerUnidadesMayoresHandler)
 	// 2
-	r.GET("/estadisticas/unidades-mayores/sin_profesores", estadisticasController.ObtenerUnidadesMayoresSinProfesoresEnPipelsoftHandler)
+	r.GET("/estadisticas/unidades-mayores/sin_profesores/:semestre", estadisticasController.ObtenerUnidadesMayoresSinProfesoresEnPipelsoftHandler)
 	// 3
-	r.GET("/estadisticas/unidades-mayores/profesores-filtrados", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosHandler)
+	r.GET("/estadisticas/unidades-mayores/profesores-filtrados/:semestre", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosHandler)
 	// 4
-	r.GET("/estadisticas/unidades-mayores/profesores-codestado", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivos)
+	r.GET("/estadisticas/unidades-mayores/profesores-codestado/:semestre", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivos)
 	// 5
-	r.GET("/estadisticas/profesores/estado/:codEstadoPAF", estadisticasController.ObtenerUnidadesMayoresPorCodEstadoPAF)
+	r.GET("/estadisticas/profesores/estado/:codEstadoPAF/:semestre", estadisticasController.ObtenerUnidadesMayoresPorCodEstadoPAF)
 	// 6 arreglar
-	r.GET("/estadisticas/6/:unidadMayor/:unidadMenor", estadisticasController.ObtenerEstadisticasPorUnidad)
+	r.GET("/estadisticas/6/:unidadMayor/:unidadMenor/semestre", estadisticasController.ObtenerEstadisticasPorUnidad)
 	// 7 arreglar
-	r.GET("/estadisticas/:unidadMayor/:unidadMenor", estadisticasController.ContarRegistrosPorUnidadMayorYUnidadMenor)
+	r.GET("/estadisticas/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ContarRegistrosPorUnidadMayorYUnidadMenor)
 
 	// Ruta para obtener las unidades menores con profesores filtrados (PAF activos)
 	// 8.1
-	r.GET("/estadistica/unidades-menores-con-profesores-activos/8_1/:unidadMayor", estadisticasController.ObtenerUnidadesMenoresConProfesoresPorUnidadMayor)
+	r.GET("/estadistica/unidades-menores-con-profesores-activos/8_1/:unidadMayor/:semestre", estadisticasController.ObtenerUnidadesMenoresConProfesoresPorUnidadMayor)
 	// 8.3
-	r.GET("/estadistica/unidades-menores-sin-profesores/8_3/:unidadMayor", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayor)
+	r.GET("/estadistica/unidades-menores-sin-profesores/8_3/:unidadMayor/:semestre", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayor)
 
 	// 8.2
 	// Ruta para obtener unidades menores sin profesores en Pipelsoft (8.3)
-	r.GET("/estadistica/unidades-menores-sin-profesores-8-2/:unidadMayor", estadisticasController.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3)
+	r.GET("/estadistica/unidades-menores-sin-profesores-8-2/:unidadMayor/:semestre", estadisticasController.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3)
 
 	// 8.4
-	r.GET("/estadistica/unidades-menores-con-profesores-paf-activos/8_4/:unidadMayor", estadisticasController.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos)
+	r.GET("/estadistica/unidades-menores-con-profesores-paf-activos/8_4/:unidadMayor/:semestre", estadisticasController.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos)
 
 	// 8.5
-	r.GET("/estadistica/unidades-menores/:codEstadoPAF/:unidadMayor", estadisticasController.ObtenerUnidadesMenoresPorCodEstadoPAF)
+	r.GET("/estadistica/unidades-menores/:codEstadoPAF/:unidadMayor/:semestre", estadisticasController.ObtenerUnidadesMenoresPorCodEstadoPAF)
 	// 9.1
-	r.GET("/unidadesmenores/profesores/:unidadMayor/:unidadMenor", estadisticasController.ObtenerUnidadesMenoresConProfesoresPorUnidadMayor9_1)
+	r.GET("/unidadesmenores/profesores/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerUnidadesMenoresConProfesoresPorUnidadMayor9_1)
 	// 9.2
-	r.GET("/unidadesmenores/sinprofesores/:unidadMayor/:unidadMenor", estadisticasController.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_9_2)
+	r.GET("/unidadesmenores/sinprofesores/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_9_2)
 	// 9.3
-	r.GET("/unidadesmayores/filtradospafactivos/:unidadMayor/:unidadMenor", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayorYUnidadMenor9_3)
+	r.GET("/unidadesmayores/filtradospafactivos/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayorYUnidadMenor9_3)
 	// 9.4
-	r.GET("/unidadesmenores/filtradospafactivos/:unidadMayor/:unidadMenor", estadisticasController.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivosPorUnidadMayorYUnidadMenor9_4)
+	r.GET("/unidadesmenores/filtradospafactivos/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivosPorUnidadMayorYUnidadMenor9_4)
 	// 9.5
-	r.GET("/unidadesmenores/porcodestadopaf/:codEstadoPAF/:unidadMayor/:unidadMenor", estadisticasController.ObtenerUnidadesMenoresPorCodEstadoPAFPorCodEstadoYUnidadMayorYUnidadMenor9_5)
+	r.GET("/unidadesmenores/porcodestadopaf/:codEstadoPAF/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerUnidadesMenoresPorCodEstadoPAFPorCodEstadoYUnidadMayorYUnidadMenor9_5)
 
 	// Iniciar el cron job para actualización periódica
 	// de acuerdo al sai profes sin paf y sin contrato sin contar profesores repetidos, desde pipelsoft estan los ruts con un 0 al inicio y con digito verificador
