@@ -1,18 +1,7 @@
 <template>
   <div class="filters">
-    <!-- Filtro Nombre Asignatura -->
-    <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF && !isPaf">
-      <label for="nombreAsignatura" class="label">Nombre Asignatura</label>
-      <input
-        v-model="filtros.nombreAsignatura"
-        type="text"
-        class="input"
-        placeholder="Filtrar por nombre de asignatura"
-      />
-    </div>
-    
-    <!-- Filtro Run -->
-    <div class="filter-item" v-if="!isPaf">
+        <!-- Filtro Run -->
+        <div class="filter-item" v-if="!isPaf">
       <label for="run" class="label">Run</label>
       <input
         v-model="filtros.run"
@@ -21,7 +10,7 @@
         placeholder="Filtrar por Run"
       />
     </div>
-    
+
     <!-- Filtro Código de PAF -->
     <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF && !isPaf">
       <label for="codigoPAF" class="label">Código de PAF</label>
@@ -30,6 +19,17 @@
         type="text"
         class="input" 
         placeholder="Filtrar por código de PAF"
+      />
+    </div>
+
+    <!-- Filtro Nombre Asignatura -->
+    <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF && !isPaf">
+      <label for="nombreAsignatura" class="label">Nombre Asignatura</label>
+      <input
+        v-model="filtros.nombreAsignatura"
+        type="text"
+        class="input"
+        placeholder="Filtrar por nombre de asignatura"
       />
     </div>
     

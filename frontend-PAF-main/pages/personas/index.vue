@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <Filtros @filter="filterData" @sort="sortData" />
-    <Tabla :data="filteredPersonas" />
+    <Tabla :data="filteredPersonas" :showButton="false"/>
   </div>
 </template>
 
@@ -98,10 +98,10 @@ onMounted(async () => {
       const bloquesArray = item.HistorialPafData.Bloque || []; // Asegurar que Bloque sea un arreglo (vacío si es null o undefined)
 
       // Verificar si el arreglo no está vacío antes de hacer el map
-      const bloque = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.bloques).join("/") : "";
-      const CodigoA = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.codigoAsignatura).join("/") : "";
-      const Cupo = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.cupos).join("/") : "";
-      const seccion = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.seccion).join("/") : "";
+      const bloque = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.bloques).join(" / ") : "";
+      const CodigoA = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.codigoAsignatura).join(" / ") : "";
+      const Cupo = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.cupos).join(" / ") : "";
+      const seccion = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.seccion).join(" / ") : "";
 
       return {
       CodigoAsignatura: item.PipelsoftData.CodigoAsignatura,

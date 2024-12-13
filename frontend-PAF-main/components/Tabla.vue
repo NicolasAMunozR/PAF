@@ -12,6 +12,7 @@
           <th class="px-4 py-3 text-left font-semibold">Cupos</th>
           <th class="px-4 py-3 text-left font-semibold">Semestre de PAF</th>
           <th v-if="showButtons" class="px-4 py-3 text-left font-semibold">Opciones</th>
+          <th v-if="showButton" class="px-4 py-3 text-left font-semibold">Opciones</th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
@@ -29,6 +30,12 @@
             <br>
             <br>
             <a :href="`/horario?run=${persona.Run}`" class="button">Ver Horarios</a>
+          </td>
+          <td v-if="showButton" class="px-4 py-3">
+            <a :href="`/paf?codigoPaf=${persona.CodigoPAF}`" class="button">Ver PAF</a>
+            <br>
+            <br>
+            <button @click="deletePAF(persona.CodigoPAF)" class="buttons">Eliminar</button>
           </td>
         </tr>
       </tbody>
@@ -61,6 +68,10 @@ export default {
     showButtons: {
       type: Boolean,
       default: true
+    },
+    showButton: {
+      type: Boolean,
+      default: true
     }
   },
   data() {
@@ -82,11 +93,30 @@ export default {
     }
   },
   methods: {
-    goToPage(page) {
-      if (page < 1 || page > this.totalPages) return;
-      this.currentPage = page;
+  goToPage(page) {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+  },
+  async deletePAF(codigoPAF) {
+    try {
+      const confirmDelete = confirm(`¿Estás seguro de que deseas eliminar la PAF con código ${codigoPAF}?`);
+      if (!confirmDelete) return;
+      
+      // Realiza la solicitud DELETE
+      await this.$axios.delete(`/historial/${codigoPAF}`);
+      
+      // Muestra una notificación o mensaje de éxito
+      alert(`PAF con código ${codigoPAF} eliminada con éxito.`);
+      
+      // Opcional: Actualiza los datos localmente para reflejar la eliminación
+      this.data = this.data.filter(persona => persona.CodigoPAF !== codigoPAF);
+    } catch (error) {
+      // Maneja errores
+      console.error("Error al eliminar la PAF:", error);
+      alert("Ocurrió un error al intentar eliminar la PAF.");
     }
   }
+}
 }
 </script>
 
@@ -157,6 +187,23 @@ tbody td {
   background-color: var(--button-hover-color);
 }
 
+/* Estilos para los botones */
+.buttons {
+  display: inline-block;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  color: #090000;
+  background-color: #e00606;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.buttons:hover {
+  background-color: var(--button-hover-color);
+}
 .hover\:bg-gray-50:hover {
   background-color: #f1f5f9;
 }

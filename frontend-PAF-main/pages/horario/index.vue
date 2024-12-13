@@ -172,6 +172,7 @@ import { onMounted, ref, computed } from 'vue'
 import { useNuxtApp } from '#app'
 
 const historialSeleccionado = computed(() => persona.value.filter((p) => p.ID !== 0) || null);
+console.log(historialSeleccionado)
 
 // Cerrar todos los popups
 const cerrarTodosLosBloques = () => {
@@ -230,7 +231,7 @@ const fichasPAF = computed(() =>
 
     // Comparamos los semestres y los años
     return !historialSeleccionado.value.some(h => 
-      h.codigo == p.CodigoAsignatura && h.paf === p.CodigoPaf
+      h.ID === p.ID
     ) && semestrePafAño === añoSeleccionado && semestrePafNumber === semestreSeleccionadoNumber;
   })
 );
@@ -246,7 +247,7 @@ const fichasPAFMatch = computed(() =>
 
     // Comparamos los semestres y los años
     return historialSeleccionado.value.some(h => 
-      h.codigo == p.CodigoAsignatura && h.paf === p.CodigoPaf
+      h.ID === p.ID
     ) && semestrePafAño === añoSeleccionado && semestrePafNumber === semestreSeleccionadoNumber;
   })
 );
@@ -254,15 +255,10 @@ const fichasPAFMatch = computed(() =>
 const fichasAsignaturas = computed(() =>
   persona1.value.filter((p) =>
     !historialSeleccionado.value.some((historial) => {
-      const codigosA = historial.CodigoA ? historial.CodigoA.split("/") : []; // Dividir CodigoA en un arreglo
-      const semestres1 = historial.semestre1 ? historial.semestre1.split("/") : []; // Dividir semestre1 en un arreglo
-      const secciones = historial.seccion ? historial.seccion.split("/") : []; // Dividir seccion en un arreglo
-
-      // Verificar que ambos arreglos tengan la misma longitud
-      if (codigosA.length !== semestres1.length) {
-        return false;
-      }
-
+      const codigosA = historial.CodigoA ? historial.CodigoA.split(" / ") : []; // Dividir CodigoA en un arreglo
+      const semestres1 = historial.semestre1 ? historial.semestre1.split(" / ") : []; // Dividir semestre1 en un arreglo
+      const secciones = historial.seccion ? historial.seccion.split(" / ") : []; // Dividir seccion en un arreglo
+ 
       // Comparar cada par de elementos en codigosA y semestres1
       return codigosA.some((codigo, index) => {
         return (
@@ -281,11 +277,6 @@ const fichasAsignaturasNo = computed(() =>
       const codigosA = historial.CodigoA ? historial.CodigoA.split(" / ") : []; // Dividir CodigoA en un arreglo
       const semestres1 = historial.semestre1 ? historial.semestre1.split(" / ") : []; // Dividir semestre1 en un arreglo
       const secciones = historial.seccion ? historial.seccion.split(" / ") : []; // Dividir seccion en un arreglo
-
-      // Verificar que ambos arreglos tengan la misma longitud
-      if (codigosA.length !== semestres1.length) {
-        return false;
-      }
 
       // Comparar cada par de elementos en codigosA y semestres1
       return codigosA.some((codigo, index) => {
@@ -415,9 +406,13 @@ const bloquesPorDia = (dia: string, modulo: number) => {
     }));
 };
 
-const obtenerDatosPersona = async () => {
+const obtenerDatosPersona = async (semestreGuardado: string | null) => {
   try {
+
+    // NO DEVUELÑVE LAS PAF LISTAS
+
     const response = await $axios.get(`/pipelsoft/contratos-run/${run.value}`);
+    console.log(response.data);
     const response1 = await $axios.get(`/profesorDB/${run.value.slice(0, -2)}`);
     persona1.value = response1.data;
 
@@ -466,8 +461,11 @@ const obtenerDatosPersona = async () => {
       return 0;
     })[0];
 
+    if(semestreGuardado !== null) {
+      semestreSeleccionado.value = semestreGuardado;
+    }
     // Establecer el semestre más reciente como seleccionado
-    if (semestreReciente) {
+     else if (semestreReciente) {
       semestreSeleccionado.value = semestreReciente;
     }
   } catch (error) {
@@ -523,20 +521,13 @@ const resultado = Object.entries(grouped).map(([rest, bloques]) => {
       bloque: `Bloque ${bloques.join(", ")}`, // Prefijo "Bloque" antes de los bloques agrupados
       codigo_asignatura: codigoAsignatura
     },
-    bloque: bloques.map(b => `${semestre} ${codigoAsignatura} ${seccion} ${cupo} ${b}`)
+    bloque: bloques.map(b => `${semestre} ${codigoAsignatura} ${seccion} ${cupo} ${bloques.join("-")}`)
   };
 });
 const result = resultado.map(item => {
-  if (item.bloque.length >= 2) {
-    // Une los elementos con un "-"
-    const merged = item.bloque[0] + "-" + item.bloque.slice(1).join("-").split(" ")[4];
-    return merged;
-  }
   return item.bloque[0];
 });
 
-    // si bloqueseleccionadosString tiene un elemento Miercoles Trasformarlo en W y los demas tipo Lunes o Matrtes dejarlos como L o M
-    
     const data = resultado[0];
     data.bloque = result;
     console.log(data);
@@ -546,6 +537,7 @@ const result = resultado.map(item => {
     console.error('Error al enviar los datos:', error);
     alert('Hubo un error al enviar los datos.');
   }
+  obtenerDatosPersona(semestreSeleccionado.value);
 };
 
 
@@ -554,7 +546,7 @@ const volver = () => {
 }
 
 onMounted(() => {
-  obtenerDatosPersona()
+  obtenerDatosPersona(null)
 })
 const coloresPAF = [
   '#FFCDD2', '#F8BBD0', '#E1BEE7', '#D1C4E9', '#C5CAE9', // Tonos originales suaves
