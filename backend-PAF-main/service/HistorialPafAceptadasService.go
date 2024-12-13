@@ -78,17 +78,18 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 
 	// Crear el nuevo registro de historial sin cambiar el estado
 	historial := models.HistorialPafAceptadas{
-		Run:                     profesor.RUN,
-		IdPaf:                   codigoPAF,
-		FechaInicioContrato:     pipelsoft.FechaInicioContrato,
-		FechaFinContrato:        pipelsoft.FechaFinContrato,
-		CodigoAsignatura:        pipelsoft.CodigoAsignatura,
-		NombreAsignatura:        profesor.NombreAsignatura,
-		CantidadHoras:           pipelsoft.HorasAsignatura,
-		DesEstado:               pipelsoft.DesEstado,
-		SemestrePaf:             pipelsoft.Semestre,
-		Jerarquia:               pipelsoft.Jerarquia,
-		UltimaModificacion:      pipelsoft.UltimaModificacion,
+		Run:                 profesor.RUN,
+		IdPaf:               codigoPAF,
+		FechaInicioContrato: pipelsoft.FechaInicioContrato,
+		FechaFinContrato:    pipelsoft.FechaFinContrato,
+		CodigoAsignatura:    pipelsoft.CodigoAsignatura,
+		NombreAsignatura:    pipelsoft.NombreAsignatura,
+		CantidadHoras:       pipelsoft.HorasAsignatura,
+		DesEstado:           pipelsoft.DesEstado,
+		SemestrePaf:         pipelsoft.Semestre,
+		Jerarquia:           pipelsoft.Jerarquia,
+		UltimaModificacion:  pipelsoft.UltimaModificacion,
+
 		EstadoProceso:           pipelsoft.CodEstado, // Mantener el estado actual
 		Llave:                   pipelsoft.Llave,
 		CodigoModificacion:      0,
