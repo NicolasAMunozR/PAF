@@ -21,7 +21,7 @@ type HistorialPafAceptadasController struct {
 func (h *HistorialPafAceptadasController) CrearHistorialHandler(c *gin.Context) {
 	// Obtener el código PAF desde los parámetros de la URL
 	codigoPAFStr := c.Param("codigoPAF")
-	codigo_asignatura_pipelsoft := c.Param("cod_asignatura_paf")
+	codigo_asignatura_pipelsoft := c.Param("cod_asignatura_pipelsoft")
 	if codigoPAFStr == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'codigoPAF' es obligatorio"})
 		return
