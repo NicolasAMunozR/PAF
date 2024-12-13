@@ -36,7 +36,7 @@ func main() {
 	}
 
 	// Rutas para el controlador HistorialPafAceptadas
-	r.POST("/historial/post/:codigoPAF", historialPafAceptadasController.CrearHistorialHandler)
+	r.POST("/historial/post/:codigoPAF/:cod_asignatura_pipelsoft", historialPafAceptadasController.CrearHistorialHandler)
 	r.GET("/historial", historialPafAceptadasController.ObtenerTodosLosHistorialesHandler)
 	r.DELETE("/historial/:codigo_paf", historialPafAceptadasController.EliminarHistorialHandler)
 	r.PUT("/historial/:codigoPAF/actualizarBanderaAceptacion", historialPafAceptadasController.ActualizarBanderaAceptacion)
@@ -73,6 +73,7 @@ func main() {
 	estadisticasController := controller.NewEstadisticasController(estadisticasService)
 
 	// Ruta para obtener las estadísticas
+	///api/paf-en-linea
 	r.GET("/estadisticas", estadisticasController.ObtenerEstadisticas)
 	r.GET("/estadisticas/unidad/:nombreUnidadMayor", estadisticasController.ContarRegistrosPorUnidadMayor)
 	r.GET("/estadisticas/frecuencia-unidades-mayores", estadisticasController.ObtenerFrecuenciaNombreUnidadMayor)

@@ -21,7 +21,7 @@ func NewHistorialPafAceptadasService(db *gorm.DB) *HistorialPafAceptadasService 
 	}
 }
 
-func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor models.ProfesorDB, bloque []string) (*models.HistorialPafAceptadas, error) {
+func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor models.ProfesorDB, bloque []string, cod_asignatura_paf string) (*models.HistorialPafAceptadas, error) {
 	// Parsear los bloques en una lista de BloqueDTO
 	bloquesDTO, err := parseBloques(bloque)
 	if err != nil {
@@ -48,7 +48,6 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 	if len(bloquesParsed) == 0 {
 		return nil, fmt.Errorf("no se encontró el codigo_asignatura en los bloques")
 	}
-	codigoAsignatura := bloquesParsed[0].CodigoAsignatura
 
 	// Iniciar una transacción para garantizar consistencia
 	tx := s.DB.Begin()
@@ -58,7 +57,7 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 
 	// Obtener los valores de Pipelsoft
 	var pipelsoft models.Pipelsoft
-	if err := tx.Where("id_paf = ? and codigo_asignatura = ?", codigoPAF, codigoAsignatura).First(&pipelsoft).Error; err != nil {
+	if err := tx.Where("id_paf = ? and codigo_asignatura = ?", codigoPAF, cod_asignatura_paf).First(&pipelsoft).Error; err != nil {
 		tx.Rollback()
 		return nil, fmt.Errorf("error al obtener datos de Pipelsoft: %w", err)
 	}
@@ -161,14 +160,13 @@ func (s *HistorialPafAceptadasService) ObtenerHistorialPorID(id uint) (*models.H
 // EliminarHistorial elimina un registro de HistorialPafAceptadas por su CodigoPAF en DBPersonal
 func (s *HistorialPafAceptadasService) EliminarHistorial(codigoPAF string) error {
 	// Eliminar directamente usando la condición
-	return s.DB.Where("id_paf = ?", codigoPAF).Delete(&models.HistorialPafAceptadas{}).Error
+	return s.DB.Where("id = ?", codigoPAF).Delete(&models.HistorialPafAceptadas{}).Error
 }
 
-// ObtenerTodosLosHistoriales devuelve todos los registros de HistorialPafAceptadas desde DBPersonal
 func (s *HistorialPafAceptadasService) ObtenerTodosLosHistoriales() ([]models.HistorialPafAceptadas, error) {
 	var historiales []models.HistorialPafAceptadas
-	// Obtener todos los historiales desde DBPersonal
-	if err := s.DB.Find(&historiales).Error; err != nil {
+	// Obtener todos los historiales con 'bandera_aceptacion' igual a 1 desde DBPersonal
+	if err := s.DB.Where("bandera_aceptacion = ?", 1).Find(&historiales).Error; err != nil {
 		return nil, err
 	}
 	return historiales, nil
