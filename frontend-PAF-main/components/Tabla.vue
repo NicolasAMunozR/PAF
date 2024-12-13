@@ -32,10 +32,10 @@
             <a :href="`/horario?run=${persona.Run}`" class="button">Ver Horarios</a>
           </td>
           <td v-if="showButton" class="px-4 py-3">
-            <a :href="`/paf?codigoPaf=${persona.CodigoPAF}`" class="button">Ver PAF</a>
+            <a :href="`/paf?codigoPaf=${persona.IdPaf}`" class="button">Ver PAF</a>
             <br>
             <br>
-            <button @click="deletePAF(persona.CodigoPAF)" class="buttons">Eliminar</button>
+            <button @click="deletePAF(persona.IdPaf)" class="buttons">Eliminar</button>
           </td>
         </tr>
       </tbody>
