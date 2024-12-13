@@ -246,7 +246,7 @@ const fichasPAFMatch = computed(() =>
 
     // Comparamos los semestres y los años
     return historialSeleccionado.value.some(h => 
-      h.codigo == p.CodigoAsignatura || h.paf === p.CodigoPaf
+      h.codigo == p.CodigoAsignatura && h.paf === p.CodigoPaf
     ) && semestrePafAño === añoSeleccionado && semestrePafNumber === semestreSeleccionadoNumber;
   })
 );
@@ -278,9 +278,9 @@ const fichasAsignaturas = computed(() =>
 const fichasAsignaturasNo = computed(() =>
   persona1.value.filter((p) =>
     historialSeleccionado.value.some((historial) => {
-      const codigosA = historial.CodigoA ? historial.CodigoA.split("/") : []; // Dividir CodigoA en un arreglo
-      const semestres1 = historial.semestre1 ? historial.semestre1.split("/") : []; // Dividir semestre1 en un arreglo
-      const secciones = historial.seccion ? historial.seccion.split("/") : []; // Dividir seccion en un arreglo
+      const codigosA = historial.CodigoA ? historial.CodigoA.split(" / ") : []; // Dividir CodigoA en un arreglo
+      const semestres1 = historial.semestre1 ? historial.semestre1.split(" / ") : []; // Dividir semestre1 en un arreglo
+      const secciones = historial.seccion ? historial.seccion.split(" / ") : []; // Dividir seccion en un arreglo
 
       // Verificar que ambos arreglos tengan la misma longitud
       if (codigosA.length !== semestres1.length) {
@@ -425,11 +425,11 @@ const obtenerDatosPersona = async () => {
       const bloquesArray = item.HistorialPafData.Bloque || []; // Asegurar que Bloque sea un arreglo (vacío si es null o undefined)
 
       // Verificar si el arreglo no está vacío antes de hacer el map
-      const bloque = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.bloques).join("/") : "";
-      const CodigoA = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.codigoAsignatura).join("/") : "";
-      const cupo = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.cupos).join("/") : "";
-      const seccion = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.seccion).join("/") : "";
-      const semestre1 = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.semestre).join("/") : "";
+      const bloque = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.bloques).join(" / ") : "";
+      const CodigoA = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.codigoAsignatura).join(" / ") : "";
+      const cupo = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.cupos).join(" / ") : "";
+      const seccion = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.seccion).join(" / ") : "";
+      const semestre1 = bloquesArray.length > 0 ? bloquesArray.map((bloque: any) => bloque.semestre).join(" / ") : "";
 
       return {
         CodigoPaf: item.PipelsoftData.IdPaf,
