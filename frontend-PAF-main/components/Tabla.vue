@@ -108,8 +108,6 @@ export default {
       // Muestra una notificación o mensaje de éxito
       alert(`PAF con código ${codigoPAF} eliminada con éxito.`);
       
-      // Opcional: Actualiza los datos localmente para reflejar la eliminación
-      this.data = this.data.filter(persona => persona.CodigoPAF !== codigoPAF);
     } catch (error) {
       // Maneja errores
       console.error("Error al eliminar la PAF:", error);

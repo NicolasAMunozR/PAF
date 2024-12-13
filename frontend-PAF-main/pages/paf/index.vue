@@ -35,7 +35,11 @@
 
             <!-- Botón ubicado en la parte inferior -->
             <div class="flex justify-end mt-4">
-              <button @click="dejarListaPaf(persona.CodigoPaf)" class="procesar-button">
+              <button 
+                v-if="persona.Aceptada === 0" 
+                @click="dejarListaPaf(persona.CodigoPaf)" 
+                class="procesar-button"
+              >
                 Dejar lista la PAF
               </button>
             </div>
@@ -105,6 +109,7 @@ const obtenerDatosPaf = async () => {
   try {
     if (!codigoPaf.value) return;
     const response = await $axios.get(`/contratos/codigo_paf/${codigoPaf.value}`);
+    console.log('Datos de la PAF:', response.data);
     if (response.data) {
       paf.value = response.data.map((item: any) => {
         const bloquesArray = item.HistorialPafData.Bloque || []; // Asegurar que Bloque sea un arreglo (vacío si es null o undefined)
@@ -125,6 +130,7 @@ const obtenerDatosPaf = async () => {
         SegundoApellido: item.PipelsoftData.SegundoApp,
         NombreUnidadMenor: item.PipelsoftData.NombreUnidadMenor,
         NombreUnidadMayor: item.PipelsoftData.NombreUnidadMayor,
+        Aceptada: item.HistorialPafData.BanderaAceptacion,
         Run: item.PipelsoftData.RunEmpleado,
         bloque, // Agregar las cadenas combinadas como propiedades
         CodigoA,

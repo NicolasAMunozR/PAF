@@ -19,6 +19,7 @@
       <h1 class="section-title">
         Horario para: {{ persona[0]?.Nombres }} {{ persona[0]?.PrimerApellido }} {{ persona[0]?.SegundoApellido }}
       </h1>
+      <h1>Run: {{ persona[0]?.Run }}</h1>
 
       <div v-if="persona.length > 0">
         <div class="mb-4">
@@ -320,6 +321,7 @@ interface Persona {
   semestre1: string;
   SemestrePaf: string;
   CantidadHorasPAF: number;
+  Run: string;
 }
 
 interface Horario {
@@ -436,6 +438,7 @@ const obtenerDatosPersona = async (semestreGuardado: string | null) => {
         NombreUnidadMenor: item.PipelsoftData.NombreUnidadMenor,
         SemestrePaf: item.PipelsoftData.Semestre,
         CantidadHorasPAF: item.PipelsoftData.CantidadHorasPaf,
+        Run: item.PipelsoftData.RunEmpleado,
         Bloque: response1.data.bloque,
         Cupo: response1.data.cupo,
         Seccion: response1.data.seccion,

@@ -2,13 +2,11 @@
   <div class="main-container">
     <!-- Barra superior fija -->
     <div class="top-bar">
-      <!-- Botón para mostrar/ocultar el menú -->
       <button
         @click="toggleMenu"
-        v-if="$route.path !== '/profesorPAF'" 
+        v-if="$route.path !== '/profesorPAF'"
         class="menu-button"
       >
-        <!-- Iconos de menú -->
         <svg
           v-if="!isMenuOpen"
           xmlns="http://www.w3.org/2000/svg"
@@ -31,14 +29,15 @@
         <h1 class="header-title">PAF - Sistema de Gestión</h1>
       </div>
 
-      <!-- Botón de cerrar sesión -->
-      <button
-        @click="logout"
-        class="logout-button"
-      >
-        Cerrar sesión
-      </button>
+      <button @click="logout" class="logout-button">Cerrar sesión</button>
     </div>
+
+    <!-- Superposición detrás del menú -->
+    <div
+      v-if="isMenuOpen"
+      class="overlay"
+      @click="toggleMenu"
+    ></div>
 
     <!-- Menú lateral -->
     <div
@@ -52,16 +51,20 @@
       <div class="menu-content">
         <ul class="menu-list">
           <li v-for="link in filteredMenu" :key="link.path">
-            <a :href="link.path" class="menu-link">
-              {{ link.label }}
-            </a>
+            <a :href="link.path" class="menu-link">{{ link.label }}</a>
           </li>
         </ul>
       </div>
     </div>
 
     <!-- Contenido principal -->
-    <div :class="{'ml-64': isMenuOpen && $route.path !== '/profesorPAF', 'ml-0': !isMenuOpen || $route.path === '/profesorPAF'}" class="content">
+    <div
+      :class="{
+        'ml-64': isMenuOpen && $route.path !== '/profesorPAF',
+        'ml-0': !isMenuOpen || $route.path === '/profesorPAF'
+      }"
+      class="content"
+    >
       <slot></slot>
     </div>
   </div>
@@ -105,7 +108,8 @@ export default {
 <style scoped>
 /* Contenedor principal */
 .main-container {
-  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Barra superior */
@@ -121,6 +125,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 4rem;
 }
 
 .header-container {
@@ -152,16 +157,28 @@ export default {
   background-color: #C8102E;
 }
 
+/* Superposición detrás del menú */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 900; /* Debajo del menú lateral */
+}
+
 /* Menú lateral */
 .side-menu {
   position: fixed;
-  top: 4rem;
+  top: 0;
   left: 0;
   height: 100%;
   width: 16rem;
   background-color: #394049;
   border-right: 2px solid #EA7600;
   transition: transform 0.3s;
+  z-index: 1000; /* Siempre por encima de todo */
 }
 
 .menu-content {
@@ -191,6 +208,7 @@ export default {
 /* Contenido */
 .content {
   padding: 20px;
-  margin-top: 4rem;
+  margin-top: 4rem; /* Espaciado dinámico igual a la altura de la barra superior */
+  flex: 1;
 }
 </style>
