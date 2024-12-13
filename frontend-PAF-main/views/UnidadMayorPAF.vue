@@ -71,7 +71,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import Filtros from '../../components/Filtros.vue';
+import Filtros from '../components/Filtros.vue';
 const { $axios } = useNuxtApp() as unknown as { $axios: typeof import('axios').default };
 
 const rut = ref('');

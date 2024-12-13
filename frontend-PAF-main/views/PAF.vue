@@ -59,7 +59,7 @@
 import { useRoute, useRouter } from 'vue-router';
 import { onMounted, ref } from 'vue';
 import { useNuxtApp } from '#app';
-import Filtros from '../../components/Filtros.vue'
+import Filtros from '../components/Filtros.vue'
 
 const route = useRoute();
 const router = useRouter();
