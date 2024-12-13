@@ -21,6 +21,7 @@ type HistorialPafAceptadasController struct {
 func (h *HistorialPafAceptadasController) CrearHistorialHandler(c *gin.Context) {
 	// Obtener el código PAF desde los parámetros de la URL
 	codigoPAFStr := c.Param("codigoPAF")
+	codigo_asignatura_pipelsoft := c.Param("cod_asignatura_paf")
 	if codigoPAFStr == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'codigoPAF' es obligatorio"})
 		return
@@ -45,7 +46,7 @@ func (h *HistorialPafAceptadasController) CrearHistorialHandler(c *gin.Context) 
 	}
 
 	// Llamar al servicio para crear el historial
-	historial, err := h.Service.CrearHistorial(codigoPAF, request.Profesor, request.Bloque)
+	historial, err := h.Service.CrearHistorial(codigoPAF, request.Profesor, request.Bloque, codigo_asignatura_pipelsoft)
 	if err != nil {
 		log.Printf("Error al crear el historial: %v\n", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error al crear el historial: %v", err)})

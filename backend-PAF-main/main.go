@@ -36,7 +36,7 @@ func main() {
 	}
 
 	// Rutas para el controlador HistorialPafAceptadas
-	r.POST("/historial/post/:codigoPAF", historialPafAceptadasController.CrearHistorialHandler)
+	r.POST("/historial/post/:codigoPAF/:cod_asignatura_pipelsoft", historialPafAceptadasController.CrearHistorialHandler)
 	r.GET("/historial", historialPafAceptadasController.ObtenerTodosLosHistorialesHandler)
 	r.DELETE("/historial/:codigo_paf", historialPafAceptadasController.EliminarHistorialHandler)
 	r.PUT("/historial/:codigoPAF/actualizarBanderaAceptacion", historialPafAceptadasController.ActualizarBanderaAceptacion)
