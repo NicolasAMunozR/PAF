@@ -73,6 +73,7 @@ func main() {
 	estadisticasController := controller.NewEstadisticasController(estadisticasService)
 
 	// Ruta para obtener las estadísticas
+	///api/paf-en-linea
 	r.GET("/estadisticas", estadisticasController.ObtenerEstadisticas)
 	r.GET("/estadisticas/unidad/:nombreUnidadMayor", estadisticasController.ContarRegistrosPorUnidadMayor)
 	r.GET("/estadisticas/frecuencia-unidades-mayores", estadisticasController.ObtenerFrecuenciaNombreUnidadMayor)
