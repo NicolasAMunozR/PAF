@@ -158,9 +158,9 @@ func (s *HistorialPafAceptadasService) ObtenerHistorialPorID(id uint) (*models.H
 }
 
 // EliminarHistorial elimina un registro de HistorialPafAceptadas por su CodigoPAF en DBPersonal
-func (s *HistorialPafAceptadasService) EliminarHistorial(codigoPAF string) error {
+func (s *HistorialPafAceptadasService) EliminarHistorial(id int64) error {
 	// Eliminar directamente usando la condición
-	return s.DB.Where("id = ?", codigoPAF).Delete(&models.HistorialPafAceptadas{}).Error
+	return s.DB.Where("id = ?", id).Delete(&models.HistorialPafAceptadas{}).Error
 }
 
 func (s *HistorialPafAceptadasService) ObtenerTodosLosHistoriales() ([]models.HistorialPafAceptadas, error) {

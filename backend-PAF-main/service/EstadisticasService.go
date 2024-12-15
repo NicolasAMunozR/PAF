@@ -39,7 +39,7 @@ func NewEstadisticasService(dbPersonal *gorm.DB) *EstadisticasService {
 }
 
 // ObtenerEstadisticas obtiene las estadísticas generales de los profesores y Pipelsofts
-func (s *EstadisticasService) ObtenerEstadisticas() (*EstadisticasResponse, error) {
+func (s *EstadisticasService) ObtenerEstadisticas(semestre string) (*EstadisticasResponse, error) {
 	var resp EstadisticasResponse
 
 	// Contar los RUN únicos en la tabla profesor_dbs
@@ -47,13 +47,22 @@ func (s *EstadisticasService) ObtenerEstadisticas() (*EstadisticasResponse, erro
 		Distinct("run").Count(&resp.TotalProfesores).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los profesores únicos por RUN: %w", err)
 	}
-	// Contar todos los registros en la tabla pipelsofts
-	if err := s.DB.Model(&models.Pipelsoft{}).Count(&resp.TotalPipelsoft).Error; err != nil {
+
+	// Contar todos los registros en la tabla pipelsofts, aplicando filtro por semestre si se proporciona
+	query := s.DB.Model(&models.Pipelsoft{})
+	if semestre != "" {
+		query = query.Where("semestre = ?", semestre)
+	}
+	if err := query.Count(&resp.TotalPipelsoft).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los registros en pipelsofts: %w", err)
 	}
 
-	// Contar los registros únicos de Run en la tabla pipelsofts
-	if err := s.DB.Model(&models.Pipelsoft{}).Distinct("run_empleado").Count(&resp.TotalPipelsoftUnicos).Error; err != nil {
+	// Contar los registros únicos de Run en la tabla pipelsofts, aplicando filtro por semestre
+	queryUnicos := s.DB.Model(&models.Pipelsoft{}).Distinct("run_empleado")
+	if semestre != "" {
+		queryUnicos = queryUnicos.Where("semestre = ?", semestre)
+	}
+	if err := queryUnicos.Count(&resp.TotalPipelsoftUnicos).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los registros únicos de Run en pipelsofts: %w", err)
 	}
 
@@ -87,10 +96,14 @@ func (s *EstadisticasService) ObtenerEstadisticas() (*EstadisticasResponse, erro
 		"Sin Solicitar", "Enviada al Interesado", "Enviada al Validador", "Aprobada por Validador", "Rechazada por Validador", "Aprobada por Dir. Pregrado", "Rechazada por Dir. de Pregrado", "Aprobada por RRHH", "Rechazada por RRHH", "Anulada",
 	}
 
-	// Contar registros por cada estado
+	// Contar registros por cada estado, aplicando filtro por semestre si se proporciona
 	for _, estado := range estados {
 		var count int64
-		if err := s.DB.Model(&models.Pipelsoft{}).Where("des_estado = ?", estado).Count(&count).Error; err != nil {
+		queryEstado := s.DB.Model(&models.Pipelsoft{}).Where("des_estado = ?", estado)
+		if semestre != "" {
+			queryEstado = queryEstado.Where("semestre = ?", semestre)
+		}
+		if err := queryEstado.Count(&count).Error; err != nil {
 			return nil, fmt.Errorf("error al contar los registros de pipelsofts con estado %s: %w", estado, err)
 		}
 		resp.EstadoProcesoCount[estado] = int(count)
@@ -105,13 +118,20 @@ func (s *EstadisticasService) ObtenerEstadisticas() (*EstadisticasResponse, erro
 }
 
 // ContarRegistrosPorNombreUnidadMayor cuenta los registros en Pipelsoft que coinciden con el nombre de la unidad Mayor
-func (s *EstadisticasService) ContarRegistrosPorNombreUnidadMayor(nombreUnidadMayor string) (int64, error) {
+func (s *EstadisticasService) ContarRegistrosPorNombreUnidadMayor(nombreUnidadMayor string, semestre string) (int64, error) {
 	var count int64
 
+	// Iniciar la consulta
+	query := s.DB.Model(&models.Pipelsoft{}).
+		Where("nombre_unidad_mayor = ?", nombreUnidadMayor)
+
+	// Aplicar el filtro por semestre si se proporciona
+	if semestre != "" {
+		query = query.Where("semestre = ?", semestre)
+	}
+
 	// Contar los registros que coinciden con el nombre de unidad Mayor
-	if err := s.DB.Model(&models.Pipelsoft{}).
-		Where("nombre_unidad_Mayor = ?", nombreUnidadMayor).
-		Count(&count).Error; err != nil {
+	if err := query.Count(&count).Error; err != nil {
 		return 0, fmt.Errorf("error al contar los registros por nombre de unidad Mayor: %w", err)
 	}
 
@@ -119,17 +139,24 @@ func (s *EstadisticasService) ContarRegistrosPorNombreUnidadMayor(nombreUnidadMa
 }
 
 // ObtenerFrecuenciaNombreUnidadMayor devuelve un mapa con cada NombreUnidadMayor y la cantidad de veces que aparece
-func (s *EstadisticasService) ObtenerFrecuenciaNombreUnidadMayor() (map[string]int, error) {
+func (s *EstadisticasService) ObtenerFrecuenciaNombreUnidadMayor(semestre string) (map[string]int, error) {
 	var resultados []struct {
 		NombreUnidadMayor string
 		Conteo            int
 	}
 
-	// Realizar la consulta agrupada
-	if err := s.DB.Model(&models.Pipelsoft{}).
+	// Iniciar la consulta
+	query := s.DB.Model(&models.Pipelsoft{}).
 		Select("nombre_unidad_mayor, COUNT(*) as conteo").
-		Group("nombre_unidad_mayor").
-		Scan(&resultados).Error; err != nil {
+		Group("nombre_unidad_mayor")
+
+	// Aplicar el filtro por semestre si se proporciona
+	if semestre != "" {
+		query = query.Where("semestre = ?", semestre)
+	}
+
+	// Ejecutar la consulta
+	if err := query.Scan(&resultados).Error; err != nil {
 		return nil, fmt.Errorf("error al obtener la frecuencia de NombreUnidadMayor: %w", err)
 	}
 
@@ -146,17 +173,22 @@ func (s *EstadisticasService) ObtenerFrecuenciaNombreUnidadMayor() (map[string]i
 
 // ContarRegistrosExcluyendoEstados cuenta los registros en Pipelsoft donde cod_estado no sea "F1", "F9" o "A9"
 // y calcula el porcentaje dividiéndolo por el total de profesores.
-func (s *EstadisticasService) ContarRegistrosExcluyendoEstados() (int64, float64, error) {
+func (s *EstadisticasService) ContarRegistrosExcluyendoEstados(semestre string) (int64, float64, error) {
 	var count int64
 	var totalProfesores int64
 
-	// Contar los registros en Pipelsoft donde cod_estado no sea "F1", "F9", o "A9"
-	if err := s.DB.Model(&models.Pipelsoft{}).
-		Where("cod_estado NOT IN ?", []string{"F1", "F9", "A9"}).
-		Count(&count).Error; err != nil {
+	// Contar los registros en Pipelsoft donde cod_estado no sea "F1", "F9", o "A9", y aplicar el filtro por semestre si se proporciona
+	queryPipelsoft := s.DB.Model(&models.Pipelsoft{}).
+		Where("cod_estado NOT IN ?", []string{"F1", "F9", "A9"})
+	if semestre != "" {
+		queryPipelsoft = queryPipelsoft.Where("semestre = ?", semestre)
+	}
+
+	if err := queryPipelsoft.Count(&count).Error; err != nil {
 		return 0, 0, fmt.Errorf("error al contar los registros excluyendo estados: %w", err)
 	}
-	// Contar el total de RUN únicos en la tabla profesor_dbs
+
+	// Contar el total de RUN únicos en la tabla profesor_dbs (sin aplicar filtro por semestre)
 	if err := s.DB.Model(&models.ProfesorDB{}).
 		Distinct("run").Count(&totalProfesores).Error; err != nil {
 		return 0, 0, fmt.Errorf("error al contar el total de profesores únicos por RUN: %w", err)
@@ -171,23 +203,28 @@ func (s *EstadisticasService) ContarRegistrosExcluyendoEstados() (int64, float64
 	return count, porcentaje, nil
 }
 
-func (s *EstadisticasService) ObtenerEstadisticasPorUnidadMayor(unidadMayor string) (*EstadisticasResponse, error) {
+func (s *EstadisticasService) ObtenerEstadisticasPorUnidadMayor(unidadMayor, semestre string) (*EstadisticasResponse, error) {
 	var resp EstadisticasResponse
 
-	// Validar que el parámetro no esté vacío
+	// Validar que el parámetro unidadMayor no esté vacío
 	if unidadMayor == "" {
 		return nil, fmt.Errorf("el parámetro 'unidad-mayor' es obligatorio")
 	}
 
-	// Contar los registros en pipelsofts que coincidan con la unidad mayor
-	if err := s.DB.Model(&models.Pipelsoft{}).Where("nombre_unidad_mayor = ?", unidadMayor).Count(&resp.TotalPipelsoft).Error; err != nil {
-		return nil, fmt.Errorf("error al contar los registros en pipelsofts para la unidad mayor %s: %w", unidadMayor, err)
+	// Construir una consulta base con los filtros dinámicos
+	query := s.DB.Model(&models.Pipelsoft{}).Where("nombre_unidad_mayor = ?", unidadMayor)
+	if semestre != "" {
+		query = query.Where("semestre = ?", semestre)
 	}
 
-	// Contar los registros únicos de Run en la tabla pipelsofts para la unidad mayor
-	if err := s.DB.Model(&models.Pipelsoft{}).Where("nombre_unidad_mayor = ?", unidadMayor).
-		Distinct("run_empleado").Count(&resp.TotalPipelsoftUnicos).Error; err != nil {
-		return nil, fmt.Errorf("error al contar los registros únicos de Run en pipelsofts para la unidad mayor %s: %w", unidadMayor, err)
+	// Contar los registros en pipelsofts que coincidan con la unidad mayor y semestre
+	if err := query.Count(&resp.TotalPipelsoft).Error; err != nil {
+		return nil, fmt.Errorf("error al contar los registros en pipelsofts para la unidad mayor %s y semestre %s: %w", unidadMayor, semestre, err)
+	}
+
+	// Contar los registros únicos de Run en la tabla pipelsofts para la unidad mayor y semestre
+	if err := query.Distinct("run_empleado").Count(&resp.TotalPipelsoftUnicos).Error; err != nil {
+		return nil, fmt.Errorf("error al contar los registros únicos de Run en pipelsofts para la unidad mayor %s y semestre %s: %w", unidadMayor, semestre, err)
 	}
 
 	// Calcular el porcentaje de registros únicos en Pipelsoft
@@ -195,7 +232,7 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidadMayor(unidadMayor stri
 		resp.PorcentajeUnicos = float64(resp.TotalPipelsoftUnicos) / float64(resp.TotalPipelsoft) * 100
 	}
 
-	// Contar los registros en pipelsofts por cada EstadoProceso filtrando por unidad mayor
+	// Contar los registros en pipelsofts por cada EstadoProceso filtrando por unidad mayor y semestre
 	resp.EstadoProcesoCount = make(map[string]int)
 	resp.EstadoProcesoPct = make(map[string]float64)
 
@@ -207,10 +244,8 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidadMayor(unidadMayor stri
 	// Contar registros por cada estado
 	for _, estado := range estados {
 		var count int64
-		if err := s.DB.Model(&models.Pipelsoft{}).
-			Where("nombre_unidad_mayor = ? AND des_estado = ?", unidadMayor, estado).
-			Count(&count).Error; err != nil {
-			return nil, fmt.Errorf("error al contar los registros de pipelsofts con estado %s para la unidad mayor %s: %w", estado, unidadMayor, err)
+		if err := query.Where("des_estado = ?", estado).Count(&count).Error; err != nil {
+			return nil, fmt.Errorf("error al contar los registros de pipelsofts con estado %s para la unidad mayor %s y semestre %s: %w", estado, unidadMayor, semestre, err)
 		}
 		resp.EstadoProcesoCount[estado] = int(count)
 
@@ -220,29 +255,34 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidadMayor(unidadMayor stri
 		}
 	}
 
-	// Contar la cantidad de profesores en la tabla contratos que tengan la misma unidad mayor
-	if err := s.DB.Model(&models.Contrato{}).Where("unidad_mayor = ?", unidadMayor).Count(&resp.TotalProfesores).Error; err != nil {
-		return nil, fmt.Errorf("error al contar los profesores en la tabla contratos para la unidad mayor %s: %w", unidadMayor, err)
+	// Contar la cantidad de profesores en la tabla contratos que tengan la misma unidad mayor y semestre
+	queryContratos := s.DB.Model(&models.Contrato{}).Where("unidad_mayor = ?", unidadMayor)
+	if semestre != "" {
+		queryContratos = queryContratos.Where("semestre = ?", semestre)
+	}
+	if err := queryContratos.Count(&resp.TotalProfesores).Error; err != nil {
+		return nil, fmt.Errorf("error al contar los profesores en la tabla contratos para la unidad mayor %s y semestre %s: %w", unidadMayor, semestre, err)
 	}
 
 	return &resp, nil
 }
 
-func (s *EstadisticasService) ObtenerFrecuenciaNombreUnidadMenorPorUnidadMayor(nombreUnidadMayor string) (map[string]int, error) {
+func (s *EstadisticasService) ObtenerFrecuenciaNombreUnidadMenorPorUnidadMayor(nombreUnidadMayor, semestre string) (map[string]int, error) {
 	var resultados []struct {
 		NombreUnidadMenor string
 		Conteo            int
 	}
 
-	// Validar que se proporciona el parámetro
-	if nombreUnidadMayor == "" {
-		return nil, fmt.Errorf("el nombre de la unidad mayor es obligatorio")
+	// Validar que se proporcionan los parámetros
+	if nombreUnidadMayor == "" || semestre == "" {
+		return nil, fmt.Errorf("los parámetros nombreUnidadMayor y semestre son obligatorios")
 	}
 
-	// Realizar la consulta agrupada
+	// Realizar la consulta agrupada con filtro por semestre
 	if err := s.DB.Model(&models.Pipelsoft{}).
 		Select("nombre_unidad_menor, COUNT(*) as conteo").
 		Where("nombre_unidad_mayor = ?", nombreUnidadMayor).
+		Where("semestre = ?", semestre).
 		Group("nombre_unidad_menor").
 		Scan(&resultados).Error; err != nil {
 		return nil, fmt.Errorf("error al obtener la frecuencia de NombreUnidadMenor: %w", err)
@@ -257,7 +297,7 @@ func (s *EstadisticasService) ObtenerFrecuenciaNombreUnidadMenorPorUnidadMayor(n
 	return frecuencia, nil
 }
 
-func (s *EstadisticasService) ContarRegistrosPorUnidadMayorConRuns(unidadMayor string) (int64, int64, error) {
+func (s *EstadisticasService) ContarRegistrosPorUnidadMayorConRuns(unidadMayor, semestre string) (int64, int64, error) {
 	var count int64     // Conteo de registros finales en Pipelsoft
 	var totalRUNs int64 // Conteo de RUNs únicos
 
@@ -269,11 +309,12 @@ func (s *EstadisticasService) ContarRegistrosPorUnidadMayorConRuns(unidadMayor s
 		return 0, 0, fmt.Errorf("error al obtener RUNs de ProfesorDB: %w", err)
 	}
 
-	// Paso 2: Filtrar Pipelsoft por RUNs coincidentes
+	// Paso 2: Filtrar Pipelsoft por RUNs coincidentes, unidad mayor y semestre
 	if err := s.DB.Model(&models.Pipelsoft{}).
 		Where("run_empleado IN ?", runsProfesorDB). // Nombre del campo en la base de datos
 		Where("cod_estado NOT IN ?", []string{"F1", "F9", "A9"}).
 		Where("nombre_unidad_mayor = ?", unidadMayor).
+		Where("semestre = ?", semestre). // Filtro por semestre
 		Count(&count).Error; err != nil {
 		return 0, 0, fmt.Errorf("error al contar registros filtrados de Pipelsoft: %w", err)
 	}
@@ -281,6 +322,7 @@ func (s *EstadisticasService) ContarRegistrosPorUnidadMayorConRuns(unidadMayor s
 	// Paso 3: Contar los RUNs únicos coincidentes entre ProfesorDB y Pipelsoft
 	if err := s.DB.Model(&models.Pipelsoft{}).
 		Where("run_empleado IN ?", runsProfesorDB). // Nombre del campo en la base de datos
+		Where("semestre = ?", semestre).            // Filtro por semestre
 		Distinct("run_empleado").                   // Nombre del campo en la base de datos
 		Count(&totalRUNs).Error; err != nil {
 		return 0, 0, fmt.Errorf("error al contar RUNs únicos en Pipelsoft: %w", err)
@@ -361,6 +403,7 @@ type UnidadMayorConProfesores struct {
 	TotalProfesores   int64
 }
 
+// 1
 func (s *EstadisticasService) ObtenerUnidadesMayoresConProfesores(semestre string) (map[string]int, error) {
 	var resultados []struct {
 		NombreUnidadMayor string

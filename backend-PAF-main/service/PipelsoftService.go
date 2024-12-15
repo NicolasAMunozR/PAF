@@ -256,3 +256,13 @@ func (s *PipelsoftService) ObtenerNombreUnidadMenorPorMayor(nombreUnidadMayor st
 
 	return unidadesMenores, nil
 }
+
+func (s *PipelsoftService) ObtenerContratosPorRUNMostrarTodo(run string) ([]models.Pipelsoft, error) {
+	var pipelsofts []models.Pipelsoft
+
+	if err := s.DBPersonal.Where("run_empleado = ?", run).Find(&pipelsofts).Error; err != nil {
+		return nil, err
+	}
+
+	return pipelsofts, nil
+}

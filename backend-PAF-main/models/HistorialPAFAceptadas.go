@@ -20,6 +20,7 @@ type BloqueDTO struct {
 // HistorialPafAceptadas representa el historial de aceptaciones de PAFs con información relevante.
 type HistorialPafAceptadas struct {
 	gorm.Model
+	DeletedAt gorm.DeletedAt `gorm:"index"` // Si no quieres soft delete, quita este campo
 
 	// Campos de Contrato
 	Run                 string    `gorm:"type:text;not null"`

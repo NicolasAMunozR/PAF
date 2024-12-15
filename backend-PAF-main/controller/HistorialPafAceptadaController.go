@@ -71,9 +71,16 @@ func (h *HistorialPafAceptadasController) ObtenerTodosLosHistorialesHandler(c *g
 // EliminarHistorialHandler maneja la solicitud para eliminar un historial por CodigoPAF
 func (h *HistorialPafAceptadasController) EliminarHistorialHandler(c *gin.Context) {
 	// Obtener el CodigoPAF desde los parámetros de la URL
-	codigoPAF := c.Param("codigo_paf")
-	if codigoPAF == "" {
+	codigoPAFStr := c.Param("codigo_paf")
+	if codigoPAFStr == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'codigo_paf' es obligatorio"})
+		return
+	}
+
+	// Convertir el string a int64
+	codigoPAF, err := strconv.ParseInt(codigoPAFStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'codigo_paf' debe ser un número válido"})
 		return
 	}
 

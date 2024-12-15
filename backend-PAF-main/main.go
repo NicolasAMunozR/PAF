@@ -36,37 +36,40 @@ func main() {
 	}
 
 	// Rutas para el controlador HistorialPafAceptadas
-	r.POST("/historial/post/:codigoPAF/:cod_asignatura_pipelsoft", historialPafAceptadasController.CrearHistorialHandler)
-	r.GET("/historial", historialPafAceptadasController.ObtenerTodosLosHistorialesHandler)
-	r.DELETE("/historial/:codigo_paf", historialPafAceptadasController.EliminarHistorialHandler)
-	r.PUT("/historial/:codigoPAF/actualizarBanderaAceptacion", historialPafAceptadasController.ActualizarBanderaAceptacion)
+	r.POST("/api/paf-en-linea/historial/post/:codigoPAF/:cod_asignatura_pipelsoft", historialPafAceptadasController.CrearHistorialHandler)
+	r.GET("/api/paf-en-linea/historial", historialPafAceptadasController.ObtenerTodosLosHistorialesHandler)
+	r.DELETE("/api/paf-en-linea/historial/:codigo_paf", historialPafAceptadasController.EliminarHistorialHandler)
+	r.PUT("/api/paf-en-linea/historial/:codigoPAF/actualizarBanderaAceptacion", historialPafAceptadasController.ActualizarBanderaAceptacion)
 
 	// Servicios y controladores adicionales
 	pipelsoftService := service.NewPipelsoftService(DB.DBPersonal)
 	pipelsoftController := controller.NewPipelsoftController(pipelsoftService)
 
 	// Rutas para el controlador de Pipelsoft (actualizadas)
-	r.GET("/pipelsoft/contratos-curso/:codigo_curso", pipelsoftController.ObtenerContratosPorCodigoCurso)
-	r.GET("/pipelsoft/contratos", pipelsoftController.ObtenerTodosLosContratos)
-	r.GET("/pipelsoft/contratos-run/:run", pipelsoftController.ObtenerContratosPorRUN)
-	r.GET("/pipelsoft/contratos-nombreUnidadMenor/:nombreUnidadMenor", pipelsoftController.ObtenerContratosPorNombreUnidadMenor)
-	r.GET("/pipelsoft/contratos-nombreUnidadMayor/:nombreUnidadMayor", pipelsoftController.ObtenerContratosPorNombreUnidadMayor)
-	r.GET("/contratos/codigo_paf/:codigo_paf", pipelsoftController.ObtenerPorCodigoPAF)
-	r.GET("/contratos/ultimos_7_dias", pipelsoftController.ObtenerPAFUltimos7Dias)
-	r.GET("/contratos/ultimo_mes", pipelsoftController.ObtenerPAFUltimoMes)
+	r.GET("/api/paf-en-linea/pipelsoft/contratos-curso/:codigo_curso", pipelsoftController.ObtenerContratosPorCodigoCurso)
+	r.GET("/api/paf-en-linea/pipelsoft/contratos", pipelsoftController.ObtenerTodosLosContratos)
+	r.GET("/api/paf-en-linea/pipelsoft/contratos-run/:run", pipelsoftController.ObtenerContratosPorRUN)
+	r.GET("/api/paf-en-linea/pipelsoft/contratos-nombreUnidadMenor/:nombreUnidadMenor", pipelsoftController.ObtenerContratosPorNombreUnidadMenor)
+	r.GET("/api/paf-en-linea/pipelsoft/contratos-nombreUnidadMayor/:nombreUnidadMayor", pipelsoftController.ObtenerContratosPorNombreUnidadMayor)
+	r.GET("/api/paf-en-linea/contratos/codigo_paf/:codigo_paf", pipelsoftController.ObtenerPorCodigoPAF)
+	r.GET("/api/paf-en-linea/contratos/ultimos_7_dias", pipelsoftController.ObtenerPAFUltimos7Dias)
+	r.GET("/api/paf-en-linea/contratos/ultimo_mes", pipelsoftController.ObtenerPAFUltimoMes)
+	//controaldor igual a contratos-run pero muestra todos aunque esten aceptados
+	r.GET("/api/paf-en-linea/pipelsoft/obtenerContratos/mostrarTodo/:rut", pipelsoftController.ObtenerContratosPorRUNMostrarTodo)
+
 	// Ruta para obtener unidades menores por unidad mayor
-	r.GET("/pipelsoft/unidades-menores", pipelsoftController.ObtenerUnidadesMenores)
+	r.GET("/api/paf-en-linea/pipelsoft/unidades-menores", pipelsoftController.ObtenerUnidadesMenores)
 	// Instanciar el servicio y controlador de Horarios
 	horarioService := service.NewHorarioService(DB.DBPersonal)
 	horarioController := controller.NewHorarioController(horarioService)
 
 	// Ruta para obtener los horarios por Run
-	r.GET("/horarios/:run", horarioController.ObtenerHorariosPorRun)
+	r.GET("/api/paf-en-linea/horarios/:run", horarioController.ObtenerHorariosPorRun)
 
 	// Instanciar el servicio y controlador de ProfesorDB
 	profesorDBService := service.NewProfesorDBService(DB.DBPersonal)
 	profesorDBController := controller.NewProfesorDBController(*profesorDBService)
-	r.GET("/profesorDB/:run", profesorDBController.ObtenerProfesorDBPorRun)
+	r.GET("/api/paf-en-linea/profesorDB/:run", profesorDBController.ObtenerProfesorDBPorRun)
 
 	// Instanciar el servicio y controlador de Estadísticas
 	estadisticasService := service.NewEstadisticasService(DB.DBPersonal)
@@ -74,19 +77,19 @@ func main() {
 
 	// Ruta para obtener las estadísticas
 	///api/paf-en-linea
-	r.GET("/estadisticas", estadisticasController.ObtenerEstadisticas)
-	r.GET("/estadisticas/unidad/:nombreUnidadMayor", estadisticasController.ContarRegistrosPorUnidadMayor)
-	r.GET("/estadisticas/frecuencia-unidades-mayores", estadisticasController.ObtenerFrecuenciaNombreUnidadMayor)
-	r.GET("/estadisticas/PafActivas", estadisticasController.ContarRegistrosPorCodEstado)
-	r.GET("/estadisticas/pafActivas/unidad-mayor/:unidadMayor", estadisticasController.ObtenerPafActivasPorUnidadHandler)
-	r.GET("/estadisticas/unidad-mayor/:unidad-mayor", estadisticasController.ObtenerEstadisticasPorUnidadMayorHandler)
-	r.GET("/estadisticas/unidad-mayor/unidades-menores-frecuencia/:unidad-mayor", estadisticasController.ObtenerFrecuenciaNombreUnidadMenorPorUnidadMayorHandler)
+	r.GET("/api/paf-en-linea/estadisticas/:semestre", estadisticasController.ObtenerEstadisticas)
+	r.GET("/api/paf-en-linea/estadisticas/unidad/:nombreUnidadMayor/:semestre", estadisticasController.ContarRegistrosPorUnidadMayor)
+	r.GET("/api/paf-en-linea/estadisticas/frecuencia-unidades-mayores/:semestre", estadisticasController.ObtenerFrecuenciaNombreUnidadMayor)
+	r.GET("/api/paf-en-linea/estadisticas/PafActivas/:semestre", estadisticasController.ContarRegistrosPorCodEstado)
+	r.GET("/api/paf-en-linea/estadisticas/pafActivas/unidad-mayor/:unidadMayor/:semestre", estadisticasController.ObtenerPafActivasPorUnidadHandler)
+	r.GET("/api/paf-en-linea/estadisticas/unidad-mayor/:unidad-mayor/:semestre", estadisticasController.ObtenerEstadisticasPorUnidadMayorHandler)
+	r.GET("/api/paf-en-linea/estadisticas/unidad-mayor/unidades-menores-frecuencia/:unidad-mayor/semestre", estadisticasController.ObtenerFrecuenciaNombreUnidadMenorPorUnidadMayorHandler)
 
 	// Inicializar servicios y controladores
 	contratoService := service.NewContratoService(DB.DBPersonal)
 	contratoController := controller.NewContratoController(contratoService)
 
-	contrato := r.Group("/contratos")
+	contrato := r.Group("/api/paf-en-linea/contratos")
 	{
 		contrato.Use(cors.Default())
 		contrato.GET("/", contratoController.GetAllContratosHandler)
@@ -99,58 +102,58 @@ func main() {
 	usuariosService := service.NewUsuariosService(DB.DBPersonal)
 	usuariosController := controller.NewUsuariosController(usuariosService)
 	// Ruta para obtener un usuario por su Run
-	r.GET("/usuario/rut/:run", usuariosController.GetUsuarioByRun)
+	r.GET("/api/paf-en-linea/usuario/rut/:run", usuariosController.GetUsuarioByRun)
 
 	// nuevo y nueva url
 	// Crear servicio y controlador
 	historialService := service.NewHistorialPasosPafService(DB.DBPersonal)
 	historialController := controller.NewHistorialPasosPafController(historialService)
 
-	r.GET("/historialPaso/:id_paf/:run_docente", historialController.ObtenerHistorialYDuracionesPorIdYRun)
+	r.GET("/api/paf-en-linea/historialPaso/:id_paf/:run_docente", historialController.ObtenerHistorialYDuracionesPorIdYRun)
 
 	//controlador para obtener los profesores que no poseen paf
-	r.GET("/estadisticas/obtener-y-comparar-runs", estadisticasController.ObtenerYCompararRunsHandler)
+	r.GET("/api/paf-en-linea/estadisticas/obtener-y-comparar-runs", estadisticasController.ObtenerYCompararRunsHandler)
 
 	// 1
-	r.GET("/estadisticas/unidades-mayores/cant_profesores/:semestre", estadisticasController.ObtenerUnidadesMayoresHandler)
+	r.GET("/api/paf-en-linea/estadisticas/unidades-mayores/cant_profesores/:semestre", estadisticasController.ObtenerUnidadesMayoresHandler)
 	// 2
-	r.GET("/estadisticas/unidades-mayores/sin_profesores/:semestre", estadisticasController.ObtenerUnidadesMayoresSinProfesoresEnPipelsoftHandler)
+	r.GET("/api/paf-en-linea/estadisticas/unidades-mayores/sin_profesores/:semestre", estadisticasController.ObtenerUnidadesMayoresSinProfesoresEnPipelsoftHandler)
 	// 3
-	r.GET("/estadisticas/unidades-mayores/profesores-filtrados/:semestre", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosHandler)
+	r.GET("/api/paf-en-linea/estadisticas/unidades-mayores/profesores-filtrados/:semestre", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosHandler)
 	// 4
-	r.GET("/estadisticas/unidades-mayores/profesores-codestado/:semestre", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivos)
+	r.GET("/api/paf-en-linea/estadisticas/unidades-mayores/profesores-codestado/:semestre", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivos)
 	// 5
-	r.GET("/estadisticas/profesores/estado/:codEstadoPAF/:semestre", estadisticasController.ObtenerUnidadesMayoresPorCodEstadoPAF)
+	r.GET("/api/paf-en-linea/estadisticas/profesores/estado/:codEstadoPAF/:semestre", estadisticasController.ObtenerUnidadesMayoresPorCodEstadoPAF)
 	// 6 arreglar
-	r.GET("/estadisticas/6/:unidadMayor/:unidadMenor/semestre", estadisticasController.ObtenerEstadisticasPorUnidad)
+	r.GET("/api/paf-en-linea/estadisticas/6/:unidadMayor/:unidadMenor/semestre", estadisticasController.ObtenerEstadisticasPorUnidad)
 	// 7 arreglar
-	r.GET("/estadisticas/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ContarRegistrosPorUnidadMayorYUnidadMenor)
+	r.GET("/api/paf-en-linea/estadisticas/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ContarRegistrosPorUnidadMayorYUnidadMenor)
 
 	// Ruta para obtener las unidades menores con profesores filtrados (PAF activos)
 	// 8.1
-	r.GET("/estadistica/unidades-menores-con-profesores-activos/8_1/:unidadMayor/:semestre", estadisticasController.ObtenerUnidadesMenoresConProfesoresPorUnidadMayor)
+	r.GET("/api/paf-en-linea/estadistica/unidades-menores-con-profesores-activos/8_1/:unidadMayor/:semestre", estadisticasController.ObtenerUnidadesMenoresConProfesoresPorUnidadMayor)
 	// 8.3
-	r.GET("/estadistica/unidades-menores-sin-profesores/8_3/:unidadMayor/:semestre", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayor)
+	r.GET("/api/paf-en-linea/estadistica/unidades-menores-sin-profesores/8_3/:unidadMayor/:semestre", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayor)
 
 	// 8.2
 	// Ruta para obtener unidades menores sin profesores en Pipelsoft (8.3)
-	r.GET("/estadistica/unidades-menores-sin-profesores-8-2/:unidadMayor/:semestre", estadisticasController.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3)
+	r.GET("/api/paf-en-linea/estadistica/unidades-menores-sin-profesores-8-2/:unidadMayor/:semestre", estadisticasController.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3)
 
 	// 8.4
-	r.GET("/estadistica/unidades-menores-con-profesores-paf-activos/8_4/:unidadMayor/:semestre", estadisticasController.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos)
+	r.GET("/api/paf-en-linea/estadistica/unidades-menores-con-profesores-paf-activos/8_4/:unidadMayor/:semestre", estadisticasController.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos)
 
 	// 8.5
-	r.GET("/estadistica/unidades-menores/:codEstadoPAF/:unidadMayor/:semestre", estadisticasController.ObtenerUnidadesMenoresPorCodEstadoPAF)
+	r.GET("/api/paf-en-linea/estadistica/unidades-menores/:codEstadoPAF/:unidadMayor/:semestre", estadisticasController.ObtenerUnidadesMenoresPorCodEstadoPAF)
 	// 9.1
-	r.GET("/unidadesmenores/profesores/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerUnidadesMenoresConProfesoresPorUnidadMayor9_1)
+	r.GET("/api/paf-en-linea/unidadesmenores/profesores/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerUnidadesMenoresConProfesoresPorUnidadMayor9_1)
 	// 9.2
-	r.GET("/unidadesmenores/sinprofesores/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_9_2)
+	r.GET("/api/paf-en-linea/unidadesmenores/sinprofesores/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_9_2)
 	// 9.3
-	r.GET("/unidadesmayores/filtradospafactivos/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayorYUnidadMenor9_3)
+	r.GET("/api/paf-en-linea/unidadesmayores/filtradospafactivos/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayorYUnidadMenor9_3)
 	// 9.4
-	r.GET("/unidadesmenores/filtradospafactivos/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivosPorUnidadMayorYUnidadMenor9_4)
+	r.GET("/api/paf-en-linea/unidadesmenores/filtradospafactivos/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivosPorUnidadMayorYUnidadMenor9_4)
 	// 9.5
-	r.GET("/unidadesmenores/porcodestadopaf/:codEstadoPAF/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerUnidadesMenoresPorCodEstadoPAFPorCodEstadoYUnidadMayorYUnidadMenor9_5)
+	r.GET("/api/paf-en-linea/unidadesmenores/porcodestadopaf/:codEstadoPAF/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerUnidadesMenoresPorCodEstadoPAFPorCodEstadoYUnidadMayorYUnidadMenor9_5)
 
 	// Iniciar el cron job para actualización periódica
 	// de acuerdo al sai profes sin paf y sin contrato sin contar profesores repetidos, desde pipelsoft estan los ruts con un 0 al inicio y con digito verificador

@@ -21,8 +21,10 @@ func NewEstadisticasController(service *service.EstadisticasService) *Estadistic
 
 // ObtenerEstadisticas maneja la solicitud para obtener las estadísticas generales
 func (c *EstadisticasController) ObtenerEstadisticas(ctx *gin.Context) {
+
+	semestre := ctx.Param("semestre")
 	// Llamar al servicio para obtener las estadísticas
-	estadisticas, err := c.Service.ObtenerEstadisticas()
+	estadisticas, err := c.Service.ObtenerEstadisticas(semestre)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error al obtener estadísticas: %v", err)})
 		return
@@ -36,9 +38,10 @@ func (c *EstadisticasController) ObtenerEstadisticas(ctx *gin.Context) {
 func (c *EstadisticasController) ContarRegistrosPorUnidadMayor(ctx *gin.Context) {
 	// Obtener el nombre de la unidad Mayor desde los parámetros de la URL
 	nombreUnidadMayor := ctx.Param("nombreUnidadMayor")
+	semestre := ctx.Param("semestre")
 
 	// Llamar al servicio para contar los registros
-	count, err := c.Service.ContarRegistrosPorNombreUnidadMayor(nombreUnidadMayor)
+	count, err := c.Service.ContarRegistrosPorNombreUnidadMayor(nombreUnidadMayor, semestre)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error al contar registros: %v", err)})
 		return
@@ -54,7 +57,8 @@ func (c *EstadisticasController) ContarRegistrosPorUnidadMayor(ctx *gin.Context)
 // ContarRegistrosPorCodEstado maneja la solicitud para contar registros de Pipelsoft donde el `cod_estado` no sea "F1", "F9" ni "A9"
 func (c *EstadisticasController) ContarRegistrosPorCodEstado(ctx *gin.Context) {
 	// Llamar al servicio para obtener el conteo y el porcentaje
-	count, porcentaje, err := c.Service.ContarRegistrosExcluyendoEstados()
+	semestre := ctx.Param("semestre")
+	count, porcentaje, err := c.Service.ContarRegistrosExcluyendoEstados(semestre)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error al contar registros excluyendo estados: %v", err)})
 		return
@@ -96,7 +100,8 @@ func (ctrl *HistorialPafAceptadasController) ActualizarBanderaAceptacion(ctx *gi
 // ObtenerFrecuenciaNombreUnidadMayor maneja la solicitud para obtener la frecuencia de NombreUnidadMayor
 func (c *EstadisticasController) ObtenerFrecuenciaNombreUnidadMayor(ctx *gin.Context) {
 	// Llamar al servicio para obtener los datos
-	frecuencia, err := c.Service.ObtenerFrecuenciaNombreUnidadMayor()
+	semestre := ctx.Param("semestre")
+	frecuencia, err := c.Service.ObtenerFrecuenciaNombreUnidadMayor(semestre)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error al obtener la frecuencia de NombreUnidadMayor: %v", err)})
 		return
@@ -109,6 +114,7 @@ func (c *EstadisticasController) ObtenerFrecuenciaNombreUnidadMayor(ctx *gin.Con
 func (c *EstadisticasController) ObtenerEstadisticasPorUnidadMayorHandler(ctx *gin.Context) {
 	// Obtener el valor de 'unidad-mayor' desde los parámetros de la URL
 	unidadMayor := ctx.Param("unidad-mayor")
+	semestre := ctx.Param("semestre")
 
 	// Validar que el parámetro no esté vacío
 	if unidadMayor == "" {
@@ -117,7 +123,7 @@ func (c *EstadisticasController) ObtenerEstadisticasPorUnidadMayorHandler(ctx *g
 	}
 
 	// Llamar al servicio
-	resp, err := c.Service.ObtenerEstadisticasPorUnidadMayor(unidadMayor)
+	resp, err := c.Service.ObtenerEstadisticasPorUnidadMayor(unidadMayor, semestre)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -130,9 +136,10 @@ func (c *EstadisticasController) ObtenerEstadisticasPorUnidadMayorHandler(ctx *g
 func (c *EstadisticasController) ObtenerFrecuenciaNombreUnidadMenorPorUnidadMayorHandler(ctx *gin.Context) {
 	// Obtener el parámetro de la URL
 	nombreUnidadMayor := ctx.Param("unidad-mayor")
+	semestre := ctx.Param("semestre")
 
 	// Llamar al servicio
-	frecuencia, err := c.Service.ObtenerFrecuenciaNombreUnidadMenorPorUnidadMayor(nombreUnidadMayor)
+	frecuencia, err := c.Service.ObtenerFrecuenciaNombreUnidadMenorPorUnidadMayor(nombreUnidadMayor, semestre)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -146,6 +153,7 @@ func (c *EstadisticasController) ObtenerFrecuenciaNombreUnidadMenorPorUnidadMayo
 func (c *EstadisticasController) ObtenerPafActivasPorUnidadHandler(ctx *gin.Context) {
 	// Obtener el parámetro unidadMayor desde la URL
 	unidadMayor := ctx.Param("unidadMayor")
+	semestre := ctx.Param("semestre")
 	if unidadMayor == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "El parámetro unidadMayor es requerido",
@@ -154,7 +162,7 @@ func (c *EstadisticasController) ObtenerPafActivasPorUnidadHandler(ctx *gin.Cont
 	}
 
 	// Llamar al servicio para obtener los datos
-	count, totalRUNs, err := c.Service.ContarRegistrosPorUnidadMayorConRuns(unidadMayor)
+	count, totalRUNs, err := c.Service.ContarRegistrosPorUnidadMayorConRuns(unidadMayor, semestre)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
