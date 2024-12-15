@@ -60,8 +60,8 @@
     <!-- Contenido principal -->
     <div
       :class="{
-        'ml-64': isMenuOpen && $route.path !== '/profesorPAF',
-        'ml-0': !isMenuOpen || $route.path === '/profesorPAF'
+        'ml-64': isMenuOpen && $route.path !== '/principal/profesorPAF',
+        'ml-0': !isMenuOpen || $route.path === '/principal/profesorPAF'
       }"
       class="content"
     >
@@ -76,12 +76,12 @@ export default {
     return {
       isMenuOpen: false,
       menuItems: [
-        { path: "/personas", label: "Listado de Personas", pages: ["/personas", "/historyPAF", "/horario", "/paf"] },
-        { path: "/historyPAF", label: "Historial de PAF", pages: ["/personas", "/historyPAF", "/horario", "/paf"] },
-        { path: "/seguimientoPAF", label: "Seguimiento de la PAF", pages: ["/seguimientoPAF", "/estadisticaPAF"] },
-        { path: "/estadisticaPAF", label: "Estadísticas de PAF", pages: ["/seguimientoPAF", "/estadisticaPAF"] },
-        { path: "/unidadMayorPAF", label: "Gestión de Unidad Mayor", pages: ["/unidadMayorPAF", "/estadisticaUnidadPAF"] },
-        { path: "/estadisticaUnidadPAF", label: "Estadísticas de Unidad", pages: ["/unidadMayorPAF", "/estadisticaUnidadPAF"] },
+        { path: "/principal/personas", label: "Personas", pages: ["/principal/personas", "/principal/historyPAF", "/personas/horario", "/personas/paf"] },
+        { path: "/principal/historyPAF", label: "Historial de PAF", pages: ["/principal/personas", "/principal/historyPAF", "/personas/horario", "/personas/paf"] },
+        { path: "/seguimientoPAF", label: "Seguimiento de la PAF", pages: ["/principal/seguimientoPAF", "/principal/estadisticaPAF"] },
+        { path: "/principal/estadisticaPAF", label: "Estadísticas de PAF", pages: ["/principal/seguimientoPAF", "/principal/estadisticaPAF"] },
+        { path: "/principal/unidadMayorPAF", label: "Gestión de Unidad Mayor", pages: ["/principal/unidadMayorPAF", "/principal/estadisticaUnidadPAF"] },
+        { path: "/principal/estadisticaUnidadPAF", label: "Estadísticas de Unidad", pages: ["/principal/unidadMayorPAF", "/principal/estadisticaUnidadPAF"] },
       ],
     };
   },
@@ -93,7 +93,7 @@ export default {
   },
   methods: {
     toggleMenu() {
-      if (this.$route.path === "/profesorPAF") {
+      if (this.$route.path === "/principal/profesorPAF") {
         return; // Evitar que el menú se abra/cierre en ProfesorPAF
       }
       this.isMenuOpen = !this.isMenuOpen;

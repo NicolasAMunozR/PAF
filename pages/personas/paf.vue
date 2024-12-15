@@ -57,7 +57,7 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
-import { onMounted, ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useNuxtApp } from '#app';
 import Filtros from '../../components/Filtros.vue'
 

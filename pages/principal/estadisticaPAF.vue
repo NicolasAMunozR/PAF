@@ -145,6 +145,12 @@ const obtenerSemestres = async () => {
     if (!semestreSeleccionado.value) {
       semestreSeleccionado.value = semestresUnicos[semestresUnicos.length - 1];  // Seleccionar el semestre más reciente (último semestre)
     }
+
+      fetchCantidadPersonasSai(rut.value);
+      fetchCantidadPafSai(rut.value);
+      fetchCantidadPafPorEstado(rut.value);
+      fetchPafPorUnidadMayor(rut.value);
+      configurarGraficos();
   } catch (error) {
     console.error('Error al obtener los semestres:', error);
   }
