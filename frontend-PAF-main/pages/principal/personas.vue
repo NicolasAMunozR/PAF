@@ -6,8 +6,8 @@
 </template>
 
 <script setup lang="ts">
-import Filtros from '../../components/Filtros.vue'
-import Tabla from '../../components/Tabla.vue'
+import Filtros from '~/components/Filtros.vue'
+import Tabla from '~/components/Tabla.vue'
 import { ref, computed, onMounted } from 'vue'
 
 const { $axios } = useNuxtApp() as unknown as { $axios: typeof import('axios').default }
