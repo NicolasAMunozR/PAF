@@ -21,7 +21,7 @@ func NewHistorialPafAceptadasService(db *gorm.DB) *HistorialPafAceptadasService 
 	}
 }
 
-func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor models.ProfesorDB, bloque []string, cod_asignatura_paf string) (*models.HistorialPafAceptadas, error) {
+func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor models.ProfesorDB, bloque []string, cod_asignatura_paf string, comentario string) (*models.HistorialPafAceptadas, error) {
 	// Parsear los bloques en una lista de BloqueDTO
 	bloquesDTO, err := parseBloques(bloque)
 	if err != nil {
@@ -101,6 +101,7 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 		Cupo:                    profesor.Cupo,
 		Bloque:                  bloquesJSON, // Bloques en JSON
 		BanderaAceptacion:       0,
+		Comentario:              comentario,
 	}
 
 	// Insertar el nuevo historial en la base de datos

@@ -51,6 +51,7 @@ type HistorialPafAceptadas struct {
 	Seccion                  string    `json:"seccion"`           // Sección o grupo
 	Cupo                     int       `json:"cupo"`              // Capacidad del grupo
 	UltimaModificacion       time.Time `gorm:"type:timestamp"`
+	Comentario               string    `gorm:"type:text"`
 
 	// Bloques: Lista de objetos BloqueDTO almacenados como JSONB
 	Bloque json.RawMessage `gorm:"type:jsonb"`
