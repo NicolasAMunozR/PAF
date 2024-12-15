@@ -7,18 +7,10 @@
   </div>
   <div class="container">
     <Filtros @filter="filterData" @sort="sortData" />
-    <div class="flex flex-col">
-      <!-- Información de la PAF -->
-      <div class="info-container w-2/3 mt-6">
-        <h1 v-if="filteredPersonas.length > 0" class="section-title">Información de la PAF:</h1>
-
         <!-- Mostrar la lista de personas -->
         <div v-if="filteredPersonas.length > 0">
-          <div
-            v-for="persona in filteredPersonas"
-            :key="persona.CodigoPaf"
-            class="paf-container"
-          >
+          <div v-for="persona in filteredPersonas" :key="persona.CodigoPaf" class="paf-container">
+            <h1 v-if="filteredPersonas.length > 0" class="section-title">Información de la PAF:</h1>
             <p><strong>Código PAF:</strong> {{ persona.CodigoPaf }}</p>
             <p><strong>Run:</strong> {{ persona.Run }}</p>
             <p><strong>Código Asignatura PAF:</strong> {{ persona.CodigoAsignatura }}</p>
@@ -32,34 +24,26 @@
             <p><strong>Cupo:</strong> {{ persona.cupo }}</p>
             <p><strong>Sección:</strong> {{ persona.seccion }}</p>
             <p><strong>Semestre Asignatura:</strong> {{ persona.semestre1 }}</p>
-
             <!-- Botón ubicado en la parte inferior -->
             <div class="flex justify-end mt-4">
-              <button 
-                v-if="persona.Aceptada === 0" 
-                @click="dejarListaPaf(persona.CodigoPaf)" 
-                class="procesar-button"
-              >
-                Dejar lista la PAF
-              </button>
+              <button v-if="persona.Aceptada === 0" @click="dejarListaPaf(persona.CodigoPaf)" class="procesar-button">Dejar lista la PAF</button>
             </div>
           </div>
         </div>
-
         <div v-else>
           <p>Cargando datos o no se encontraron registros para la PAF.</p>
         </div>
-      </div>
-    </div>
-  </div>
+</div>
+
+
 </template>
 
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
-import { onMounted, ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useNuxtApp } from '#app';
-import Filtros from '../components/Filtros.vue'
+import Filtros from '~/components/Filtros.vue'
 
 const route = useRoute();
 const router = useRouter();

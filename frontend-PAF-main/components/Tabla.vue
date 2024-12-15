@@ -26,13 +26,13 @@
           <td class="px-4 py-3 text-gray-700">{{ persona.Cupo }} {{ persona.cupo }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.Semestre }} {{ persona.SemestrePaf }}</td>
           <td v-if="showButtons" class="px-4 py-3">
-            <a :href="`/paf?codigoPaf=${persona.CodigoPAF}`" class="button">Ver PAF</a>
+            <NuxtLink :to="`/personas/paf?codigoPaf=${persona.CodigoPAF}`" class="button">Ver PAF</NuxtLink>
             <br>
             <br>
-            <a :href="`/horario?run=${persona.Run}`" class="button">Ver Horarios</a>
+            <NuxtLink :to="`/personas/horario?run=${persona.Run}`" class="button">Ver Horarios</NuxtLink>
           </td>
           <td v-if="showButton" class="px-4 py-3">
-            <a :href="`/paf?codigoPaf=${persona.IdPaf}`" class="button">Ver PAF</a>
+            <NuxtLink :to="`/personas/paf?codigoPaf=${persona.IdPaf}`" class="button">Ver PAF</NuxtLink>
             <br>
             <br>
             <button @click="deletePAF(persona.IdPaf)" class="buttons">Eliminar</button>
