@@ -24,7 +24,7 @@
       <div v-if="persona.length > 0">
         <div class="mb-4">
           <label for="semestre">Seleccionar Semestre:</label>
-          <select id="semestre" v-model="semestreSeleccionado" class="select-input" @click.stop>
+          <select id="semestre" v-model="semestreSeleccionado" class="select-input" @click.stop @change="limpiarSelecciones">
             <option v-for="sem in semestres" :key="sem" :value="sem">{{ sem }}</option>
           </select>
         </div>
@@ -174,6 +174,19 @@ import { useNuxtApp } from '#app'
 
 const historialSeleccionado = computed(() => persona.value.filter((p) => p.ID !== 0) || null);
 console.log(historialSeleccionado)
+
+
+// Método para limpiar selecciones
+const limpiarSelecciones = () => {
+  bloquesSeleccionados.value = [];
+  fichaSeleccionadaPAF.value = null;
+};
+
+// Limpiar al cambiar de página
+onBeforeRouteLeave((to, from, next) => {
+  limpiarSelecciones();
+  next();
+});
 
 // Cerrar todos los popups
 const cerrarTodosLosBloques = () => {
