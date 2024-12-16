@@ -257,9 +257,6 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidadMayor(unidadMayor, sem
 
 	// Contar la cantidad de profesores en la tabla contratos que tengan la misma unidad mayor y semestre
 	queryContratos := s.DB.Model(&models.Contrato{}).Where("unidad_mayor = ?", unidadMayor)
-	if semestre != "" {
-		queryContratos = queryContratos.Where("semestre = ?", semestre)
-	}
 	if err := queryContratos.Count(&resp.TotalProfesores).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los profesores en la tabla contratos para la unidad mayor %s y semestre %s: %w", unidadMayor, semestre, err)
 	}
@@ -833,13 +830,7 @@ func (s *EstadisticasService) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3
 	if unidadMayor == "" {
 		return nil, fmt.Errorf("el parámetro 'unidadMayor' debe ser proporcionado")
 	}
-
-	// Validar que el semestre no esté vacío
-	if semestre == "" {
-		return nil, fmt.Errorf("el parámetro 'semestre' debe ser proporcionado")
-	}
-
-	// Paso 1: Obtener todos los RUNs únicos de la tabla Contrato
+	// Paso 1: Obtener todos los RUNs únicos de la tabla Contrato para el semestre específico
 	var runDocentes []string
 	if err := s.DB.Model(&models.Contrato{}).
 		Distinct("run_docente").
@@ -847,9 +838,10 @@ func (s *EstadisticasService) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3
 		return nil, fmt.Errorf("error al obtener RUNs únicos de la tabla Contrato: %w", err)
 	}
 
-	// Paso 2: Obtener RUNs únicos de la tabla Pipelsoft
+	// Paso 2: Obtener RUNs únicos de la tabla Pipelsoft para el semestre específico
 	var runPipelsoft []string
 	if err := s.DB.Model(&models.Pipelsoft{}).
+		Where("semestre = ?", semestre).
 		Distinct("run_empleado").
 		Pluck("run_empleado", &runPipelsoft).Error; err != nil {
 		return nil, fmt.Errorf("error al obtener RUNs únicos de la tabla Pipelsoft: %w", err)
@@ -863,7 +855,6 @@ func (s *EstadisticasService) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3
 		Select("unidad_menor, COUNT(DISTINCT run_docente) as total_profesores").
 		Where("run_docente IN ?", runsUnicosSinPipelsoft).
 		Where("unidad_mayor = ?", unidadMayor). // Filtro por 'unidadMayor'
-		Where("semestre = ?", semestre).        // Filtro por 'semestre' en Contrato
 		Group("unidad_menor").
 		Scan(&resultados).Error; err != nil {
 		return nil, fmt.Errorf("error al obtener unidades menores sin profesores en Pipelsoft: %w", err)

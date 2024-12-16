@@ -391,9 +391,9 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
           let labelNuevo = "";
           if(unidadSeleccionada.value === null) {
             if (label === 'Profesores con PAF') {
-            response = await $axios.get(`/api/paf-en-linea/estadistica/unidades-menores-con-profesores-activos/8_1/${responseinicial.data.UnidadMayor}/${semestreSeleccionado.value}`);
+            response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-menores-con-profesores-activos/8_1/${responseinicial.data.UnidadMayor}/${semestreSeleccionado.value}`);
             } else if (label === 'Profesores sin PAF') {
-              response = await $axios.get(`/api/paf-en-linea/estadistica/unidades-menores-sin-profesores-8-2/${responseinicial.data.UnidadMayor}/${semestreSeleccionado.value}`);
+              response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-menores-sin-profesores-8-2/${responseinicial.data.UnidadMayor}/${semestreSeleccionado.value}`);
             }
             unidadesData = response.data;
             labelNuevo = "Cantidad de PAF por Unidad Menor";
@@ -454,7 +454,7 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
           let response = null;
           let unidadesData = null;
           if(unidadSeleccionada.value === null) {
-              response = await $axios.get(`/api/paf-en-linea/estadistica/unidades-menores/${encodeURIComponent(label)}/${responseinicial.data.UnidadMayor}/${semestreSeleccionado.value}`);
+              response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-menores/${encodeURIComponent(label)}/${responseinicial.data.UnidadMayor}/${semestreSeleccionado.value}`);
               console.log(semestreSeleccionado);
               console.log(response);
           } else {
@@ -513,10 +513,10 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
 
           if(unidadSeleccionada.value === null) {
             if (label === 'Profesores con PAF activas') {
-            response = await $axios.get(`/api/paf-en-linea/estadistica/unidades-menores-sin-profesores/8_3/${responseinicial.data.UnidadMayor}/${semestreSeleccionado.value}`);
+            response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-menores-sin-profesores/8_3/${responseinicial.data.UnidadMayor}/${semestreSeleccionado.value}`);
             unidadesData = response.data.unidades;
             } else if (label === 'Profesores sin PAF activas') {
-            response = await $axios.get(`/api/paf-en-linea/estadistica/unidades-menores-con-profesores-paf-activos/8_4/${responseinicial.data.UnidadMayor}/${semestreSeleccionado.value}`);
+            response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-menores-con-profesores-paf-activos/8_4/${responseinicial.data.UnidadMayor}/${semestreSeleccionado.value}`);
             unidadesData = response.data;
             } 
             labelNuevo = "Cantidad de PAF por Unidad Menor";
