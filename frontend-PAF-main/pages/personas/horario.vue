@@ -446,7 +446,7 @@ const obtenerDatosPersona = async (semestreGuardado: string | null) => {
 
     // NO DEVUELÑVE LAS PAF LISTAS
 
-    const response = await $axios.get(`/api/paf-en-linea/pipelsoft/contratos-run/${run.value}`);
+    const response = await $axios.get(`/api/paf-en-linea/pipelsoft//obtenerContratos/mostrarTodo/${run.value}`);
     console.log(response.data);
     const response1 = await $axios.get(`/api/paf-en-linea/profesorDB/${run.value.slice(0, -2)}`);
     persona1.value = response1.data;
