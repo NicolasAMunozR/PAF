@@ -553,6 +553,28 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
   };
   
   onMounted(async () => {
+    const response = await $axios.get(`/api/paf-en-linea/pipelsoft/contratos`);
+    // Extraer los semestres únicos de la respuesta
+    const semestres = response.data.map(item => item.PipelsoftData.Semestre);
+    // Filtrar y ordenar los semestres en base al año (YY) y mes (MM)
+    const semestresUnicos = [...new Set(semestres)].sort((a, b) => {
+      const [monthA, yearA] = a.split('-'); // Obtener mes y año de "MM-YY"
+      const [monthB, yearB] = b.split('-');
+      
+      // Primero ordenar por año (YY) de forma ascendente
+      if (yearA !== yearB) {
+        return yearA.localeCompare(yearB);
+      }
+      // Si los años son iguales, ordenar por mes (MM) de forma ascendente
+      return monthA.localeCompare(monthB);
+    });
+
+    semestresDisponibles.value = semestresUnicos;
+
+    // Establecer semestre por defecto como el más reciente, solo si no hay una selección previa
+    if (!semestreSeleccionado.value) {
+      semestreSeleccionado.value = semestresUnicos[semestresUnicos.length - 1];  // Seleccionar el semestre más reciente (último semestre)
+    }
     rut.valueOf = sessionStorage.getItem('rut') || '';
     await Promise.all([
       fetchCantidadPersonasSai(rut.valueOf),
@@ -560,7 +582,6 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
       fetchPromedioTiempoPorEstado(),
       fetchPafPorUnidadMayor(rut.valueOf),
       fetchCantidadPafSai(rut.valueOf),
-      obtenerSemestres(rut.valueOf),
     ]);
     configurarGraficos(rut.valueOf);
   });

@@ -200,6 +200,7 @@ const fetchPafPorUnidadMayor = async () => {
       obtenerSemestres();
     }
     const response = await $axios.get(`/api/paf-en-linea/estadisticas/frecuencia-unidades-mayores/${semestreSeleccionado.value}`);
+    console.log('Cantidad de PAF por unidad mayor:', semestreSeleccionado.value, response.data);
     const unidadesData = response.data;
     pafPorUnidadMayorChartData.value = {
       labels: Object.keys(unidadesData),
@@ -535,13 +536,35 @@ const configurarGraficos = () => {
 };
 
 onMounted(async () => {
+  const response = await $axios.get(`/api/paf-en-linea/pipelsoft/contratos`);
+    // Extraer los semestres únicos de la respuesta
+    const semestres = response.data.map(item => item.PipelsoftData.Semestre);
+    // Filtrar y ordenar los semestres en base al año (YY) y mes (MM)
+    const semestresUnicos = [...new Set(semestres)].sort((a, b) => {
+      const [monthA, yearA] = a.split('-'); // Obtener mes y año de "MM-YY"
+      const [monthB, yearB] = b.split('-');
+      
+      // Primero ordenar por año (YY) de forma ascendente
+      if (yearA !== yearB) {
+        return yearA.localeCompare(yearB);
+      }
+      // Si los años son iguales, ordenar por mes (MM) de forma ascendente
+      return monthA.localeCompare(monthB);
+    });
+
+    semestresDisponibles.value = semestresUnicos;
+
+    // Establecer semestre por defecto como el más reciente, solo si no hay una selección previa
+    if (semestreSeleccionado.value === '') {
+      semestreSeleccionado.value = semestresUnicos[semestresUnicos.length - 1];  // Seleccionar el semestre más reciente (último semestre)
+    }
   await Promise.all([
+
     fetchCantidadPersonasSai(),
     fetchCantidadPafSai(),
     fetchCantidadPafPorEstado(),
     fetchPromedioTiempoPorEstado(),
     fetchPafPorUnidadMayor(),
-    obtenerSemestres(),
   ]);
 
   configurarGraficos();
