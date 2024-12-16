@@ -67,7 +67,7 @@ func setupRoutes(r *gin.Engine) {
 		estadisticas.GET("/PafActivas/:semestre", estadisticasController.ContarRegistrosPorCodEstado)
 		estadisticas.GET("/pafActivas/unidad-mayor/:unidadMayor/:semestre", estadisticasController.ObtenerPafActivasPorUnidadHandler)
 		estadisticas.GET("/unidad-mayor/:unidad-mayor/:semestre", estadisticasController.ObtenerEstadisticasPorUnidadMayorHandler)
-		estadisticas.GET("/unidad-mayor/unidades-menores-frecuencia/:unidad-mayor/semestre", estadisticasController.ObtenerFrecuenciaNombreUnidadMenorPorUnidadMayorHandler)
+		estadisticas.GET("/unidad-mayor/unidades-menores-frecuencia/:unidad-mayor/:semestre", estadisticasController.ObtenerFrecuenciaNombreUnidadMenorPorUnidadMayorHandler)
 		estadisticas.GET("/obtener-y-comparar-runs", estadisticasController.ObtenerYCompararRunsHandler)
 
 		// Rutas específicas de unidades mayores

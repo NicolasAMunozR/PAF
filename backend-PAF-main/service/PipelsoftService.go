@@ -257,22 +257,22 @@ func (s *PipelsoftService) ObtenerNombreUnidadMenorPorMayor(nombreUnidadMayor st
 	return unidadesMenores, nil
 }
 
-func (s *PipelsoftService) ObtenerContratosPorRUNMostrarTodo(run string) ([]models.Pipelsoft, error) {
+func (s *PipelsoftService) ObtenerContratosPorRUNMostrarTodo(run string) ([]models.DatosCombinados, error) {
 	var pipelsofts []models.Pipelsoft
 
 	if err := s.DBPersonal.Where("run_empleado = ?", run).Find(&pipelsofts).Error; err != nil {
 		return nil, err
 	}
 
-	return pipelsofts, nil
+	return s.comprobarYCombinarDatosPorCodigoPAF(pipelsofts)
 }
 
-func (s *PipelsoftService) ObtenerContratosPorIdPafMostrarTodo(run string) ([]models.Pipelsoft, error) {
+func (s *PipelsoftService) ObtenerContratosPorIdPafMostrarTodo(run string) ([]models.DatosCombinados, error) {
 	var pipelsofts []models.Pipelsoft
 
 	if err := s.DBPersonal.Where("id_paf = ?", run).Find(&pipelsofts).Error; err != nil {
 		return nil, err
 	}
 
-	return pipelsofts, nil
+	return s.comprobarYCombinarDatosPorCodigoPAF(pipelsofts)
 }

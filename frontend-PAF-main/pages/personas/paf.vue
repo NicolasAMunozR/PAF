@@ -92,7 +92,7 @@ const filteredPersonas = computed(() => {
 const obtenerDatosPaf = async () => {
   try {
     if (!codigoPaf.value) return;
-    const response = await $axios.get(`/api/paf-en-linea/pipelsoft/obtenerContratos/mostrarTodo/idpaf/${codigoPaf.value}`);
+    const response = await $axios.get(`/api/paf-en-linea/pipelsoft/obtenerContratos/mostrarTodo/${codigoPaf.value}`);
     console.log('Datos de la PAF:', response.data);
     if (response.data) {
       paf.value = response.data.map((item: any) => {
