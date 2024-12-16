@@ -144,7 +144,7 @@ const filteredPersonas = computed(() => {
 // Fetch inicial de datos
 const fetchContratos = async () => {
   try {
-    const response = await $axios.get(`/pipelsoft/contratos-nombreUnidadMayor/${UnidadMayor.value}`);
+    const response = await $axios.get(`/api/paf-en-linea/pipelsoft/contratos-nombreUnidadMayor/${UnidadMayor.value}`);
     if (response.data && Array.isArray(response.data)) {
       contratos.value = response.data;
     } else {
@@ -160,7 +160,7 @@ onMounted(async () => {
   let UnidadMayorFromQuery = route.query.UnidadMayor as string;
   if (!UnidadMayorFromQuery) {
     rut.value = sessionStorage.getItem('rut') || '';
-    const response = await $axios.get(`/usuario/rut/${rut.value}`);
+    const response = await $axios.get(`/api/paf-en-linea/usuario/rut/${rut.value}`);
     UnidadMayorFromQuery = response.data.UnidadMayor;
   }
   if (UnidadMayorFromQuery) {

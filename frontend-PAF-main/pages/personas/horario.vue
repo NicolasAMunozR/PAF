@@ -446,9 +446,9 @@ const obtenerDatosPersona = async (semestreGuardado: string | null) => {
 
     // NO DEVUELÑVE LAS PAF LISTAS
 
-    const response = await $axios.get(`/pipelsoft/contratos-run/${run.value}`);
+    const response = await $axios.get(`/api/paf-en-linea/pipelsoft/contratos-run/${run.value}`);
     console.log(response.data);
-    const response1 = await $axios.get(`/profesorDB/${run.value.slice(0, -2)}`);
+    const response1 = await $axios.get(`/api/paf-en-linea/profesorDB/${run.value.slice(0, -2)}`);
     persona1.value = response1.data;
 
     persona.value = response.data.map((item: any) => {
@@ -566,7 +566,7 @@ const result = resultado.map(item => {
     const data = resultado[0];
     data.bloque = result;
     console.log(data);
-    await $axios.post(`/historial/post/${codigoPAF}/${fichaSeleccionadaPAF.value?.CodigoAsignatura}/${comentario.value}`, data);
+    await $axios.post(`/api/paf-en-linea/historial/post/${codigoPAF}/${fichaSeleccionadaPAF.value?.CodigoAsignatura}/${comentario.value}`, data);
     alert('Datos enviados correctamente.');
   } catch (error) {
     console.error('Error al enviar los datos:', error);

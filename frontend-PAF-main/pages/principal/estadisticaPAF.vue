@@ -142,14 +142,14 @@ const obtenerSemestres = async () => {
     semestresDisponibles.value = semestresUnicos;
 
     // Establecer semestre por defecto como el más reciente, solo si no hay una selección previa
-    if (!semestreSeleccionado.value) {
+    if (semestreSeleccionado.value === '') {
       semestreSeleccionado.value = semestresUnicos[semestresUnicos.length - 1];  // Seleccionar el semestre más reciente (último semestre)
     }
 
-      fetchCantidadPersonasSai(rut.value);
-      fetchCantidadPafSai(rut.value);
-      fetchCantidadPafPorEstado(rut.value);
-      fetchPafPorUnidadMayor(rut.value);
+      fetchCantidadPersonasSai();
+      fetchCantidadPafSai();
+      fetchCantidadPafPorEstado();
+      fetchPafPorUnidadMayor();
       configurarGraficos();
   } catch (error) {
     console.error('Error al obtener los semestres:', error);
@@ -158,6 +158,9 @@ const obtenerSemestres = async () => {
 // Las demás funciones para obtener datos y configurar gráficos son iguales.
 const fetchCantidadPersonasSai = async () => {
   try {
+    if (!semestreSeleccionado.value) {
+      obtenerSemestres();
+    }
     const response = await $axios.get(`/api/paf-en-linea/estadisticas/${semestreSeleccionado.value}`);
     cantidadPersonasSai.value = response.data.total_profesores;
     cantidadPafUnicas.value = response.data.total_pipelsoft_unicos;
@@ -176,7 +179,9 @@ const recargarPagina = () => {
 
 const fetchCantidadPafSai = async () => {
   try {
-    
+    if (!semestreSeleccionado.value) {
+      obtenerSemestres();
+    }
     const response = await $axios.get(`/api/paf-en-linea/estadisticas/PafActivas/${semestreSeleccionado.value}`);
     cantidadPafActivas.value = response.data.conteo;
   } catch (error) {
@@ -191,6 +196,9 @@ const cerrarModal = () => {
 
 const fetchPafPorUnidadMayor = async () => {
   try {
+    if (!semestreSeleccionado.value) {
+      obtenerSemestres();
+    }
     const response = await $axios.get(`/api/paf-en-linea/estadisticas/frecuencia-unidades-mayores/${semestreSeleccionado.value}`);
     const unidadesData = response.data;
     pafPorUnidadMayorChartData.value = {
@@ -528,12 +536,12 @@ const configurarGraficos = () => {
 
 onMounted(async () => {
   await Promise.all([
-    obtenerSemestres(),
     fetchCantidadPersonasSai(),
     fetchCantidadPafSai(),
     fetchCantidadPafPorEstado(),
     fetchPromedioTiempoPorEstado(),
     fetchPafPorUnidadMayor(),
+    obtenerSemestres(),
   ]);
 
   configurarGraficos();

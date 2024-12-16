@@ -87,7 +87,7 @@ const fetchProfesorYContratos = async () => {
   }
 
   try {
-    const contratosResponse = await $axios.get(`/pipelsoft/contratos-run/${run.value}`);
+    const contratosResponse = await $axios.get(`/api/paf-en-linea/pipelsoft/contratos-run/${run.value}`);
     if (contratosResponse.data && Array.isArray(contratosResponse.data)) {
       contratos.value = contratosResponse.data;
       errorMessage.value = "";

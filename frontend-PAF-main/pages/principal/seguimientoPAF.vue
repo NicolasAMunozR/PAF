@@ -138,7 +138,7 @@ const nextPage = () => {
 // Fetch inicial de datos
 const fetchContratos = async () => {
   try {
-    const response = await $axios.get(`/pipelsoft/contratos`);
+    const response = await $axios.get(`/api/paf-en-linea/pipelsoft/contratos`);
     if (response.data && Array.isArray(response.data)) {
       contratos.value = response.data;
     } else {

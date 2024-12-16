@@ -112,7 +112,7 @@ const handleRowStatusChanged = (persona: Persona) => {
 
 onMounted(async () => {
   try {
-    const response = await $axios.get('/historial');
+    const response = await $axios.get('/api/paf-en-linea/historial');
     personas.value = response.data;
   } catch (error) {
     console.error('Error al obtener personas:', error);

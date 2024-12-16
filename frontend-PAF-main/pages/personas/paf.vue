@@ -92,7 +92,7 @@ const filteredPersonas = computed(() => {
 const obtenerDatosPaf = async () => {
   try {
     if (!codigoPaf.value) return;
-    const response = await $axios.get(`/contratos/codigo_paf/${codigoPaf.value}`);
+    const response = await $axios.get(`/api/paf-en-linea/contratos/codigo_paf/${codigoPaf.value}`);
     console.log('Datos de la PAF:', response.data);
     if (response.data) {
       paf.value = response.data.map((item: any) => {
@@ -136,7 +136,7 @@ const volver = () => {
 
 const dejarListaPaf = async (codigoPaf: string) => {
   try {
-    await $axios.put(`/historial/${codigoPaf}/actualizarBanderaAceptacion`, {
+    await $axios.put(`/api/paf-en-linea/historial/${codigoPaf}/actualizarBanderaAceptacion`, {
       nuevaBanderaAceptacion: 1,
     });
     router.push('/personas');
