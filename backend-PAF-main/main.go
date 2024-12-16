@@ -77,7 +77,7 @@ func main() {
 
 	// Ruta para obtener las estadísticas
 	///api/paf-en-linea
-	r.GET("/api/paf-en-linea/estadisticas/:semestre", estadisticasController.ObtenerEstadisticas)
+	r.GET("/api/paf-en-linea/estadisticas/:semestreId", estadisticasController.ObtenerEstadisticas)
 	r.GET("/api/paf-en-linea/estadisticas/unidad/:nombreUnidadMayor/:semestre", estadisticasController.ContarRegistrosPorUnidadMayor)
 	r.GET("/api/paf-en-linea/estadisticas/frecuencia-unidades-mayores/:semestre", estadisticasController.ObtenerFrecuenciaNombreUnidadMayor)
 	r.GET("/api/paf-en-linea/estadisticas/PafActivas/:semestre", estadisticasController.ContarRegistrosPorCodEstado)
@@ -125,9 +125,9 @@ func main() {
 	// 5
 	r.GET("/api/paf-en-linea/estadisticas/profesores/estado/:codEstadoPAF/:semestre", estadisticasController.ObtenerUnidadesMayoresPorCodEstadoPAF)
 	// 6 arreglar
-	r.GET("/api/paf-en-linea/estadisticas/6/:unidadMayor/:unidadMenor/semestre", estadisticasController.ObtenerEstadisticasPorUnidad)
+	r.GET("/api/paf-en-linea/estadisticas/6/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerEstadisticasPorUnidad)
 	// 7 arreglar
-	r.GET("/api/paf-en-linea/estadisticas/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ContarRegistrosPorUnidadMayorYUnidadMenor)
+	r.GET("/api/paf-en-linea/estadisticas/7/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ContarRegistrosPorUnidadMayorYUnidadMenor)
 
 	// Ruta para obtener las unidades menores con profesores filtrados (PAF activos)
 	// 8.1
