@@ -55,12 +55,40 @@ func setupRoutes(r *gin.Engine) {
 	// Estadísticas
 	estadisticasService := service.NewEstadisticasService(DB.DBPersonal)
 	estadisticasController := controller.NewEstadisticasController(estadisticasService)
-	estadisticasRoutes := r.Group("/api/paf-en-linea/estadisticas")
+	estadisticas := r.Group("/api/paf-en-linea/estadisticas")
 	{
-		estadisticasRoutes.GET("/:semestreId", estadisticasController.ObtenerEstadisticas)
-		estadisticasRoutes.GET("/unidad/:nombreUnidadMayor/:semestre", estadisticasController.ContarRegistrosPorUnidadMayor)
-		estadisticasRoutes.GET("/frecuencia-unidades-mayores/:semestre", estadisticasController.ObtenerFrecuenciaNombreUnidadMayor)
-		// Resto de rutas de estadísticas...
+		// Rutas de estadisticas generales
+		estadisticas.GET("/:semestreId", estadisticasController.ObtenerEstadisticas)
+		estadisticas.GET("/unidad/:nombreUnidadMayor/:semestre", estadisticasController.ContarRegistrosPorUnidadMayor)
+		estadisticas.GET("/frecuencia-unidades-mayores/:semestre", estadisticasController.ObtenerFrecuenciaNombreUnidadMayor)
+		estadisticas.GET("/PafActivas/:semestre", estadisticasController.ContarRegistrosPorCodEstado)
+		estadisticas.GET("/pafActivas/unidad-mayor/:unidadMayor/:semestre", estadisticasController.ObtenerPafActivasPorUnidadHandler)
+		estadisticas.GET("/unidad-mayor/:unidad-mayor/:semestre", estadisticasController.ObtenerEstadisticasPorUnidadMayorHandler)
+		estadisticas.GET("/unidad-mayor/unidades-menores-frecuencia/:unidad-mayor/semestre", estadisticasController.ObtenerFrecuenciaNombreUnidadMenorPorUnidadMayorHandler)
+		estadisticas.GET("/obtener-y-comparar-runs", estadisticasController.ObtenerYCompararRunsHandler)
+
+		// Rutas específicas de unidades mayores
+		estadisticas.GET("/unidades-mayores/cant_profesores/:semestre", estadisticasController.ObtenerUnidadesMayoresHandler)
+		estadisticas.GET("/unidades-mayores/sin_profesores/:semestre", estadisticasController.ObtenerUnidadesMayoresSinProfesoresEnPipelsoftHandler)
+		estadisticas.GET("/unidades-mayores/profesores-filtrados/:semestre", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosHandler)
+		estadisticas.GET("/unidades-mayores/profesores-codestado/:semestre", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivos)
+		estadisticas.GET("/profesores/estado/:codEstadoPAF/:semestre", estadisticasController.ObtenerUnidadesMayoresPorCodEstadoPAF)
+		estadisticas.GET("/6/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerEstadisticasPorUnidad)
+		estadisticas.GET("/7/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ContarRegistrosPorUnidadMayorYUnidadMenor)
+
+		// Rutas para obtener unidades menores con profesores filtrados (PAF activos)
+		estadisticas.GET("/unidades-menores-con-profesores-activos/8_1/:unidadMayor/:semestre", estadisticasController.ObtenerUnidadesMenoresConProfesoresPorUnidadMayor)
+		estadisticas.GET("/unidades-menores-sin-profesores/8_3/:unidadMayor/:semestre", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayor)
+		estadisticas.GET("/unidades-menores-sin-profesores-8-2/:unidadMayor/:semestre", estadisticasController.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3)
+		estadisticas.GET("/unidades-menores-con-profesores-paf-activos/8_4/:unidadMayor/:semestre", estadisticasController.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivos)
+		estadisticas.GET("/unidades-menores/:codEstadoPAF/:unidadMayor/:semestre", estadisticasController.ObtenerUnidadesMenoresPorCodEstadoPAF)
+
+		// Rutas 9.x
+		estadisticas.GET("/unidadesmenores/profesores/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerUnidadesMenoresConProfesoresPorUnidadMayor9_1)
+		estadisticas.GET("/unidadesmenores/sinprofesores/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_9_2)
+		estadisticas.GET("/unidadesmayores/filtradospafactivos/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivasPorUnidadMayorYUnidadMenor9_3)
+		estadisticas.GET("/unidadesmenores/filtradospafactivos/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerUnidadesMenoresConProfesoresFiltradosPAFActivosPorUnidadMayorYUnidadMenor9_4)
+		estadisticas.GET("/unidadesmenores/porcodestadopaf/:codEstadoPAF/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerUnidadesMenoresPorCodEstadoPAFPorCodEstadoYUnidadMayorYUnidadMenor9_5)
 	}
 
 	// Contratos
@@ -106,15 +134,12 @@ func main() {
 	// Configurar rutas
 	setupRoutes(r)
 
-	// Iniciar el cron job para actualización periódica
-	// de acuerdo al sai profes sin paf y sin contrato sin contar profesores repetidos, desde pipelsoft estan los ruts con un 0 al inicio y con digito verificador
-	// luego se busca en la tabla de contratos, y hay revisamos cuales ruts corresponden,
 	go iniciarCronJob()
 
-	// Iniciar el servidor
-	log.Println("Servidor iniciado en el puerto 8080")
+	// Iniciar el servidor Gin
+	log.Println("Servidor escuchando en el puerto 3000...")
 	if err := r.Run(":3000"); err != nil {
-		log.Fatalf("Error al iniciar el servidor: %s", err)
+		log.Fatal("Error al iniciar el servidor:", err)
 	}
 }
 
