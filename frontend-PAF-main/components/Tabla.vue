@@ -105,7 +105,7 @@ export default {
       if (!confirmDelete) return;
       
       // Realiza la solicitud DELETE
-      await this.$axios.delete(`/historial/${codigoPAF}`);
+      await this.$axios.delete(`/api/paf-en-linea/historial/${codigoPAF}`);
       
       // Muestra una notificación o mensaje de éxito
       alert(`PAF con código ${codigoPAF} eliminada con éxito.`);
