@@ -153,3 +153,24 @@ func (controller *PipelsoftController) ObtenerContratosPorRUNMostrarTodo(c *gin.
 	// Devolver todos los registros encontrados
 	c.JSON(http.StatusOK, records)
 }
+
+// Handler para buscar por RunEmpleado y retornar múltiples registros
+func (controller *PipelsoftController) ObtenerContratosPorIdPafMostrarTodo(c *gin.Context) {
+	runEmpleado := c.Param("rut")
+
+	// Llamar al servicio
+	records, err := controller.Service.ObtenerContratosPorIdPafMostrarTodo(runEmpleado)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al buscar los registros"})
+		return
+	}
+
+	// Si no se encontraron registros, devolver un mensaje adecuado
+	if len(records) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"message": "No se encontraron registros"})
+		return
+	}
+
+	// Devolver todos los registros encontrados
+	c.JSON(http.StatusOK, records)
+}
