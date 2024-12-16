@@ -69,7 +69,7 @@
           sessionStorage.setItem("rut", this.run); // Guardar en sesión
           try {
             // Accede a $axios desde el contexto del componente
-            const response = await this.$axios.get(`/usuario/rut/${this.run}`);
+            const response = await this.$axios.get(`/api/paf-en-linea/usuario/rut/${this.run}`);
             if (!response.data) {
               this.errorMessage = "Usuario no encontrado.";
               return;

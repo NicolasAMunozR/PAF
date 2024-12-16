@@ -12,6 +12,18 @@
   >
     Enviar Selección
   </button>
+  <br>
+ <!-- Modal para ingresar el comentario -->
+ <div v-if="mostrarDialogo" class="modal-overlay">
+    <div class="modal">
+      <h3>Ingrese su comentario</h3>
+      <textarea v-model="comentario" class="textarea-comentario" placeholder="Escriba su comentario aquí..."></textarea>
+      <div class="modal-actions">
+        <button @click="cancelarEnvio" class="cancel-button">Cancelar</button>
+        <button @click="enviarSeleccion" class="confirm-button">Enviar</button>
+      </div>
+    </div>
+  </div>
 </div>
   <div class="flex flex-wrap" @click="cerrarTodosLosBloques">
     <!-- Tabla de horarios -->
@@ -174,6 +186,14 @@ import { useNuxtApp } from '#app'
 
 const historialSeleccionado = computed(() => persona.value.filter((p) => p.ID !== 0) || null);
 console.log(historialSeleccionado)
+
+const mostrarDialogo = ref(false);
+const comentario = ref('');
+
+const cancelarEnvio = () => {
+  mostrarDialogo.value = false;
+  comentario.value = ''; // Limpia el comentario al cancelar
+};
 
 
 // Método para limpiar selecciones
@@ -494,7 +514,6 @@ const enviarSeleccion = async () => {
     alert('Por favor selecciona una ficha de PAF y una de asignatura.');
     return;
   }
-
   try {
     const codigoPAF = fichaSeleccionadaPAF.value?.CodigoPaf; // Ajustar si el código es otro campo
     const bloquesSeleccionadosString = computed(() => bloquesSeleccionados.value.join(','))
@@ -547,7 +566,7 @@ const result = resultado.map(item => {
     const data = resultado[0];
     data.bloque = result;
     console.log(data);
-    await $axios.post(`/historial/post/${codigoPAF}/${fichaSeleccionadaPAF.value?.CodigoAsignatura}`, data);
+    await $axios.post(`/historial/post/${codigoPAF}/${fichaSeleccionadaPAF.value?.CodigoAsignatura}/${comentario.value}`, data);
     alert('Datos enviados correctamente.');
   } catch (error) {
     console.error('Error al enviar los datos:', error);
@@ -668,5 +687,54 @@ const coloresPAF = [
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   padding: 10px;
 }
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
+.modal {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 90%;
+}
+
+.textarea-comentario {
+  width: 100%;
+  height: 100px;
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cancel-button {
+  background: #ccc;
+  border: none;
+  padding: 10px 15px;
+  margin-right: 10px;
+  border-radius: 4px;
+}
+
+.confirm-button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+}
 </style>

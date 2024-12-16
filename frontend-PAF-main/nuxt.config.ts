@@ -10,7 +10,4 @@ export default defineNuxtConfig({
   devServer: {
     port: 3001
   },
-  plugins: [
-    '~/plugins/extend-routes.ts', // Asegúrate de que el archivo de plugin se registre aquí
-  ]
 })
