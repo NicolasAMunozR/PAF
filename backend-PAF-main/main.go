@@ -41,6 +41,7 @@ func setupRoutes(r *gin.Engine) {
 		pipelsoftRoutes.GET("/obtenerContratos/mostrarTodo/:rut", pipelsoftController.ObtenerContratosPorRUNMostrarTodo)
 		pipelsoftRoutes.GET("/obtenerContratos/mostrarTodo/idPaf/:rut", pipelsoftController.ObtenerContratosPorRUNMostrarTodo)
 		pipelsoftRoutes.GET("/unidades-menores", pipelsoftController.ObtenerUnidadesMenores)
+		pipelsoftRoutes.GET("/contratos/codigo_paf/:codigo_paf", pipelsoftController.ObtenerPorCodigoPAF)
 	}
 
 	// Horarios
