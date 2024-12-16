@@ -43,6 +43,7 @@ interface Persona {
   SemestrePaf: string;
   DesEstado: string;
   UltimaModificacion: string;
+  Comentario: string;
 }
 
 const personas = ref<Persona[]>([]);
@@ -55,7 +56,6 @@ const filtros = ref({
   jerarquia: '',
   semestre: '',
   nombreAsignatura: '',
-  
 });
 const sortBy = ref('nombres');
 const sortOrder = ref('asc');

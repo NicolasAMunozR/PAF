@@ -11,6 +11,7 @@
           <th class="px-4 py-3 text-left font-semibold">Sección</th>
           <th class="px-4 py-3 text-left font-semibold">Cupos</th>
           <th class="px-4 py-3 text-left font-semibold">Semestre de PAF</th>
+          <th v-if="showButton" class="px-4 py-3 text-left font-semibold">Comentarios</th>
           <th v-if="showButtons" class="px-4 py-3 text-left font-semibold">Opciones</th>
           <th v-if="showButton" class="px-4 py-3 text-left font-semibold">Opciones</th>
         </tr>
@@ -25,6 +26,7 @@
           <td class="px-4 py-3 text-gray-700">{{ persona.seccion }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.Cupo }} {{ persona.cupo }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.Semestre }} {{ persona.SemestrePaf }}</td>
+          <td v-if="showButton" class="px-4 py-3 text-gray-700">{{ persona.Comentario }}</td>
           <td v-if="showButtons" class="px-4 py-3">
             <NuxtLink :to="`/personas/paf?codigoPaf=${persona.CodigoPAF}`" class="button">Ver PAF</NuxtLink>
             <br>

@@ -13,17 +13,23 @@
     Enviar Selección
   </button>
   <br>
- <!-- Modal para ingresar el comentario -->
- <div v-if="mostrarDialogo" class="modal-overlay">
-    <div class="modal">
-      <h3>Ingrese su comentario</h3>
-      <textarea v-model="comentario" class="textarea-comentario" placeholder="Escriba su comentario aquí..."></textarea>
-      <div class="modal-actions">
-        <button @click="cancelarEnvio" class="cancel-button">Cancelar</button>
-        <button @click="enviarSeleccion" class="confirm-button">Enviar</button>
-      </div>
+  <button
+    v-if="fichaSeleccionadaPAF && bloquesSeleccionados.length > 0"
+    @click="enviarSeleccion1"
+    class="procesar-button"
+  >
+    Enviar Selección Con Comentario
+  </button>
+  <div v-if="fichaSeleccionadaPAF && bloquesSeleccionados.length > 0 && mostrarDialogo" class="modal-overlay">
+  <div class="modal">
+    <h3>Ingrese su comentario</h3>
+    <textarea v-model="comentario" class="textarea-comentario" placeholder="Escriba su comentario aquí..."></textarea>
+    <div class="modal-actions">
+      <button @click="cancelarEnvio" class="cancel-button">Cancelar</button>
+      <button @click="enviarSeleccion" class="confirm-button">Enviar</button>
     </div>
   </div>
+</div>
 </div>
   <div class="flex flex-wrap" @click="cerrarTodosLosBloques">
     <!-- Tabla de horarios -->
@@ -508,11 +514,21 @@ const obtenerDatosPersona = async (semestreGuardado: string | null) => {
     console.error("Error al obtener los datos:", error);
   }
 };
+const enviarSeleccion1 = async () => {
+  if (!fichaSeleccionadaPAF || !fichaSeleccionadaAsignatura) {
+    alert('Por favor selecciona una ficha de PAF y una de asignatura.');
+    return;
+  }
+  mostrarDialogo.value = true;
+};
 
 const enviarSeleccion = async () => {
   if (!fichaSeleccionadaPAF || !fichaSeleccionadaAsignatura) {
     alert('Por favor selecciona una ficha de PAF y una de asignatura.');
     return;
+  }
+  if(comentario.value === '') {
+    comentario.value = 'Sin comentarios';
   }
   try {
     const codigoPAF = fichaSeleccionadaPAF.value?.CodigoPaf; // Ajustar si el código es otro campo
@@ -568,6 +584,7 @@ const result = resultado.map(item => {
     console.log(data);
     await $axios.post(`/api/paf-en-linea/historial/post/${codigoPAF}/${fichaSeleccionadaPAF.value?.CodigoAsignatura}/${comentario.value}`, data);
     alert('Datos enviados correctamente.');
+    mostrarDialogo.value = false;
   } catch (error) {
     console.error('Error al enviar los datos:', error);
     alert('Hubo un error al enviar los datos.');
@@ -693,48 +710,45 @@ const coloresPAF = [
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Asegúrate de que esté por encima de otros elementos */
 }
 
 .modal {
-  background: white;
+  background-color: white;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
-  width: 90%;
+  width: 400px; /* Ajusta el tamaño según lo necesites */
+  z-index: 10000; /* Asegúrate de que el modal esté encima del overlay */
 }
 
 .textarea-comentario {
   width: 100%;
   height: 100px;
-  margin-bottom: 20px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
 }
 
 .modal-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.cancel-button, .confirm-button {
+  padding: 10px 20px;
+  cursor: pointer;
 }
 
 .cancel-button {
-  background: #ccc;
-  border: none;
-  padding: 10px 15px;
-  margin-right: 10px;
-  border-radius: 4px;
+  background-color: #f44336;
+  color: white;
 }
 
 .confirm-button {
-  background: #007bff;
+  background-color: #4CAF50;
   color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 4px;
 }
+
 </style>
