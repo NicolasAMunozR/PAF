@@ -39,7 +39,8 @@ func setupRoutes(r *gin.Engine) {
 		pipelsoftRoutes.GET("/contratos-nombreUnidadMenor/:nombreUnidadMenor", pipelsoftController.ObtenerContratosPorNombreUnidadMenor)
 		pipelsoftRoutes.GET("/contratos-nombreUnidadMayor/:nombreUnidadMayor", pipelsoftController.ObtenerContratosPorNombreUnidadMayor)
 		pipelsoftRoutes.GET("/obtenerContratos/mostrarTodo/:rut", pipelsoftController.ObtenerContratosPorRUNMostrarTodo)
-		pipelsoftRoutes.GET("/obtenerContratos/mostrarTodo/idPaf/:rut", pipelsoftController.ObtenerContratosPorRUNMostrarTodo)
+		//modificado
+		pipelsoftRoutes.GET("/obtenerContratos/mostrarTodo/idPaf/:rut", pipelsoftController.ObtenerContratosPorIdPafMostrarTodo)
 		pipelsoftRoutes.GET("/unidades-menores", pipelsoftController.ObtenerUnidadesMenores)
 		pipelsoftRoutes.GET("/contratos/codigo_paf/:codigo_paf", pipelsoftController.ObtenerPorCodigoPAF)
 	}
