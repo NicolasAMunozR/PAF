@@ -22,7 +22,7 @@ func NewEstadisticasController(service *service.EstadisticasService) *Estadistic
 // ObtenerEstadisticas maneja la solicitud para obtener las estadísticas generales
 func (c *EstadisticasController) ObtenerEstadisticas(ctx *gin.Context) {
 
-	semestre := ctx.Param("semestre")
+	semestre := ctx.Param("semestreId")
 	// Llamar al servicio para obtener las estadísticas
 	estadisticas, err := c.Service.ObtenerEstadisticas(semestre)
 	if err != nil {
