@@ -10,4 +10,7 @@ export default defineNuxtConfig({
   devServer: {
     port: 3001
   },
+  app: {
+    baseURL: '/paf-en-linea' // Prefijo para las rutas de la aplicación
+  }
 })

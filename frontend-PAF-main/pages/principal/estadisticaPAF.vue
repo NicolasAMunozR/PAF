@@ -394,6 +394,7 @@ const configurarGraficos = () => {
             }
             unidadesData = response.data.unidadesMayores;
             labelNuevo = 'Cantidad de PAF por Unidad Mayor';
+            console.log('Cantidad de PAF por Unidad Mayor:',response.data);
           } else {
             if (label === 'Profesores con PAF') {
             response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-menores-con-profesores-activos/8_1/${unidadSeleccionada.value}/${semestreSeleccionado.value}`);
