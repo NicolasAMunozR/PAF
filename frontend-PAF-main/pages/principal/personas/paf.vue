@@ -6,7 +6,7 @@
     </button>
   </div>
   <div class="container">
-    <Filtros @filter="filterData" @sort="sortData" />
+    <Filtros @filter="filterData" @sort="sortData" :isPAF="true" />
         <!-- Mostrar la lista de personas -->
         <div v-if="filteredPersonas.length > 0">
           <div v-for="persona in filteredPersonas" :key="persona.CodigoPaf" class="paf-container">
@@ -43,7 +43,7 @@
 import { useRoute, useRouter } from 'vue-router';
 import { ref, onMounted } from 'vue';
 import { useNuxtApp } from '#app';
-import Filtros from '~/components/Filtros.vue'
+import Filtros from '../../../components/Filtros.vue'
 
 const route = useRoute();
 const router = useRouter();
@@ -72,7 +72,7 @@ const sortOrder = ref('asc');
 const filteredPersonas = computed(() => {
   let filtered = paf.value.filter(contrato => {
     return (
-      (contrato.SemestrePaf || '').toLowerCase().includes((filtros.value.semestre || '').toLowerCase())
+      (contrato.SemestrePaf || '').toLowerCase().includes((filtros.value.semestre || '').toLowerCase()) 
     );
   });
 

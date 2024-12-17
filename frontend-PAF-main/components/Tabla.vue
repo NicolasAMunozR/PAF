@@ -28,13 +28,13 @@
           <td class="px-4 py-3 text-gray-700">{{ persona.Semestre }} {{ persona.SemestrePaf }}</td>
           <td v-if="showButton" class="px-4 py-3 text-gray-700">{{ persona.Comentario }}</td>
           <td v-if="showButtons" class="px-4 py-3">
-            <NuxtLink :to="`/personas/paf?codigoPaf=${persona.CodigoPAF}`" class="button">Ver PAF</NuxtLink>
+            <NuxtLink :to="`/principal/personas/paf?codigoPaf=${persona.CodigoPAF}`" class="button">Ver PAF</NuxtLink>
             <br>
             <br>
-            <NuxtLink :to="`/personas/horario?run=${persona.Run}`" class="button">Ver Horarios</NuxtLink>
+            <NuxtLink :to="`/principal/personas/horario?run=${persona.Run}`" class="button">Ver Horarios</NuxtLink>
           </td>
           <td v-if="showButton" class="px-4 py-3">
-            <NuxtLink :to="`/personas/paf?codigoPaf=${persona.IdPaf}`" class="button">Ver PAF</NuxtLink>
+            <NuxtLink :to="`/principal/personas/paf?codigoPaf=${persona.IdPaf}`" class="button">Ver PAF</NuxtLink>
             <br>
             <br>
             <button @click="deletePAF(persona.IdPaf)" class="buttons">Eliminar</button>
@@ -105,7 +105,7 @@ export default {
       if (!confirmDelete) return;
       
       // Realiza la solicitud DELETE
-      await this.$axios.delete(`/api/paf-en-linea/historial/${codigoPAF}`);
+      await this.$axios.delete(`/historial/${codigoPAF}`);
       
       // Muestra una notificación o mensaje de éxito
       alert(`PAF con código ${codigoPAF} eliminada con éxito.`);

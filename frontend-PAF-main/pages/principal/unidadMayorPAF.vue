@@ -19,6 +19,7 @@
               <th>Estado del Proceso</th>
               <th>Descripción del Proceso</th>
               <th>Fecha de la última Actualización de Estado</th>
+              <th>Semestre</th>
               <th>Historial de Estados</th>
             </tr>
           </thead>
@@ -34,6 +35,7 @@
                 {{ new Date(contrato.PipelsoftData.UltimaModificacion).toLocaleDateString() }}
                 {{ new Date(contrato.PipelsoftData.UltimaModificacion).toLocaleTimeString() }} 
               </td>
+              <td>{{ contrato.PipelsoftData.Semestre }}</td>
               <td>
                 <div v-for="(estado, idx) in contrato.PipelsoftData.historialEstados" :key="idx">
                   <p>
@@ -83,6 +85,7 @@ const filtros = ref({
   nombreUnidadMenor: '',
   run: '',
   semestre: '',
+  ruta: '/unidadMayorPAF',
 });
 const sortBy = ref('');
 const sortOrder = ref('asc');

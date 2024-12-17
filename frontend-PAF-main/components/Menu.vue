@@ -76,9 +76,9 @@ export default {
     return {
       isMenuOpen: false,
       menuItems: [
-        { path: "/principal/personas", label: "Personas", pages: ["/principal/personas", "/principal/historyPAF", "/personas/horario", "/personas/paf"] },
-        { path: "/principal/historyPAF", label: "Historial de PAF", pages: ["/principal/personas", "/principal/historyPAF", "/personas/horario", "/personas/paf"] },
-        { path: "/seguimientoPAF", label: "Seguimiento de la PAF", pages: ["/principal/seguimientoPAF", "/principal/estadisticaPAF"] },
+        { path: "/principal/personas", label: "Personas", pages: ["/principal/personas", "/principal/historyPAF", "/principal/personas/horario", "/principal/personas/paf"] },
+        { path: "/principal/historyPAF", label: "Historial de PAF", pages: ["/principal/personas", "/principal/historyPAF", "/principal/personas/horario", "/principal/personas/paf"] },
+        { path: "/principal/seguimientoPAF", label: "Seguimiento de la PAF", pages: ["/principal/seguimientoPAF", "/principal/estadisticaPAF"] },
         { path: "/principal/estadisticaPAF", label: "Estadísticas de PAF", pages: ["/principal/seguimientoPAF", "/principal/estadisticaPAF"] },
         { path: "/principal/unidadMayorPAF", label: "Gestión de Unidad Mayor", pages: ["/principal/unidadMayorPAF", "/principal/estadisticaUnidadPAF"] },
         { path: "/principal/estadisticaUnidadPAF", label: "Estadísticas de Unidad", pages: ["/principal/unidadMayorPAF", "/principal/estadisticaUnidadPAF"] },

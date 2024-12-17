@@ -150,30 +150,31 @@ const filtros = ref({
   fechaUltimaModificacionProceso: '',
   nombreUnidadMenor: '',
   nombreUnidadMayor: '',
+  ruta: '',
 });
 
 const sortBy = ref('nombres');
 const sortOrder = ref('asc');
 
-const routes = [
-  { path: '/seguimientoPAF', name: 'seguimientoPAF' },
-  { path: '/unidadMayorPAF', name: 'unidadMayorPAF' },
-  { path: '/paf', name: 'paf' },
-];
 const route = useRoute();
 const isSeguimientoPAF = ref(false);
 const isUnidadMayorPAF = ref(false);
 const isPaf = ref(false);
 
-watchEffect(() => {
-  const currentRoute = useRoute().name;
-  isSeguimientoPAF.value = currentRoute === 'seguimientoPAF';
-  isUnidadMayorPAF.value = currentRoute === 'unidadMayorPAF';
-  isPaf.value = currentRoute === 'paf';
-});
+const aplicar = () => {
+  if (route.path === "/principal/seguimientoPAF") {
+    isSeguimientoPAF.value = true;
+  } else if (route.path === "/principal/unidadMayorPAF") {
+    isUnidadMayorPAF.value = true;
+  } else if (route.path === "/principal/personas/paf") {
+    isPaf.value = true;
+  }
+}
 
 // Resetear filtros al montar el componente
 onMounted(() => {
+  aplicar();
+  console.log("Página actual:", route.path);
   resetFilters();
 });
 
@@ -215,6 +216,7 @@ const resetFilters = () => {
     fechaUltimaModificacionProceso: '',
     nombreUnidadMenor: '',
     nombreUnidadMayor: '',
+    ruta: '',
   };
   sortBy.value = 'nombres'; // Resetear ordenamiento
   sortOrder.value = 'asc'; // Resetear dirección de ordenamiento
