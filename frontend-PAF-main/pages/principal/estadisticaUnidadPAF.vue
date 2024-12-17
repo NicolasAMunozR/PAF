@@ -94,7 +94,6 @@
 
   
   const rut = ref(''); // Sin tipo
-  console.log(rut);
 
   ///pipelsoft/contratos
   //item.PipelsoftData.Semestre,
@@ -102,9 +101,8 @@
 const semestresDisponibles = ref([]); // Semestres disponibles de la API
 
 // Función para obtener los semestres de la respuesta de la API
-const obtenerSemestres = async () => {
+const obtenerSemestres = async (rut) => {
   try {
-    console.log("dgsdgsdsfffff", valor.value)
     const response = await $axios.get(`/api/paf-en-linea/pipelsoft/contratos`);
     // Extraer los semestres únicos de la respuesta
     const semestres = response.data.map(item => item.PipelsoftData.Semestre);
@@ -127,11 +125,11 @@ const obtenerSemestres = async () => {
     if (!semestreSeleccionado.value) {
       semestreSeleccionado.value = semestresUnicos[semestresUnicos.length - 1];  // Seleccionar el semestre más reciente (último semestre)
     }
-      fetchCantidadPersonasSai(valor.value);
-      fetchCantidadPafSai(valor.value);
-      fetchCantidadPafPorEstado(valor.value);
-      fetchPafPorUnidadMayor(valor.value);
-      configurarGraficos(valor.value);
+      fetchCantidadPersonasSai(rut.value);
+      fetchCantidadPafSai(rut.value);
+      fetchCantidadPafPorEstado(rut.value);
+      fetchPafPorUnidadMayor(rut.value);
+      configurarGraficos();
   } catch (error) {
     console.error('Error al obtener los semestres:', error);
   }
@@ -156,20 +154,17 @@ const obtenerSemestres = async () => {
   const totalPorcPaf = ref([]);
   const unidadSeleccionada = ref(null); // Unidad seleccionada
   const detalleUnidadSeleccionada = ref(null); // Detalles de la unidad seleccionada
-  const valor = ref('');
+  
   const fetchCantidadPersonasSai = async (rut) => {
     try {
       if(!semestreSeleccionado.value){
-        valor.value = rut;
-        obtenerSemestres();
+        obtenerSemestres(rut);
       }
-
       const response1 = await $axios.get(`/api/paf-en-linea/usuario/rut/${rut}`)
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
-      const response = await $axios.get(`/api/paf-en-linea/estadisticas/unidad-mayor/${response1.data.UnidadMayor}/${semestreSeleccionado.value}`);
+      const response = await $axios.get(`/api/paf-en-linea/estadisticas/unidad-mayor/${response1.data.unidadMayor}/${semestreSeleccionado.value}`);
       cantidadPersonasSai.value = response.data.total_profesores;
       cantidadPafUnicas.value = response.data.total_pipelsoft_unicos;
-      console.log("Datos específicos del controladorAHHHHHHH:", response.data); 
     } catch (error) {
       console.error('Error al obtener la cantidad de personas del SAI:', error);
     }
@@ -186,16 +181,13 @@ const cerrarModal = () => {
 
   const fetchCantidadPafSai = async (rut) => {
     try {
-      valor.value = rut;
       if(!semestreSeleccionado.value){
-        obtenerSemestres();
+        obtenerSemestres(rut);
       }
       const response1 = await $axios.get(`/api/paf-en-linea/usuario/rut/${rut}`)
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
       const response = await $axios.get(`/api/paf-en-linea/estadisticas/pafActivas/unidad-mayor/${response1.data.UnidadMayor}/${semestreSeleccionado.value}`);
       cantidadPafActivas.value = response.data.totalRuns;
-      console.log("Respuesta completa del controlador:", response); // Log completo de la respuesta del controlador
-      console.log("Datos específicos del controlador:", response.data); // Mostrar solo el contenido de 'data'
     } catch (error) {
       console.error('Error al obtener la cantidad de personas del SAI:', error);
     }
@@ -203,7 +195,6 @@ const cerrarModal = () => {
   
   const fetchCantidadPafPorEstado = async (rut) => {
     try {
-      valor.value = rut;
       if(!semestreSeleccionado.value){
         obtenerSemestres(rut);
       }
@@ -212,7 +203,6 @@ const cerrarModal = () => {
       localStorage.setItem('/unidadMayorPAF', response1.data.UnidadMayor);
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
       const response = await $axios.get(`/api/paf-en-linea/estadisticas/unidad-mayor/${response1.data.UnidadMayor}/${semestreSeleccionado.value}`);
-      console.log("Datos específicos del controlador estadisticas-unidad_mayor:", response.data); // Mostrar solo el contenido de 'data'
       // Ordenar el objeto EstadoProcesoCount para que Sin Solicitar sea el último
       const estadoProcesoCount = response.data.estado_proceso_count;
 
@@ -270,9 +260,8 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
   
   const fetchPafPorUnidadMayor = async (rut) => {
     try {
-      valor.value = rut;
       if(!semestreSeleccionado.value){
-        obtenerSemestres();
+        obtenerSemestres(rut);
       }
       const response1 = await $axios.get(`/api/paf-en-linea/usuario/rut/${rut}`)
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
@@ -406,8 +395,7 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
             } else if (label === 'Profesores sin PAF') {
               response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-menores-sin-profesores-8-2/${responseinicial.data.UnidadMayor}/${semestreSeleccionado.value}`);
             }
-            console.log("Datos específicos del controlador estadisticas-8-2:", response.data); // Mostrar solo el contenido de 'data'
-            unidadesData = response.data.unidades;
+            unidadesData = response.data;
             labelNuevo = "Cantidad de PAF por Unidad Menor";
           } else {
             if (label === 'Profesores con PAF') {
@@ -417,6 +405,7 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
               // CAMBIAR AQUÍ
             response = await $axios.get(`/api/paf-en-linea/estadisticas/unidadesmenores/sinprofesores/${responseinicial.data.UnidadMayor}/${unidadSeleccionada.value}/${semestreSeleccionado.value}`);
             }
+
             unidadesData = response.data;
             labelNuevo = "Cantidad de PAF por Unidad Mayor y Menor"; 
           }
@@ -461,7 +450,6 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
           if (!label || label.trim() === '') {
             throw new Error('El label está vacío. No se puede realizar la consulta.');
           }
-          console.log(rut);
           const responseinicial = await $axios.get(`/api/paf-en-linea/usuario/rut/${rut}`)
 
           let response = null;
@@ -474,8 +462,8 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
               // CAMBIAR AQUÍ
               response = await $axios.get(`/api/paf-en-linea/estadisticas/unidadesmenores/porcodestadopaf/${encodeURIComponent(label)}/${responseinicial.data.UnidadMayor}/${unidadSeleccionada.value}/${semestreSeleccionado.value}`);
           }
-          unidadesData = response.data.unidades;
-          console.log("Valor de unidadesData:", unidadesData);
+          unidadesData = response.data;
+          console.log("error datos RAROS", response.data)
           graficoModalData.value = {
             labels: Object.keys(unidadesData),
             datasets: [
@@ -590,9 +578,7 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
       semestreSeleccionado.value = semestresUnicos[semestresUnicos.length - 1];  // Seleccionar el semestre más reciente (último semestre)
     }
     rut.valueOf = sessionStorage.getItem('rut') || '';
-    console.log(rut.valueOf);
     await Promise.all([
-
       fetchCantidadPersonasSai(rut.valueOf),
       fetchCantidadPafPorEstado(rut.valueOf),
       fetchPromedioTiempoPorEstado(),
