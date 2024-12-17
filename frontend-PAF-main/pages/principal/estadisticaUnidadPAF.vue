@@ -169,6 +169,7 @@ const obtenerSemestres = async () => {
       const response = await $axios.get(`/api/paf-en-linea/estadisticas/unidad-mayor/${response1.data.unidadMayor}/${semestreSeleccionado.value}`);
       cantidadPersonasSai.value = response.data.total_profesores;
       cantidadPafUnicas.value = response.data.total_pipelsoft_unicos;
+      console.log("Datos específicos del controladorAHHHHHHH:", response.data); 
     } catch (error) {
       console.error('Error al obtener la cantidad de personas del SAI:', error);
     }
@@ -193,6 +194,8 @@ const cerrarModal = () => {
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
       const response = await $axios.get(`/api/paf-en-linea/estadisticas/pafActivas/unidad-mayor/${response1.data.UnidadMayor}/${semestreSeleccionado.value}`);
       cantidadPafActivas.value = response.data.totalRuns;
+      console.log("Respuesta completa del controlador:", response); // Log completo de la respuesta del controlador
+      console.log("Datos específicos del controlador:", response.data); // Mostrar solo el contenido de 'data'
     } catch (error) {
       console.error('Error al obtener la cantidad de personas del SAI:', error);
     }
@@ -209,6 +212,7 @@ const cerrarModal = () => {
       localStorage.setItem('/unidadMayorPAF', response1.data.UnidadMayor);
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
       const response = await $axios.get(`/api/paf-en-linea/estadisticas/unidad-mayor/${response1.data.UnidadMayor}/${semestreSeleccionado.value}`);
+      console.log("Datos específicos del controlador estadisticas-unidad_mayor:", response.data); // Mostrar solo el contenido de 'data'
       // Ordenar el objeto EstadoProcesoCount para que Sin Solicitar sea el último
       const estadoProcesoCount = response.data.estado_proceso_count;
 

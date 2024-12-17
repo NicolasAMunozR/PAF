@@ -120,6 +120,7 @@ func (s *EstadisticasService) ObtenerEstadisticas(semestre string) (*Estadistica
 // ContarRegistrosPorNombreUnidadMayor cuenta los registros en Pipelsoft que coinciden con el nombre de la unidad Mayor
 func (s *EstadisticasService) ContarRegistrosPorNombreUnidadMayor(nombreUnidadMayor string, semestre string) (int64, error) {
 	var count int64
+	fmt.Println("Valor de semestre:", semestre)
 
 	// Iniciar la consulta
 	query := s.DB.Model(&models.Pipelsoft{}).
@@ -144,23 +145,21 @@ func (s *EstadisticasService) ObtenerFrecuenciaNombreUnidadMayor(semestre string
 		NombreUnidadMayor string
 		Conteo            int
 	}
+	fmt.Println("Valor de semestre:", semestre)
 
-	// Iniciar la consulta
-	query := s.DB.Model(&models.Pipelsoft{}).
+	// Construir y ejecutar la consulta en una sola línea
+	err := s.DB.Model(&models.Pipelsoft{}).
 		Select("nombre_unidad_mayor, COUNT(*) as conteo").
-		Group("nombre_unidad_mayor")
+		Group("nombre_unidad_mayor").
+		Where(semestre != "", "semestre = ?", semestre).
+		Scan(&resultados).Error
 
-	// Aplicar el filtro por semestre si se proporciona
-	if semestre != "" {
-		query = query.Where("semestre = ?", semestre)
-	}
-
-	// Ejecutar la consulta
-	if err := query.Scan(&resultados).Error; err != nil {
+	if err != nil {
 		return nil, fmt.Errorf("error al obtener la frecuencia de NombreUnidadMayor: %w", err)
 	}
+	fmt.Println("Valor de semestre:", semestre)
 
-	// Convertir los resultados en un mapa
+	// Convertir los resultados a un mapa
 	frecuencia := make(map[string]int)
 	for _, resultado := range resultados {
 		frecuencia[resultado.NombreUnidadMayor] = resultado.Conteo
@@ -203,7 +202,7 @@ func (s *EstadisticasService) ContarRegistrosExcluyendoEstados(semestre string) 
 	return count, porcentaje, nil
 }
 
-func (s *EstadisticasService) ObtenerEstadisticasPorUnidadMayor(unidadMayor, semestre string) (*EstadisticasResponse, error) {
+func (s *EstadisticasService) ObtenerEstadisticasPorUnidadMayor(unidadMayor string, semestre string) (*EstadisticasResponse, error) {
 	var resp EstadisticasResponse
 
 	// Validar que el parámetro unidadMayor no esté vacío
@@ -244,9 +243,14 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidadMayor(unidadMayor, sem
 	// Contar registros por cada estado
 	for _, estado := range estados {
 		var count int64
-		if err := query.Where("des_estado = ?", estado).Count(&count).Error; err != nil {
+		// Modificar la consulta para filtrar por unidadMayor y semestre además de estado
+		queryEstados := s.DB.Model(&models.Pipelsoft{}).Where("des_estado = ? AND nombre_unidad_mayor = ? AND semestre = ?", estado, unidadMayor, semestre)
+
+		// Ejecutar la consulta y contar los registros
+		if err := queryEstados.Count(&count).Error; err != nil {
 			return nil, fmt.Errorf("error al contar los registros de pipelsofts con estado %s para la unidad mayor %s y semestre %s: %w", estado, unidadMayor, semestre, err)
 		}
+
 		resp.EstadoProcesoCount[estado] = int(count)
 
 		// Calcular el porcentaje de registros por cada estado
@@ -269,6 +273,8 @@ func (s *EstadisticasService) ObtenerFrecuenciaNombreUnidadMenorPorUnidadMayor(n
 		NombreUnidadMenor string
 		Conteo            int
 	}
+
+	fmt.Println("Valor de semestre:", semestre)
 
 	// Validar que se proporcionan los parámetros
 	if nombreUnidadMayor == "" || semestre == "" {
@@ -305,6 +311,9 @@ func (s *EstadisticasService) ContarRegistrosPorUnidadMayorConRuns(unidadMayor, 
 		Pluck("RUN", &runsProfesorDB).Error; err != nil {
 		return 0, 0, fmt.Errorf("error al obtener RUNs de ProfesorDB: %w", err)
 	}
+	fmt.Println("Valor de semestre:", semestre)
+	fmt.Println("Valor de semestre:", runsProfesorDB)
+	fmt.Println("Valor de unidad_mayor:", unidadMayor)
 
 	// Paso 2: Filtrar Pipelsoft por RUNs coincidentes, unidad mayor y semestre
 	if err := s.DB.Model(&models.Pipelsoft{}).
@@ -324,6 +333,8 @@ func (s *EstadisticasService) ContarRegistrosPorUnidadMayorConRuns(unidadMayor, 
 		Count(&totalRUNs).Error; err != nil {
 		return 0, 0, fmt.Errorf("error al contar RUNs únicos en Pipelsoft: %w", err)
 	}
+	fmt.Println("Valor de count:", count)
+	fmt.Println("Valor de total:", totalRUNs)
 
 	return count, totalRUNs, nil
 }
