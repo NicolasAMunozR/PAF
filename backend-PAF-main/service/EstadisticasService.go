@@ -151,7 +151,7 @@ func (s *EstadisticasService) ObtenerFrecuenciaNombreUnidadMayor(semestre string
 	err := s.DB.Model(&models.Pipelsoft{}).
 		Select("nombre_unidad_mayor, COUNT(*) as conteo").
 		Group("nombre_unidad_mayor").
-		Where(semestre != "", "semestre = ?", semestre).
+		Where("semestre = ?", semestre).
 		Scan(&resultados).Error
 
 	if err != nil {

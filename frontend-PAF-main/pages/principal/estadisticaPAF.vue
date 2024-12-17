@@ -392,6 +392,7 @@ const configurarGraficos = () => {
             } else if (label === 'Profesores sin PAF') {
             response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-mayores/sin_profesores/${semestreSeleccionado.value}`);
             }
+            console.log("data", response.data)
             unidadesData = response.data.unidadesMayores;
             labelNuevo = 'Cantidad de PAF por Unidad Mayor';
             console.log('Cantidad de PAF por Unidad Mayor:',response.data);
@@ -401,6 +402,7 @@ const configurarGraficos = () => {
             } else if (label === 'Profesores sin PAF') {
             response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-menores-sin-profesores-8-2/${unidadSeleccionada.value}/${semestreSeleccionado.value}`);
             }
+            console.log("data2", response.data)
             unidadesData = response.data;
             labelNuevo = 'Cantidad de PAF por Unidad Menor';
           }
