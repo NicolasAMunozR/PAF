@@ -632,6 +632,7 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMe
 		return nil, fmt.Errorf("el parámetro 'unidadMenor' es obligatorio")
 	}
 
+	fmt.Println("Valor de semestre:", semestre)
 	// Crear una consulta base con filtros dinámicos
 	query := s.DB.Model(&models.Pipelsoft{}).Where("nombre_unidad_mayor = ? AND nombre_unidad_menor = ?", unidadMayor, unidadMenor)
 	if semestre != "" {
@@ -663,11 +664,16 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMe
 
 	for _, estado := range estados {
 		var count int64
-		if err := query.Where("des_estado = ?", estado).Count(&count).Error; err != nil {
-			return nil, fmt.Errorf("error al contar los registros con estado '%s': %w", estado, err)
+		// Modificar la consulta para filtrar por des_estado, unidad_mayor y unidad_menor
+		queryEstados := s.DB.Model(&models.Pipelsoft{}).Where("des_estado = ? AND nombre_unidad_mayor = ? AND nombre_unidad_menor = ? AND semestre = ?", estado, unidadMayor, unidadMenor, semestre)
+
+		// Ejecutar la consulta y contar los registros
+		if err := queryEstados.Count(&count).Error; err != nil {
+			return nil, fmt.Errorf("error al contar los registros con estado '%s', unidad mayor '%s' y unidad menor '%s': %w", estado, unidadMayor, unidadMenor, err)
 		}
 		resp.EstadoProcesoCount[estado] = int(count)
 
+		// Calcular el porcentaje de registros por cada estado
 		if resp.TotalPipelsoft > 0 {
 			resp.EstadoProcesoPct[estado] = float64(count) / float64(resp.TotalPipelsoft) * 100
 		}
@@ -675,10 +681,6 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMe
 
 	// Contar la cantidad de profesores en la tabla contratos
 	queryContratos := s.DB.Model(&models.Contrato{}).Where("unidad_mayor = ? AND unidad_menor = ?", unidadMayor, unidadMenor)
-	if semestre != "" {
-		queryContratos = queryContratos.Where("semestre = ?", semestre)
-	}
-
 	if err := queryContratos.Count(&resp.TotalProfesores).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los profesores en la tabla contratos: %w", err)
 	}
@@ -841,6 +843,7 @@ func (s *EstadisticasService) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3
 	if unidadMayor == "" {
 		return nil, fmt.Errorf("el parámetro 'unidadMayor' debe ser proporcionado")
 	}
+
 	// Paso 1: Obtener todos los RUNs únicos de la tabla Contrato para el semestre específico
 	var runDocentes []string
 	if err := s.DB.Model(&models.Contrato{}).
@@ -877,6 +880,7 @@ func (s *EstadisticasService) ObtenerUnidadesMenoresSinProfesoresEnPipelsoft_8_3
 		unidadesSinProfesores[resultado.UnidadMenor] = resultado.TotalProfesores
 	}
 
+	// Devolver el mapa con los resultados
 	return unidadesSinProfesores, nil
 }
 

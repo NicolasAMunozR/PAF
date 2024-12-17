@@ -372,7 +372,7 @@ func (ctrl *EstadisticasController) ObtenerEstadisticasPorUnidad(c *gin.Context)
 	unidadMenor := c.Param("unidadMenor")
 
 	// Obtener el parámetro 'semestre' como query parameter
-	semestre := c.Query("semestre")
+	semestre := c.Param("semestre")
 
 	// Validar los parámetros obligatorios
 	if unidadMayor == "" {
