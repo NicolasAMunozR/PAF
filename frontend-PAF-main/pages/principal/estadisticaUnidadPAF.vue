@@ -94,6 +94,7 @@
 
   
   const rut = ref(''); // Sin tipo
+  console.log(rut);
 
   ///pipelsoft/contratos
   //item.PipelsoftData.Semestre,
@@ -101,8 +102,9 @@
 const semestresDisponibles = ref([]); // Semestres disponibles de la API
 
 // Función para obtener los semestres de la respuesta de la API
-const obtenerSemestres = async (rut) => {
+const obtenerSemestres = async () => {
   try {
+    console.log("dgsdgsdsfffff", valor.value)
     const response = await $axios.get(`/api/paf-en-linea/pipelsoft/contratos`);
     // Extraer los semestres únicos de la respuesta
     const semestres = response.data.map(item => item.PipelsoftData.Semestre);
@@ -125,11 +127,11 @@ const obtenerSemestres = async (rut) => {
     if (!semestreSeleccionado.value) {
       semestreSeleccionado.value = semestresUnicos[semestresUnicos.length - 1];  // Seleccionar el semestre más reciente (último semestre)
     }
-      fetchCantidadPersonasSai(rut.value);
-      fetchCantidadPafSai(rut.value);
-      fetchCantidadPafPorEstado(rut.value);
-      fetchPafPorUnidadMayor(rut.value);
-      configurarGraficos();
+      fetchCantidadPersonasSai(valor.value);
+      fetchCantidadPafSai(valor.value);
+      fetchCantidadPafPorEstado(valor.value);
+      fetchPafPorUnidadMayor(valor.value);
+      configurarGraficos(valor.value);
   } catch (error) {
     console.error('Error al obtener los semestres:', error);
   }
@@ -154,12 +156,14 @@ const obtenerSemestres = async (rut) => {
   const totalPorcPaf = ref([]);
   const unidadSeleccionada = ref(null); // Unidad seleccionada
   const detalleUnidadSeleccionada = ref(null); // Detalles de la unidad seleccionada
-  
+  const valor = ref('');
   const fetchCantidadPersonasSai = async (rut) => {
     try {
       if(!semestreSeleccionado.value){
-        obtenerSemestres(rut);
+        valor.value = rut;
+        obtenerSemestres();
       }
+
       const response1 = await $axios.get(`/api/paf-en-linea/usuario/rut/${rut}`)
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
       const response = await $axios.get(`/api/paf-en-linea/estadisticas/unidad-mayor/${response1.data.unidadMayor}/${semestreSeleccionado.value}`);
@@ -181,8 +185,9 @@ const cerrarModal = () => {
 
   const fetchCantidadPafSai = async (rut) => {
     try {
+      valor.value = rut;
       if(!semestreSeleccionado.value){
-        obtenerSemestres(rut);
+        obtenerSemestres();
       }
       const response1 = await $axios.get(`/api/paf-en-linea/usuario/rut/${rut}`)
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
@@ -195,6 +200,7 @@ const cerrarModal = () => {
   
   const fetchCantidadPafPorEstado = async (rut) => {
     try {
+      valor.value = rut;
       if(!semestreSeleccionado.value){
         obtenerSemestres(rut);
       }
@@ -260,8 +266,9 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
   
   const fetchPafPorUnidadMayor = async (rut) => {
     try {
+      valor.value = rut;
       if(!semestreSeleccionado.value){
-        obtenerSemestres(rut);
+        obtenerSemestres();
       }
       const response1 = await $axios.get(`/api/paf-en-linea/usuario/rut/${rut}`)
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
@@ -449,6 +456,7 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
           if (!label || label.trim() === '') {
             throw new Error('El label está vacío. No se puede realizar la consulta.');
           }
+          console.log(rut);
           const responseinicial = await $axios.get(`/api/paf-en-linea/usuario/rut/${rut}`)
 
           let response = null;
@@ -576,7 +584,9 @@ cantidadPafPorEstado.value = orderedEstadoProcesoCount;
       semestreSeleccionado.value = semestresUnicos[semestresUnicos.length - 1];  // Seleccionar el semestre más reciente (último semestre)
     }
     rut.valueOf = sessionStorage.getItem('rut') || '';
+    console.log(rut.valueOf);
     await Promise.all([
+
       fetchCantidadPersonasSai(rut.valueOf),
       fetchCantidadPafPorEstado(rut.valueOf),
       fetchPromedioTiempoPorEstado(),
