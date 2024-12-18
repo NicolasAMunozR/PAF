@@ -164,7 +164,7 @@ onMounted(async () => {
   if (!UnidadMayorFromQuery) {
     rut.value = sessionStorage.getItem('rut') || '';
     const response = await $axios.get(`/api/paf-en-linea/usuario/rut/${rut.value}`);
-    UnidadMayorFromQuery = response.data.UnidadMayor;
+    UnidadMayorFromQuery = response.data[0].UnidadMayor;
   }
   if (UnidadMayorFromQuery) {
     UnidadMayor.value = UnidadMayorFromQuery;

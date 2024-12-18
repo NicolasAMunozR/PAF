@@ -123,6 +123,7 @@ const semestresDisponibles = ref([]); // Semestres disponibles de la API
 // Función para obtener los semestres de la respuesta de la API
 const obtenerSemestres = async () => {
   try {
+    unidadSeleccionada.value = null;
     const response = await $axios.get(`/api/paf-en-linea/pipelsoft/contratos`);
     // Extraer los semestres únicos de la respuesta
     const semestres = response.data.map(item => item.PipelsoftData.Semestre);

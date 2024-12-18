@@ -70,19 +70,23 @@
     try {
       // Accede a $axios desde el contexto del componente
       const response = await this.$axios.get(`/api/paf-en-linea/usuario/rut/${this.run}`);
+      console.log(response.data.find(user =>
+        user.Rol === this.selectedRole &&
+        (user.Rol === "encargado"  ||
+         user.Rol === "personal-dei")
+      ));
       if (!response.data || response.data.length === 0) {
         this.errorMessage = "Usuario no encontrado.";
         return;
       }
-
+      console.log(this.selectedRole);
       // Verificar cada caso en el array
       const userMatch = response.data.find(user =>
         user.Rol === this.selectedRole &&
-        ((user.Rol === "encargado" && 
-          (user.UnidadMayor === "RECTORIA" || user.UnidadMayor === "VR ACADEMICA")) ||
+        (user.Rol === "encargado"  ||
          user.Rol === "personal-dei")
       );
-
+      console.log(userMatch);
       if (userMatch) {
         // Redirigir según el caso encontrado
         if (userMatch.Rol === "encargado") {
