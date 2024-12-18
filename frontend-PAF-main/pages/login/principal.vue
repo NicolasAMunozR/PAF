@@ -65,38 +65,46 @@
         this.errorMessage = "";
       },
       async handleLogin() {
-        if (this.run && this.selectedRole) {
-          sessionStorage.setItem("rut", this.run); // Guardar en sesión
-          try {
-            // Accede a $axios desde el contexto del componente
-            const response = await this.$axios.get(`/api/paf-en-linea/usuario/rut/${this.run}`);
-            if (!response.data) {
-              this.errorMessage = "Usuario no encontrado.";
-              return;
-            }
-            // Redirige según el rol
-            //if (response.data.rol === "profesor") {
-            //  this.$router.push(`/profesorPAF?run=${this.run}`);
-            //} else 
-            if (response.data.Rol === "encargado" && this.selectedRole === "encargado") {
-              if (response.data.UnidadMayor == "RECTORIA" || response.data.UnidadMayor == "VR ACADEMICA") {
-                this.$router.push("principal/seguimientoPAF");
-              } else {
-                this.$router.push(`principal/unidadMayorPAF?UnidadMayor=${response.data.UnidadMayor}`);
-              }
-            } else if (response.data.Rol === "personal-dei" && this.selectedRole === "personal-dei") {
-              this.$router.push("principal/personas");
-            } else {
-              this.errorMessage = "El rol seleccionado no coincide con el usuario.";
-            }
-          } catch (error) {
-            this.errorMessage = "Hubo un error al iniciar sesión.";
-            console.error(error);
+  if (this.run && this.selectedRole) {
+    sessionStorage.setItem("rut", this.run); // Guardar en sesión
+    try {
+      // Accede a $axios desde el contexto del componente
+      const response = await this.$axios.get(`/api/paf-en-linea/usuario/rut/${this.run}`);
+      if (!response.data || response.data.length === 0) {
+        this.errorMessage = "Usuario no encontrado.";
+        return;
+      }
+
+      // Verificar cada caso en el array
+      const userMatch = response.data.find(user =>
+        user.Rol === this.selectedRole &&
+        ((user.Rol === "encargado" && 
+          (user.UnidadMayor === "RECTORIA" || user.UnidadMayor === "VR ACADEMICA")) ||
+         user.Rol === "personal-dei")
+      );
+
+      if (userMatch) {
+        // Redirigir según el caso encontrado
+        if (userMatch.Rol === "encargado") {
+          if (userMatch.UnidadMayor === "RECTORIA" || userMatch.UnidadMayor === "VR ACADEMICA") {
+            this.$router.push("principal/seguimientoPAF");
+          } else {
+            this.$router.push(`principal/unidadMayorPAF?UnidadMayor=${userMatch.UnidadMayor}`);
           }
-        } else {
-          this.errorMessage = "Por favor, completa todos los campos.";
+        } else if (userMatch.Rol === "personal-dei") {
+          this.$router.push("principal/personas");
         }
-      },
+      } else {
+        this.errorMessage = "El rol seleccionado no coincide con los usuarios disponibles.";
+      }
+    } catch (error) {
+      this.errorMessage = "Hubo un error al iniciar sesión.";
+      console.error(error);
+    }
+  } else {
+    this.errorMessage = "Por favor, completa todos los campos.";
+  }
+}
     },
   };
   </script>
