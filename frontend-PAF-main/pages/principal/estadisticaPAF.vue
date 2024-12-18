@@ -234,6 +234,7 @@ const fetchPafPorUnidadMayor = async () => {
 
           const response = await $axios.get(`/api/paf-en-linea/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}/${semestreSeleccionado.value}`);
           const unidadesData = response.data;
+          console.log("newDATOSAAAAHHH", unidadesData)
           graficoModalData.value = {
             labels: Object.keys(unidadesData),
             datasets: [
@@ -389,21 +390,24 @@ const configurarGraficos = () => {
           if(unidadSeleccionada.value === null) {
             if (label === 'Profesores con PAF') {
             response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-mayores/cant_profesores/${semestreSeleccionado.value}`);
+            unidadesData = response.data.unidadesMayores;
             } else if (label === 'Profesores sin PAF') {
             response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-mayores/sin_profesores/${semestreSeleccionado.value}`);
+            unidadesData = response.data;
             }
+            
             console.log("data", response.data)
-            unidadesData = response.data.unidadesMayores;
             labelNuevo = 'Cantidad de PAF por Unidad Mayor';
-            console.log('Cantidad de PAF por Unidad Mayor:',response.data);
+            console.log('Cantidad de PAF por Unidad Mayor:', unidadesData);
           } else {
             if (label === 'Profesores con PAF') {
             response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-menores-con-profesores-activos/8_1/${unidadSeleccionada.value}/${semestreSeleccionado.value}`);
+            unidadesData = response.data;
             } else if (label === 'Profesores sin PAF') {
             response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-menores-sin-profesores-8-2/${unidadSeleccionada.value}/${semestreSeleccionado.value}`);
+            unidadesData = response.data.unidades;
             }
             console.log("data2", response.data)
-            unidadesData = response.data;
             labelNuevo = 'Cantidad de PAF por Unidad Menor';
           }
           graficoModalData.value = {
