@@ -17,7 +17,9 @@ func NewUsuariosController(usuariosService *service.UsuariosService) *UsuariosCo
 }
 
 // Endpoint para obtener un usuario por su Run
-func (uc *UsuariosController) GetUsuarioByRun(c *gin.Context) {
+
+// Endpoint para obtener una lista de usuarios por su Run
+func (uc *UsuariosController) GetUsuariosByRun(c *gin.Context) {
 	// Obtener el parámetro "run" de la ruta
 	run := c.Param("run")
 	if run == "" {
@@ -25,17 +27,17 @@ func (uc *UsuariosController) GetUsuarioByRun(c *gin.Context) {
 		return
 	}
 
-	// Llamar al servicio para obtener el usuario
-	usuario, err := uc.UsuariosService.GetUsuarioByRun(run)
+	// Llamar al servicio para obtener la lista de usuarios
+	usuarios, err := uc.UsuariosService.GetUsuariosByRun(run)
 	if err != nil {
-		if err.Error() == "usuario no encontrado" {
+		if err.Error() == "no se encontraron usuarios con el RUN proporcionado" {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener el usuario"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener los usuarios"})
 		}
 		return
 	}
 
-	// Responder con la información del usuario
-	c.JSON(http.StatusOK, usuario)
+	// Responder con la lista de usuarios
+	c.JSON(http.StatusOK, usuarios)
 }

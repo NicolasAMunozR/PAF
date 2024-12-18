@@ -107,7 +107,7 @@ func setupRoutes(r *gin.Engine) {
 	// Usuarios
 	usuariosService := service.NewUsuariosService(DB.DBPersonal)
 	usuariosController := controller.NewUsuariosController(usuariosService)
-	r.GET("/api/paf-en-linea/usuario/rut/:run", usuariosController.GetUsuarioByRun)
+	r.GET("/api/paf-en-linea/usuario/rut/:run", usuariosController.GetUsuariosByRun)
 }
 
 // Middleware común
