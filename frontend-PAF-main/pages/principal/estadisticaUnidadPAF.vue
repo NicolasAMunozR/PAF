@@ -224,6 +224,7 @@ const normalizedEstadoProcesoCount = Object.fromEntries(
   ])
 );
 
+
 // Definir el orden de las claves
 const ordenCorrecto = [
   'Sin-Solicitar',

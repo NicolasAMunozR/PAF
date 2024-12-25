@@ -9,9 +9,9 @@ type Usuarios struct {
 	//se añadio este parametro
 	UnidadMenor string `gorm:"type:text"`
 	  // Se agregan los siguientes campos
-    Cod_umayor int gorm:"type:integer"
-    Cod_umenor int gorm:"type:integer"
-    acceso int gorm:"type:integer"
-    vista_universidad int gorm:"type:integer"
-    vista_facultad int gorm:"type:integer"
+	Cod_umayor int `gorm:"type:int"`
+	Cod_umenor int `gorm:"type:int"`
+	Acceso int `gorm:"type:int"`
+	Vista_universidad int `gorm:"type:int"`
+	Vista_facultad int `gorm:"type:int"`
 }

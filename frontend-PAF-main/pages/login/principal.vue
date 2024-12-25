@@ -70,16 +70,11 @@
     try {
       // Accede a $axios desde el contexto del componente
       const response = await this.$axios.get(`/api/paf-en-linea/usuario/rut/${this.run}`);
-      console.log(response.data.find(user =>
-        user.Rol === this.selectedRole &&
-        (user.Rol === "encargado"  ||
-         user.Rol === "personal-dei")
-      ));
+console.log(response.data);
       if (!response.data || response.data.length === 0) {
         this.errorMessage = "Usuario no encontrado.";
         return;
       }
-      console.log(this.selectedRole);
       // Verificar cada caso en el array
       const userMatch = response.data.find(user =>
         user.Rol === this.selectedRole &&
@@ -88,11 +83,20 @@
       );
       console.log(userMatch);
       if (userMatch) {
+        if (userMatch.Acceso === 0) {
+        this.errorMessage = "Este usuario no posee accesos.";
+        return;
+      }
+      if (userMatch.Acceso === 1 && userMatch.Vista_facultad === 0 && userMatch.Vista_universidad === 0) {
+          this.errorMessage = "Este usuario pertenece a la unidad menor: " + userMatch.UnidadMenor;
+          return;
+        }
         // Redirigir según el caso encontrado
         if (userMatch.Rol === "encargado") {
-          if (userMatch.UnidadMayor === "RECTORIA" || userMatch.UnidadMayor === "VR ACADEMICA") {
+          if (userMatch.Vista_universidad === 1) {
             this.$router.push("principal/seguimientoPAF");
-          } else {
+          } 
+          if(userMatch.Vista_facultad === 1) {
             this.$router.push(`principal/unidadMayorPAF?UnidadMayor=${userMatch.UnidadMayor}`);
           }
         } else if (userMatch.Rol === "personal-dei") {
