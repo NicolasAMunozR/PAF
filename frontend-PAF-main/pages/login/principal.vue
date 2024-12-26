@@ -65,6 +65,7 @@
         this.errorMessage = "";
       },
       async handleLogin() {
+        sessionStorage.clear();
   if (this.run && this.selectedRole) {
     sessionStorage.setItem("rut", this.run); // Guardar en sesión
     try {
@@ -87,16 +88,18 @@ console.log(response.data);
         this.errorMessage = "Este usuario no posee accesos.";
         return;
       }
-      if (userMatch.Acceso === 1 && userMatch.Vista_facultad === 0 && userMatch.Vista_universidad === 0) {
-          this.errorMessage = "Este usuario pertenece a la unidad menor: " + userMatch.UnidadMenor;
-          return;
-        }
         // Redirigir según el caso encontrado
         if (userMatch.Rol === "encargado") {
+          if (userMatch.Acceso === 1 && userMatch.Vista_facultad === 0 && userMatch.Vista_universidad === 0) {
+            sessionStorage.setItem("unidadMayor", userMatch.UnidadMayor);
+            sessionStorage.setItem("unidadMenor", userMatch.UnidadMenor);
+          this.$router.push(`principal/unidadMayorPAF?UnidadMayor=${userMatch.UnidadMayor}&UnidadMenor=${userMatch.UnidadMenor}`)
+        }
           if (userMatch.Vista_universidad === 1) {
             this.$router.push("principal/seguimientoPAF");
           } 
           if(userMatch.Vista_facultad === 1) {
+            sessionStorage.setItem("unidadMayor", userMatch.UnidadMayor);
             this.$router.push(`principal/unidadMayorPAF?UnidadMayor=${userMatch.UnidadMayor}`);
           }
         } else if (userMatch.Rol === "personal-dei") {

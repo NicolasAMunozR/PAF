@@ -4,6 +4,7 @@
       <Filtros 
         @filter="filterData" 
         @sort="sortData" 
+        :showButton="true"
       />
     </div>
     <div>

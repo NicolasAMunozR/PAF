@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <Filtros @filter="filterData" @sort="sortData" />
+    <Filtros @filter="filterData" @sort="sortData" :showButton="true"/>
     <Tabla :data="filteredPersonas" :showButton="false"/>
   </div>
 </template>

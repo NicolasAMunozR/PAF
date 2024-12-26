@@ -9,7 +9,7 @@
     </div>
     
     <!-- Filtros -->
-    <Filtros @filter="filterData" @sort="sortData" />
+    <Filtros @filter="filterData" @sort="sortData" :showButton="true"/>
     
     <!-- Tabla -->
     <Tabla :data="filteredPersonas" :showButtons="false" @rowStatusChanged="handleRowStatusChanged" />

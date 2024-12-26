@@ -56,7 +56,7 @@
     </div>
     
     <!-- Filtro Nombre Unidad Menor (solo visible si es seguimientoPAF o unidadMayorPAF) -->
-    <div class="filter-item" v-if="!isPaf">
+    <div class="filter-item" v-if="showButton && !isPaf">
       <label for="nombreUnidadMenor" class="label">Nombre Unidad Menor</label>
       <input
         v-model="filtros.nombreUnidadMenor"
@@ -78,7 +78,7 @@
     </div>
     
     <!-- Filtro Estado de Proceso -->
-    <div class="filter-item" v-if="!isSeguimientoPAF && !isUnidadMayorPAF && !isPaf">
+    <div class="filter-item" v-if="!isPaf">
       <label for="estadoProceso" class="label">Estado de Proceso</label>
       <select id="estadoProceso" v-model="filtros.estadoProceso" class="select">
         <option value="">Todos</option>
@@ -133,6 +133,10 @@
 <script setup lang="ts">
 import { ref, defineEmits, onMounted, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
+// Define las props que el componente espera recibir
+const props = defineProps<{
+  showButton: boolean; // Define el tipo de la propiedad
+}>();
 
 const emit = defineEmits<{
   (event: 'filter', filters: any): void;
@@ -173,6 +177,9 @@ const aplicar = () => {
 
 // Resetear filtros al montar el componente
 onMounted(() => {
+  if (props.showButton) {
+    // Realiza alguna acción si el botón está visible
+  }
   aplicar();
   console.log("Página actual:", route.path);
   resetFilters();
@@ -187,7 +194,7 @@ const applyFilters = () => {
     emit('filter', filtersToEmit);
   } else if (isUnidadMayorPAF.value) {
     filtersToEmit = Object.fromEntries(
-      Object.entries(filtros.value).filter(([key]) => key === 'nombreUnidadMenor' || key === 'run' || key === 'semestre')
+      Object.entries(filtros.value).filter(([key]) => key === 'nombreUnidadMenor' || key === 'run' || key === 'semestre' || key === 'estadoProceso')
     );
     emit('filter', filtersToEmit);
   } else if (isPaf.value) {

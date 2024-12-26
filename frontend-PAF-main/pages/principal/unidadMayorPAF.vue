@@ -4,6 +4,7 @@
       <Filtros 
         @filter="filterData" 
         @sort="sortData" 
+        :showButton="valor"
       />
     </div>
     <div>
@@ -78,13 +79,16 @@ const { $axios } = useNuxtApp() as unknown as { $axios: typeof import('axios').d
 
 const rut = ref('');
 const route = useRoute();
-const UnidadMayor = ref<string>("");
+let valor = true;
+const UnidadMayor = ref('');
+const UnidadMenor = ref('');
 const contratos = ref<any[]>([]);
 const errorMessage = ref('');
 const filtros = ref({
   nombreUnidadMenor: '',
   run: '',
   semestre: '',
+  estadoProceso: '',
   ruta: '/unidadMayorPAF',
 });
 const sortBy = ref('');
@@ -127,8 +131,8 @@ const filteredPersonas = computed(() => {
     return (
       (contrato.PipelsoftData.NombreUnidadMenor || '').toLowerCase().includes((filtros.value.nombreUnidadMenor || '').toLowerCase()) &&
       (contrato.PipelsoftData.RunEmpleado || '').toLowerCase().includes((filtros.value.run || '').toLowerCase()) &&
-      (contrato.PipelsoftData.Semestre || '').toLowerCase().includes((filtros.value.semestre || '').toLowerCase())
-    );
+      (contrato.PipelsoftData.Semestre || '').toLowerCase().includes((filtros.value.semestre || '').toLowerCase()) &&
+      (filtros.value.estadoProceso ? contrato.PipelsoftData.CodEstado?.toString() === filtros.value.estadoProceso : true));
   });
 
   if (sortBy.value) {
@@ -159,15 +163,32 @@ const fetchContratos = async () => {
   }
 };
 
-onMounted(async () => {
-  let UnidadMayorFromQuery = route.query.UnidadMayor as string;
-  if (!UnidadMayorFromQuery) {
-    rut.value = sessionStorage.getItem('rut') || '';
-    const response = await $axios.get(`/api/paf-en-linea/usuario/rut/${rut.value}`);
-    UnidadMayorFromQuery = response.data[0].UnidadMayor;
+const fetchContratos1 = async () => {
+  try {
+    const response = await $axios.get(`/api/paf-en-linea/pipelsoft/contratos-nombreUnidadMenor/${UnidadMenor.value}`);
+    console.log(response.data)
+    valor = false;
+    if (response.data && Array.isArray(response.data)) {
+      contratos.value = response.data;
+    } else {
+      errorMessage.value = 'No se encontraron contratos.';
+    }
+  } catch (error) {
+    errorMessage.value = 'Hubo un error al obtener los datos.';
+    console.error(error);
   }
-  if (UnidadMayorFromQuery) {
-    UnidadMayor.value = UnidadMayorFromQuery;
+};
+
+
+onMounted(async () => {
+  UnidadMayor.value = sessionStorage.getItem("unidadMayor") || "";
+  console.log(UnidadMayor.value)
+  UnidadMenor.value = sessionStorage.getItem("unidadMenor") || "";
+  console.log(UnidadMenor.value)
+  if(UnidadMenor.value !== ''){
+    fetchContratos1();
+  }
+  else{
     fetchContratos();
   }
 });
