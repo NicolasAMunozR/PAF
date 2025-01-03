@@ -43,6 +43,13 @@ func setupRoutes(r *gin.Engine) {
 		pipelsoftRoutes.GET("/obtenerContratos/mostrarTodo/idPaf/:rut", pipelsoftController.ObtenerContratosPorIdPafMostrarTodo)
 		pipelsoftRoutes.GET("/unidades-menores", pipelsoftController.ObtenerUnidadesMenores)
 		pipelsoftRoutes.GET("/contratos/codigo_paf/:codigo_paf", pipelsoftController.ObtenerPorCodigoPAF)
+		// nuevo
+		pipelsoftRoutes.GET("/unidades", pipelsoftController.GetUniqueUnits)
+		//nuevo
+		pipelsoftRoutes.GET("/unidadMenor/:unidadMayor", pipelsoftController.GetUnitsByMayor)
+		//nuevo
+		pipelsoftRoutes.GET("/FiltroSemestre/:semestre", pipelsoftController.GetBySemester)
+
 	}
 
 	// Horarios
@@ -54,6 +61,7 @@ func setupRoutes(r *gin.Engine) {
 	profesorDBService := service.NewProfesorDBService(DB.DBPersonal)
 	profesorDBController := controller.NewProfesorDBController(*profesorDBService)
 	r.GET("/api/paf-en-linea/profesorDB/:run", profesorDBController.ObtenerProfesorDBPorRun)
+	r.GET("/api/paf-en-linea/profesores/countNotPipelsoft", profesorDBController.GetCountProfesoresNotInPipelsoft)
 
 	// Estadísticas
 	estadisticasService := service.NewEstadisticasService(DB.DBPersonal)

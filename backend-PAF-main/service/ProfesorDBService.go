@@ -50,3 +50,35 @@ func (s *ProfesorDBService) ObtenerProfesorPorRUT(run string) ([]models.Profesor
 
 	return profesor, nil
 }
+
+func (s *ProfesorDBService) GetCountProfesoresNotInPipelsoft() (int, error) {
+	var profesores []models.ProfesorDB
+	var pipelsofts []models.Pipelsoft
+
+	// Obtener todos los RUN de ProfesorDB y Pipelsoft
+	err := s.DBPersonal.Find(&profesores).Error
+	if err != nil {
+		return 0, err
+	}
+
+	err = s.DBPersonal.Find(&pipelsofts).Error
+	if err != nil {
+		return 0, err
+	}
+
+	// Crear un mapa con los RUN de Pipelsoft para búsqueda rápida
+	rutPipelsoft := make(map[string]bool)
+	for _, pipel := range pipelsofts {
+		rutPipelsoft[pipel.RunEmpleado] = true
+	}
+
+	// Contar los profesores cuyo RUN no está en Pipelsoft
+	count := 0
+	for _, profesor := range profesores {
+		if _, exists := rutPipelsoft[profesor.RUN]; !exists {
+			count++
+		}
+	}
+
+	return count, nil
+}

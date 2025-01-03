@@ -174,3 +174,48 @@ func (controller *PipelsoftController) ObtenerContratosPorIdPafMostrarTodo(c *gi
 	// Devolver todos los registros encontrados
 	c.JSON(http.StatusOK, records)
 }
+
+func (c *PipelsoftController) GetUniqueUnits(ctx *gin.Context) {
+	mayores, menores, err := c.Service.GetUniqueUnits()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"NombreUnidadMayor": mayores,
+		"NombreUnidadMenor": menores,
+	})
+}
+
+func (ctrl *PipelsoftController) GetUnitsByMayor(c *gin.Context) {
+	nombreUnidadMayor := c.Param("unidadMayor")
+	if nombreUnidadMayor == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'unidadMayor' es requerido"})
+		return
+	}
+
+	menores, err := ctrl.Service.GetUnitsByMayor(nombreUnidadMayor)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener las unidades menores"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"unidadMenor": menores})
+}
+
+func (ctrl *PipelsoftController) GetBySemester(c *gin.Context) {
+	semestre := c.Param("semestre")
+	if semestre == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'semestre' es requerido"})
+		return
+	}
+
+	pipelsofts, err := ctrl.Service.GetBySemester(semestre)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener los elementos filtrados por semestre"})
+		return
+	}
+
+	c.JSON(http.StatusOK, pipelsofts)
+}

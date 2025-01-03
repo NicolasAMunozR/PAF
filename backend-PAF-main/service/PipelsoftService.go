@@ -3,6 +3,8 @@ package service
 import (
 	"time"
 
+	"strings"
+
 	"github.com/NicolasAMunozR/PAF/backend-PAF/models"
 	"gorm.io/gorm"
 )
@@ -275,4 +277,74 @@ func (s *PipelsoftService) ObtenerContratosPorIdPafMostrarTodo(run string) ([]mo
 	}
 
 	return s.comprobarYCombinarDatosPorCodigoPAF(pipelsofts)
+}
+
+func (s *PipelsoftService) GetUniqueUnits() ([]string, []string, error) {
+	var pipelsofts []models.Pipelsoft
+	err := s.DBPersonal.Find(&pipelsofts).Error
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Mapas para eliminar duplicados
+	uniqueMayores := map[string]bool{}
+	uniqueMenores := map[string]bool{}
+
+	for _, pipel := range pipelsofts {
+		// Limpiar espacios adicionales y validar
+		mayor := strings.TrimSpace(pipel.NombreUnidadMayor)
+		menor := strings.TrimSpace(pipel.NombreUnidadMenor)
+
+		if mayor != "" {
+			uniqueMayores[mayor] = true
+		}
+		if menor != "" {
+			uniqueMenores[menor] = true
+		}
+	}
+
+	// Convertir mapas a listas
+	mayores := make([]string, 0, len(uniqueMayores))
+	for mayor := range uniqueMayores {
+		mayores = append(mayores, mayor)
+	}
+
+	menores := make([]string, 0, len(uniqueMenores))
+	for menor := range uniqueMenores {
+		menores = append(menores, menor)
+	}
+
+	return mayores, menores, nil
+}
+
+func (s *PipelsoftService) GetUnitsByMayor(nombreUnidadMayor string) ([]string, error) {
+	var pipelsofts []models.Pipelsoft
+	err := s.DBPersonal.Where("nombre_unidad_mayor = ?", nombreUnidadMayor).Find(&pipelsofts).Error
+	if err != nil {
+		return nil, err
+	}
+
+	uniqueMenores := map[string]bool{}
+	for _, pipel := range pipelsofts {
+		menor := strings.TrimSpace(pipel.NombreUnidadMenor)
+		if menor != "" {
+			uniqueMenores[menor] = true
+		}
+	}
+
+	menores := make([]string, 0, len(uniqueMenores))
+	for menor := range uniqueMenores {
+		menores = append(menores, menor)
+	}
+
+	return menores, nil
+}
+
+func (s *PipelsoftService) GetBySemester(semestre string) ([]models.Pipelsoft, error) {
+	var pipelsofts []models.Pipelsoft
+	err := s.DBPersonal.Where("semestre = ?", semestre).Find(&pipelsofts).Error
+	if err != nil {
+		return nil, err
+	}
+	return pipelsofts, nil
 }
