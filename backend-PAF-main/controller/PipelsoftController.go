@@ -206,16 +206,12 @@ func (ctrl *PipelsoftController) GetUnitsByMayor(c *gin.Context) {
 
 func (ctrl *PipelsoftController) GetBySemester(c *gin.Context) {
 	semestre := c.Param("semestre")
-	if semestre == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'semestre' es requerido"})
-		return
-	}
 
-	pipelsofts, err := ctrl.Service.GetBySemester(semestre)
+	result, err := ctrl.Service.GetBySemester(semestre)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener los elementos filtrados por semestre"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener los datos"})
 		return
 	}
 
-	c.JSON(http.StatusOK, pipelsofts)
+	c.JSON(http.StatusOK, result)
 }

@@ -340,11 +340,64 @@ func (s *PipelsoftService) GetUnitsByMayor(nombreUnidadMayor string) ([]string, 
 	return menores, nil
 }
 
-func (s *PipelsoftService) GetBySemester(semestre string) ([]models.Pipelsoft, error) {
+func (s *PipelsoftService) GetBySemester(semestre string) ([]models.PipelsoftDTO, error) {
 	var pipelsofts []models.Pipelsoft
 	err := s.DBPersonal.Where("semestre = ?", semestre).Find(&pipelsofts).Error
 	if err != nil {
 		return nil, err
 	}
-	return pipelsofts, nil
+
+	// Mapa para agrupar por IdPaf y recolectar los códigos de asignatura
+	grouped := make(map[int]*models.PipelsoftDTO)
+
+	for _, pipel := range pipelsofts {
+		if existing, exists := grouped[pipel.IdPaf]; exists {
+			// Agregar el CódigoAsignatura si es diferente
+			if !contains(existing.CodigoAsignaturaList, pipel.CodigoAsignatura) {
+				existing.CodigoAsignaturaList = append(existing.CodigoAsignaturaList, pipel.CodigoAsignatura)
+			}
+		} else {
+			// Crear una nueva entrada en el mapa con el primer elemento
+			grouped[pipel.IdPaf] = &models.PipelsoftDTO{
+				RunEmpleado:          pipel.RunEmpleado,
+				Nombres:              pipel.Nombres,
+				PrimerApp:            pipel.PrimerApp,
+				SegundoApp:           pipel.SegundoApp,
+				NombreUnidadMayor:    pipel.NombreUnidadMayor,
+				NombreUnidadMenor:    pipel.NombreUnidadMenor,
+				IdPaf:                pipel.IdPaf,
+				FechaInicioContrato:  pipel.FechaInicioContrato,
+				FechaFinContrato:     pipel.FechaFinContrato,
+				NombreAsignatura:     pipel.NombreAsignatura,
+				HorasAsignatura:      pipel.HorasAsignatura,
+				CantidadHorasPaf:     pipel.CantidadHorasPaf,
+				Jerarquia:            pipel.Jerarquia,
+				Semestre:             pipel.Semestre,
+				UltimaModificacion:   pipel.UltimaModificacion,
+				Categoria:            pipel.Categoria,
+				CodEstado:            pipel.CodEstado,
+				DesEstado:            pipel.DesEstado,
+				Llave:                pipel.Llave,
+				Veces:                pipel.Veces,
+				CodigoAsignaturaList: []string{pipel.CodigoAsignatura}, // Lista inicial con un solo código
+			}
+		}
+	}
+
+	// Convertir el mapa en una lista de resultados
+	result := make([]models.PipelsoftDTO, 0, len(grouped))
+	for _, pipel := range grouped {
+		result = append(result, *pipel)
+	}
+
+	return result, nil
+}
+
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
 }
