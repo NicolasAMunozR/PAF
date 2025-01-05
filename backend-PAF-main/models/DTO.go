@@ -12,7 +12,6 @@ type PipelsoftDTO struct {
 	IdPaf                int       `json:"id_paf"`
 	FechaInicioContrato  time.Time `json:"fecha_inicio_contrato"`
 	FechaFinContrato     time.Time `json:"fecha_fin_contrato"`
-	NombreAsignatura     string    `json:"nombre_asignatura"`
 	HorasAsignatura      int       `json:"horas_asignatura"`
 	CantidadHorasPaf     int       `json:"cantidad_horas_paf"`
 	Jerarquia            string    `json:"jerarquia"`
@@ -23,5 +22,6 @@ type PipelsoftDTO struct {
 	DesEstado            string    `json:"des_estado"`
 	Llave                string    `json:"llave"`
 	Veces                string    `json:"veces"`
-	CodigoAsignaturaList []string  `json:"codigo_asignatura_list"` // Campo adicional
+	CodigoAsignaturaList []string  `json:"codigo_asignatura_list"` // Lista de códigos de asignatura
+	NombreAsignaturaList []string  `json:"nombre_asignatura_list"` // Lista de nombres de asignatura
 }

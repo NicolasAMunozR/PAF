@@ -214,3 +214,45 @@ func (ctrl *PipelsoftController) GetBySemester(c *gin.Context) {
 
 	c.JSON(http.StatusOK, result)
 }
+
+func (c *PipelsoftController) GetByNombreUnidadMayor(ctx *gin.Context) {
+	// Obtener el parámetro desde la URL
+	nombreUnidadMayor := ctx.Param("unidadMayor")
+
+	// Validar el parámetro
+	if nombreUnidadMayor == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'nombreUnidadMayor' es requerido"})
+		return
+	}
+
+	// Llamar al servicio para obtener los datos filtrados y agrupados
+	result, err := c.Service.GetByNombreUnidadMayor(nombreUnidadMayor)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Responder con los datos
+	ctx.JSON(http.StatusOK, result)
+}
+
+func (c *PipelsoftController) GetByNombreUnidadMenor(ctx *gin.Context) {
+	// Obtener el parámetro desde la URL
+	nombreUnidadMenor := ctx.Param("unidadMenor")
+
+	// Validar el parámetro
+	if nombreUnidadMenor == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'nombreUnidadMenor' es requerido"})
+		return
+	}
+
+	// Llamar al servicio para obtener los datos filtrados y agrupados
+	result, err := c.Service.GetByNombreUnidadMenor(nombreUnidadMenor)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Responder con los datos
+	ctx.JSON(http.StatusOK, result)
+}

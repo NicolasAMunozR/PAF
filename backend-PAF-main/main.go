@@ -49,6 +49,8 @@ func setupRoutes(r *gin.Engine) {
 		pipelsoftRoutes.GET("/unidadMenor/:unidadMayor", pipelsoftController.GetUnitsByMayor)
 		//nuevo
 		pipelsoftRoutes.GET("/FiltroSemestre/", pipelsoftController.GetBySemester)
+		pipelsoftRoutes.GET("/unidadMayor/:unidadMayor", pipelsoftController.GetByNombreUnidadMayor)
+		pipelsoftRoutes.GET("/Filtro/unidadMenor/:unidadMenor", pipelsoftController.GetByNombreUnidadMenor)
 
 	}
 

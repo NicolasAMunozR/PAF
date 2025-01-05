@@ -347,7 +347,7 @@ func (s *PipelsoftService) GetAll() ([]models.PipelsoftDTO, error) {
 		return nil, err
 	}
 
-	// Mapa para agrupar por IdPaf y recolectar los códigos de asignatura
+	// Mapa para agrupar por IdPaf y recolectar los códigos y nombres de asignatura
 	grouped := make(map[int]*models.PipelsoftDTO)
 
 	for _, pipel := range pipelsofts {
@@ -355,6 +355,10 @@ func (s *PipelsoftService) GetAll() ([]models.PipelsoftDTO, error) {
 			// Agregar el CódigoAsignatura si es diferente
 			if !contains(existing.CodigoAsignaturaList, pipel.CodigoAsignatura) {
 				existing.CodigoAsignaturaList = append(existing.CodigoAsignaturaList, pipel.CodigoAsignatura)
+			}
+			// Agregar el NombreAsignatura si es diferente
+			if !contains(existing.NombreAsignaturaList, pipel.NombreAsignatura) {
+				existing.NombreAsignaturaList = append(existing.NombreAsignaturaList, pipel.NombreAsignatura)
 			}
 		} else {
 			// Crear una nueva entrada en el mapa con el primer elemento
@@ -368,7 +372,6 @@ func (s *PipelsoftService) GetAll() ([]models.PipelsoftDTO, error) {
 				IdPaf:                pipel.IdPaf,
 				FechaInicioContrato:  pipel.FechaInicioContrato,
 				FechaFinContrato:     pipel.FechaFinContrato,
-				NombreAsignatura:     pipel.NombreAsignatura,
 				HorasAsignatura:      pipel.HorasAsignatura,
 				CantidadHorasPaf:     pipel.CantidadHorasPaf,
 				Jerarquia:            pipel.Jerarquia,
@@ -380,6 +383,125 @@ func (s *PipelsoftService) GetAll() ([]models.PipelsoftDTO, error) {
 				Llave:                pipel.Llave,
 				Veces:                pipel.Veces,
 				CodigoAsignaturaList: []string{pipel.CodigoAsignatura}, // Lista inicial con un solo código
+				NombreAsignaturaList: []string{pipel.NombreAsignatura}, // Lista inicial con un solo nombre
+			}
+		}
+	}
+
+	// Convertir el mapa en una lista de resultados
+	result := make([]models.PipelsoftDTO, 0, len(grouped))
+	for _, pipel := range grouped {
+		result = append(result, *pipel)
+	}
+
+	return result, nil
+}
+
+func (s *PipelsoftService) GetByNombreUnidadMayor(nombreUnidadMayor string) ([]models.PipelsoftDTO, error) {
+	var pipelsofts []models.Pipelsoft
+
+	// Filtrar registros por nombreUnidadMayor
+	err := s.DBPersonal.Where("nombre_unidad_mayor = ?", nombreUnidadMayor).Find(&pipelsofts).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Mapa para agrupar por IdPaf y recolectar los códigos y nombres de asignatura
+	grouped := make(map[int]*models.PipelsoftDTO)
+
+	for _, pipel := range pipelsofts {
+		if existing, exists := grouped[pipel.IdPaf]; exists {
+			// Agregar el CódigoAsignatura si es diferente
+			if !contains(existing.CodigoAsignaturaList, pipel.CodigoAsignatura) {
+				existing.CodigoAsignaturaList = append(existing.CodigoAsignaturaList, pipel.CodigoAsignatura)
+			}
+			// Agregar el NombreAsignatura si es diferente
+			if !contains(existing.NombreAsignaturaList, pipel.NombreAsignatura) {
+				existing.NombreAsignaturaList = append(existing.NombreAsignaturaList, pipel.NombreAsignatura)
+			}
+		} else {
+			// Crear una nueva entrada en el mapa con el primer elemento
+			grouped[pipel.IdPaf] = &models.PipelsoftDTO{
+				RunEmpleado:          pipel.RunEmpleado,
+				Nombres:              pipel.Nombres,
+				PrimerApp:            pipel.PrimerApp,
+				SegundoApp:           pipel.SegundoApp,
+				NombreUnidadMayor:    pipel.NombreUnidadMayor,
+				NombreUnidadMenor:    pipel.NombreUnidadMenor,
+				IdPaf:                pipel.IdPaf,
+				FechaInicioContrato:  pipel.FechaInicioContrato,
+				FechaFinContrato:     pipel.FechaFinContrato,
+				HorasAsignatura:      pipel.HorasAsignatura,
+				CantidadHorasPaf:     pipel.CantidadHorasPaf,
+				Jerarquia:            pipel.Jerarquia,
+				Semestre:             pipel.Semestre,
+				UltimaModificacion:   pipel.UltimaModificacion,
+				Categoria:            pipel.Categoria,
+				CodEstado:            pipel.CodEstado,
+				DesEstado:            pipel.DesEstado,
+				Llave:                pipel.Llave,
+				Veces:                pipel.Veces,
+				CodigoAsignaturaList: []string{pipel.CodigoAsignatura}, // Lista inicial con un solo código
+				NombreAsignaturaList: []string{pipel.NombreAsignatura}, // Lista inicial con un solo nombre
+			}
+		}
+	}
+
+	// Convertir el mapa en una lista de resultados
+	result := make([]models.PipelsoftDTO, 0, len(grouped))
+	for _, pipel := range grouped {
+		result = append(result, *pipel)
+	}
+
+	return result, nil
+}
+
+func (s *PipelsoftService) GetByNombreUnidadMenor(nombreUnidadMenor string) ([]models.PipelsoftDTO, error) {
+	var pipelsofts []models.Pipelsoft
+
+	// Filtrar registros por nombreUnidadMenor
+	err := s.DBPersonal.Where("nombre_unidad_menor = ?", nombreUnidadMenor).Find(&pipelsofts).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Mapa para agrupar por IdPaf y recolectar los códigos y nombres de asignatura
+	grouped := make(map[int]*models.PipelsoftDTO)
+
+	for _, pipel := range pipelsofts {
+		if existing, exists := grouped[pipel.IdPaf]; exists {
+			// Agregar el CódigoAsignatura si es diferente
+			if !contains(existing.CodigoAsignaturaList, pipel.CodigoAsignatura) {
+				existing.CodigoAsignaturaList = append(existing.CodigoAsignaturaList, pipel.CodigoAsignatura)
+			}
+			// Agregar el NombreAsignatura si es diferente
+			if !contains(existing.NombreAsignaturaList, pipel.NombreAsignatura) {
+				existing.NombreAsignaturaList = append(existing.NombreAsignaturaList, pipel.NombreAsignatura)
+			}
+		} else {
+			// Crear una nueva entrada en el mapa con el primer elemento
+			grouped[pipel.IdPaf] = &models.PipelsoftDTO{
+				RunEmpleado:          pipel.RunEmpleado,
+				Nombres:              pipel.Nombres,
+				PrimerApp:            pipel.PrimerApp,
+				SegundoApp:           pipel.SegundoApp,
+				NombreUnidadMayor:    pipel.NombreUnidadMayor,
+				NombreUnidadMenor:    pipel.NombreUnidadMenor,
+				IdPaf:                pipel.IdPaf,
+				FechaInicioContrato:  pipel.FechaInicioContrato,
+				FechaFinContrato:     pipel.FechaFinContrato,
+				HorasAsignatura:      pipel.HorasAsignatura,
+				CantidadHorasPaf:     pipel.CantidadHorasPaf,
+				Jerarquia:            pipel.Jerarquia,
+				Semestre:             pipel.Semestre,
+				UltimaModificacion:   pipel.UltimaModificacion,
+				Categoria:            pipel.Categoria,
+				CodEstado:            pipel.CodEstado,
+				DesEstado:            pipel.DesEstado,
+				Llave:                pipel.Llave,
+				Veces:                pipel.Veces,
+				CodigoAsignaturaList: []string{pipel.CodigoAsignatura}, // Lista inicial con un solo código
+				NombreAsignaturaList: []string{pipel.NombreAsignatura}, // Lista inicial con un solo nombre
 			}
 		}
 	}
