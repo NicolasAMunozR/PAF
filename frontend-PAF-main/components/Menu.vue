@@ -99,6 +99,7 @@ export default {
       this.isMenuOpen = !this.isMenuOpen;
     },
     logout() {
+      localStorage.clear();
       sessionStorage.clear();
       this.$router.push('/');
     },

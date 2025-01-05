@@ -6,7 +6,7 @@
     </button>
   </div>
   <div class="container">
-    <Filtros @filter="filterData" @sort="sortData" :isPAF="true" />
+    <Filtros @filter="filterData" @sort="sortData" :isPAF="true" :showButton="true" />
         <!-- Mostrar la lista de personas -->
         <div v-if="filteredPersonas.length > 0">
           <div v-for="persona in filteredPersonas" :key="persona.CodigoPaf" class="paf-container">
@@ -93,7 +93,6 @@ const obtenerDatosPaf = async () => {
   try {
     if (!codigoPaf.value) return;
     const response = await $axios.get(`/api/paf-en-linea/pipelsoft/obtenerContratos/mostrarTodo/idPaf/${codigoPaf.value}`);
-    console.log('Datos de la PAF:', response.data);
     if (response.data) {
       paf.value = response.data.map((item: any) => {
         const bloquesArray = item.HistorialPafData.Bloque || []; // Asegurar que Bloque sea un arreglo (vacío si es null o undefined)

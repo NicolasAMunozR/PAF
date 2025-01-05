@@ -31,7 +31,19 @@
             <NuxtLink :to="`/principal/personas/paf?codigoPaf=${persona.CodigoPAF}`" class="button">Ver PAF</NuxtLink>
             <br>
             <br>
-            <NuxtLink :to="`/principal/personas/horario?run=${persona.Run}`" class="button">Ver Horarios</NuxtLink>
+            <NuxtLink 
+    :to="`/principal/personas/horario?run=${persona.Run}`"
+    class="button" 
+    @click.prevent="storeDetalle(1)">
+    Ver Horarios
+  </NuxtLink>
+  <br><br>
+  <NuxtLink 
+    :to="`/principal/personas/horario?run=${persona.Run}`"
+    class="button"
+    @click.prevent="storeDetalle(2)">
+    Ver Horarios detallado
+  </NuxtLink>
           </td>
           <td v-if="showButton" class="px-4 py-3">
             <NuxtLink :to="`/principal/personas/paf?codigoPaf=${persona.IdPaf}`" class="button">Ver PAF</NuxtLink>
@@ -99,6 +111,10 @@ export default {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
   },
+   // Función para almacenar el valor de detalle en sessionStorage
+   storeDetalle(detalleValue) {
+      sessionStorage.setItem('detalle', detalleValue); // Guarda el valor de 'detalle' en sessionStorage
+    },
   async deletePAF(codigoPAF) {
     try {
       const confirmDelete = confirm(`¿Estás seguro de que deseas eliminar la PAF con código ${codigoPAF}?`);

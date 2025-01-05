@@ -61,6 +61,7 @@ const filtros = ref({
 const sortBy = ref('nombres');
 const sortOrder = ref('asc');
 
+const semestreMasActual = ref('');
 const filteredPersonas = computed(() => {
   let filtered = personas.value.filter(persona => {
     return (
@@ -94,6 +95,24 @@ const filteredPersonas = computed(() => {
 onMounted(async () => {
   try {
     const response = await $axios.get('/api/paf-en-linea/pipelsoft/contratos');
+    semestreMasActual.value = response.data
+  .map((item: { PipelsoftData: { Semestre: any; }; }) => item.PipelsoftData.Semestre) // Extrae el semestre de cada objeto
+  .sort((a: { split: (arg0: string) => [any, any]; }, b: { split: (arg0: string) => [any, any]; }) => {
+    // Convierte los semestres en fechas para poder compararlos
+    const [mesA, anioA] = a.split('-');
+    const [mesB, anioB] = b.split('-');
+
+    // Compara año y mes
+    if (parseInt(anioA) === parseInt(anioB)) {
+      return parseInt(mesB) - parseInt(mesA); // Ordena por mes descendente
+    }
+    return parseInt(anioB) - parseInt(anioA); // Ordena por año descendente
+  })[0]; // Devuelve el semestre más reciente
+
+
+if(localStorage.getItem('semestre') === null || localStorage.getItem('semestre') === undefined || localStorage.getItem('semestre') === '') {
+  localStorage.setItem('semestre', semestreMasActual.value || '');
+}
     personas.value = response.data.map((item: any) => {
       const bloquesArray = item.HistorialPafData.Bloque || []; // Asegurar que Bloque sea un arreglo (vacío si es null o undefined)
 
@@ -130,7 +149,16 @@ onMounted(async () => {
 });
 
 const filterData = (newFilters: any) => {
-  filtros.value = newFilters;
+    filtros.value = newFilters;
+    localStorage.setItem('codigoPAF_filtro', newFilters.codigoPAF);
+    localStorage.setItem('run_filtro', newFilters.run);
+    localStorage.setItem('codigoAsignatura_filtro', newFilters.codigoAsignatura);
+    localStorage.setItem('estadoProceso_filtro', newFilters.estadoProceso);
+    localStorage.setItem('calidad_filtro', newFilters.calidad);
+    localStorage.setItem('nombreAsignatura_filtro', newFilters.nombreAsignatura);
+    localStorage.setItem('semestre', newFilters.semestre);
+    localStorage.setItem('nombreUnidadMenor_filtro', newFilters.nombreUnidadMenor);
+    localStorage.setItem('nombreUnidadMayor_filtro', newFilters.nombreUnidadMayor);
 };
 
 const sortData = (newSortBy: string, newSortOrder: string) => {

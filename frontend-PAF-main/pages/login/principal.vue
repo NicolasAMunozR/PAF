@@ -71,7 +71,6 @@
     try {
       // Accede a $axios desde el contexto del componente
       const response = await this.$axios.get(`/api/paf-en-linea/usuario/rut/${this.run}`);
-console.log(response.data);
       if (!response.data || response.data.length === 0) {
         this.errorMessage = "Usuario no encontrado.";
         return;
@@ -82,29 +81,29 @@ console.log(response.data);
         (user.Rol === "encargado"  ||
          user.Rol === "personal-dei")
       );
-      console.log(userMatch);
-      if (userMatch) {
-        if (userMatch.Acceso === 0) {
-        this.errorMessage = "Este usuario no posee accesos.";
-        return;
-      }
-        // Redirigir según el caso encontrado
-        if (userMatch.Rol === "encargado") {
-          if (userMatch.Acceso === 1 && userMatch.Vista_facultad === 0 && userMatch.Vista_universidad === 0) {
+        if (userMatch) {
+          // Redirigir según el caso encontrado
+        if (userMatch.Rol === "personal-dei") {
+          this.$router.push("principal/personas");
+        }
+        else if (userMatch.Rol === "encargado") {
+          if (userMatch.Acceso === 0) {
+            this.errorMessage = "Este usuario no posee accesos.";
+            return;
+          }
+          else if (userMatch.Vista_universidad === 1) {
+            this.$router.push("principal/seguimientoPAF");
+          } 
+          else if(userMatch.Vista_facultad === 1) {
+            sessionStorage.setItem("unidadMayor", userMatch.UnidadMayor);
+            this.$router.push(`principal/unidadMayorPAF?UnidadMayor=${userMatch.UnidadMayor}`);
+          }
+          else if (userMatch.Acceso === 1 && userMatch.Vista_facultad === 0 && userMatch.Vista_universidad === 0) {
             sessionStorage.setItem("unidadMayor", userMatch.UnidadMayor);
             sessionStorage.setItem("unidadMenor", userMatch.UnidadMenor);
           this.$router.push(`principal/unidadMayorPAF?UnidadMayor=${userMatch.UnidadMayor}&UnidadMenor=${userMatch.UnidadMenor}`)
         }
-          if (userMatch.Vista_universidad === 1) {
-            this.$router.push("principal/seguimientoPAF");
-          } 
-          if(userMatch.Vista_facultad === 1) {
-            sessionStorage.setItem("unidadMayor", userMatch.UnidadMayor);
-            this.$router.push(`principal/unidadMayorPAF?UnidadMayor=${userMatch.UnidadMayor}`);
-          }
-        } else if (userMatch.Rol === "personal-dei") {
-          this.$router.push("principal/personas");
-        }
+        } 
       } else {
         this.errorMessage = "El rol seleccionado no coincide con los usuarios disponibles.";
       }

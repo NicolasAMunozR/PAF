@@ -79,6 +79,7 @@ const { $axios } = useNuxtApp() as unknown as { $axios: typeof import('axios').d
 
 const rut = ref('');
 const route = useRoute();
+const semestreMasActual = ref('');
 let valor = true;
 const UnidadMayor = ref('');
 const UnidadMenor = ref('');
@@ -114,8 +115,10 @@ const goToPage = (page: number) => {
   currentPage.value = page;
 };
 
+const isFirstLoad = ref(true);
+
 const filterData = (newFilters: any) => {
-  filtros.value = newFilters;
+    filtros.value = { ...newFilters }; // Si no es la primera carga, no modificamos el semestre
   currentPage.value = 1; // Resetear a la primera página cuando se cambian los filtros
 };
 
@@ -154,6 +157,22 @@ const fetchContratos = async () => {
     const response = await $axios.get(`/api/paf-en-linea/pipelsoft/contratos-nombreUnidadMayor/${UnidadMayor.value}`);
     if (response.data && Array.isArray(response.data)) {
       contratos.value = response.data;
+      // Supongamos que response.data es el arreglo que has mencionado
+semestreMasActual.value = response.data
+  .map(item => item.PipelsoftData.Semestre) // Extrae el semestre de cada objeto
+  .sort((a, b) => {
+    // Convierte los semestres en fechas para poder compararlos
+    const [mesA, anioA] = a.split('-');
+    const [mesB, anioB] = b.split('-');
+
+    // Compara año y mes
+    if (parseInt(anioA) === parseInt(anioB)) {
+      return parseInt(mesB) - parseInt(mesA); // Ordena por mes descendente
+    }
+    return parseInt(anioB) - parseInt(anioA); // Ordena por año descendente
+  })[0]; // Devuelve el semestre más reciente
+localStorage.setItem('semestre', semestreMasActual.value || '');
+      
     } else {
       errorMessage.value = 'No se encontraron contratos.';
     }
@@ -166,10 +185,25 @@ const fetchContratos = async () => {
 const fetchContratos1 = async () => {
   try {
     const response = await $axios.get(`/api/paf-en-linea/pipelsoft/contratos-nombreUnidadMenor/${UnidadMenor.value}`);
-    console.log(response.data)
     valor = false;
     if (response.data && Array.isArray(response.data)) {
       contratos.value = response.data;
+      // Supongamos que response.data es el arreglo que has mencionado
+semestreMasActual.value = response.data
+  .map(item => item.PipelsoftData.Semestre) // Extrae el semestre de cada objeto
+  .sort((a, b) => {
+    // Convierte los semestres en fechas para poder compararlos
+    const [mesA, anioA] = a.split('-');
+    const [mesB, anioB] = b.split('-');
+
+    // Compara año y mes
+    if (parseInt(anioA) === parseInt(anioB)) {
+      return parseInt(mesB) - parseInt(mesA); // Ordena por mes descendente
+    }
+    return parseInt(anioB) - parseInt(anioA); // Ordena por año descendente
+  })[0]; // Devuelve el semestre más reciente
+localStorage.setItem('semestre', semestreMasActual.value);
+
     } else {
       errorMessage.value = 'No se encontraron contratos.';
     }
@@ -182,9 +216,7 @@ const fetchContratos1 = async () => {
 
 onMounted(async () => {
   UnidadMayor.value = sessionStorage.getItem("unidadMayor") || "";
-  console.log(UnidadMayor.value)
   UnidadMenor.value = sessionStorage.getItem("unidadMenor") || "";
-  console.log(UnidadMenor.value)
   if(UnidadMenor.value !== ''){
     fetchContratos1();
   }

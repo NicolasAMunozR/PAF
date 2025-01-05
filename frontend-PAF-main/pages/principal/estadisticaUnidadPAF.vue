@@ -174,7 +174,6 @@ const obtenerSemestres = async () => {
       }
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
       const response = await $axios.get(`/api/paf-en-linea/estadisticas/unidad-mayor/${UnidadMayor.value}/${semestreSeleccionado.value}`);
-      console.log(response);
       cantidadPersonasSai.value = response.data.total_profesores;
       cantidadPafUnicas.value = response.data.total_pipelsoft_unicos;
     } catch (error) {
@@ -189,7 +188,6 @@ const obtenerSemestres = async () => {
       }
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
       const response = await $axios.get(`/api/paf-en-linea/estadisticas/6/${UnidadMayor.value}/${UnidadMenor.value}/${semestreSeleccionado.value}`);
-      console.log(response);
       cantidadPersonasSai.value = response.data.total_profesores;
       cantidadPafUnicas.value = response.data.total_pipelsoft_unicos;
     } catch (error) {
@@ -364,7 +362,6 @@ const cerrarModal = () => {
           unidadSeleccionada.value = label;
           detalleUnidadSeleccionada.value = value;
           const response1 = await $axios.get(`/api/paf-en-linea/estadisticas/6/${UnidadMayor.value}/${label}/${semestreSeleccionado.value}`);
-          console.log(response1);
           cantidadPersonasSai.value = response1.data.total_profesores;
           cantidadPafUnicas.value = response1.data.total_pipelsoft_unicos;
           const response2 = await $axios.get(`/api/paf-en-linea/estadisticas/7/${UnidadMayor.value}/${label}/${semestreSeleccionado.value}`);
@@ -516,14 +513,11 @@ const cerrarModal = () => {
           let unidadesData = null;
           if(unidadSeleccionada.value === null) {
               response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-menores/${encodeURIComponent(label)}/${UnidadMayor.value}/${semestreSeleccionado.value}`);
-              console.log(semestreSeleccionado);
-              console.log(response);
           } else {
               // CAMBIAR AQUÍ
               response = await $axios.get(`/api/paf-en-linea/estadisticas/unidadesmenores/porcodestadopaf/${encodeURIComponent(label)}/${UnidadMayor.value}/${unidadSeleccionada.value}/${semestreSeleccionado.value}`);
           }
           unidadesData = response.data;
-          console.log("error datos RAROS", response.data)
           graficoModalData.value = {
             labels: Object.keys(unidadesData),
             datasets: [
@@ -717,9 +711,7 @@ const cerrarModal = () => {
     }
 
     UnidadMayor.value = sessionStorage.getItem("unidadMayor") || "";
-    console.log(UnidadMayor.value)
     UnidadMenor.value = sessionStorage.getItem("unidadMenor") || "";
-    console.log(UnidadMenor.value)
     if(UnidadMenor.value !== ''){
       rut.valueOf = sessionStorage.getItem('rut') || '';
       valor.value = rut.valueOf;

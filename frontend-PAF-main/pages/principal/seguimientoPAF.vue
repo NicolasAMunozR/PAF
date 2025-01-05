@@ -69,6 +69,7 @@ import { ref, computed, onMounted } from 'vue';
 import Filtros from '../../components/Filtros.vue';
 const { $axios } = useNuxtApp() as unknown as { $axios: typeof import('axios').default };
 
+const semestreMasActual = ref('');
 const contratos = ref<any[]>([]);
 const errorMessage = ref('');
 const filtros = ref({
@@ -76,6 +77,7 @@ const filtros = ref({
   nombreUnidadMenor: '',
   run: '',
   semestre: '',
+  estadoProceso: '',
   ruta: '/seguimientoPAF',
 });
 const sortBy = ref('');
@@ -84,9 +86,12 @@ const sortOrder = ref('asc');
 // Paginación
 const currentPage = ref(1);
 const itemsPerPage = 20; // Número de elementos por página
+const isFirstLoad = ref(true);
 
 const filterData = (newFilters: any) => {
-  filtros.value = newFilters;
+  
+    filtros.value = { ...newFilters }; // Si no es la primera carga, no modificamos el semestre
+  
   currentPage.value = 1; // Resetear la página al filtrar
 };
 
@@ -103,7 +108,8 @@ const filteredPersonas = computed(() => {
       (contrato.PipelsoftData.NombreUnidadMenor || '').toLowerCase().includes((filtros.value.nombreUnidadMenor || '').toLowerCase()) &&
       (contrato.PipelsoftData.NombreUnidadMayor || '').toLowerCase().includes((filtros.value.nombreUnidadMayor || '').toLowerCase()) &&
       (contrato.PipelsoftData.RunEmpleado || '').toLowerCase().includes((filtros.value.run || '').toLowerCase()) &&
-      (contrato.PipelsoftData.Semestre || '').toLowerCase().includes((filtros.value.semestre || '').toLowerCase())
+      (contrato.PipelsoftData.Semestre || '').toLowerCase().includes((filtros.value.semestre || '').toLowerCase()) &&
+      (filtros.value.estadoProceso ? contrato.PipelsoftData.CodEstado?.toString() === filtros.value.estadoProceso : true)
     );
   });
 
@@ -145,6 +151,21 @@ const fetchContratos = async () => {
     const response = await $axios.get(`/api/paf-en-linea/pipelsoft/contratos`);
     if (response.data && Array.isArray(response.data)) {
       contratos.value = response.data;
+      // Supongamos que response.data es el arreglo que has mencionado
+semestreMasActual.value = response.data
+  .map(item => item.PipelsoftData.Semestre) // Extrae el semestre de cada objeto
+  .sort((a, b) => {
+    // Convierte los semestres en fechas para poder compararlos
+    const [mesA, anioA] = a.split('-');
+    const [mesB, anioB] = b.split('-');
+
+    // Compara año y mes
+    if (parseInt(anioA) === parseInt(anioB)) {
+      return parseInt(mesB) - parseInt(mesA); // Ordena por mes descendente
+    }
+    return parseInt(anioB) - parseInt(anioA); // Ordena por año descendente
+  })[0]; // Devuelve el semestre más reciente
+localStorage.setItem('semestre', semestreMasActual.value);
     } else {
       errorMessage.value = 'No se encontraron contratos.';
     }

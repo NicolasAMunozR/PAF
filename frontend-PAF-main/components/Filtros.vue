@@ -137,25 +137,14 @@ import { useRoute } from 'vue-router';
 const props = defineProps<{
   showButton: boolean; // Define el tipo de la propiedad
 }>();
-
-const emit = defineEmits<{
-  (event: 'filter', filters: any): void;
-  (event: 'sort', sortBy: string, order: string): void;
-}>();
-
-const filtros = ref({
-  codigoPAF: '',
-  run: '',
-  codigoAsignatura: '',
-  semestre: '',
-  estadoProceso: '',
-  calidad: '',
-  nombreAsignatura: '',
-  fechaUltimaModificacionProceso: '',
-  nombreUnidadMenor: '',
-  nombreUnidadMayor: '',
-  ruta: '',
-});
+let semestres = ref('');
+let codigoPAF_filtro = ref('');
+let run_filtro = ref('');
+let codigoAsignatura_filtro = ref('');
+let calidad_filtro = ref('');
+let nombreAsignatura_filtro = ref('');
+let nombreUnidadMenor_filtro = ref('');
+let nombreUnidadMayor_filtro = ref('');
 
 const sortBy = ref('nombres');
 const sortOrder = ref('asc');
@@ -164,6 +153,27 @@ const route = useRoute();
 const isSeguimientoPAF = ref(false);
 const isUnidadMayorPAF = ref(false);
 const isPaf = ref(false);
+const emit = defineEmits<{
+  (event: 'filter', filters: any): void;
+  (event: 'sort', sortBy: string, order: string): void;
+}>();
+
+let valor = 0;
+const estadoProceso = ref('B1');
+const filtros = ref({
+  codigoPAF: codigoPAF_filtro && route.path === "/principal/personas" ? codigoPAF_filtro : '',
+  run: run_filtro && route.path === "/principal/personas" ? run_filtro : '',
+  codigoAsignatura: codigoAsignatura_filtro && route.path === "/principal/personas" ? codigoAsignatura_filtro : '',
+  semestre: semestres && valor === 0 ? semestres : '',
+  estadoProceso: estadoProceso && route.path === "/principal/personas" ? estadoProceso : '',
+  calidad: calidad_filtro && route.path === "/principal/personas" ? calidad_filtro : '',
+  nombreAsignatura: nombreAsignatura_filtro && route.path === "/principal/personas" ? nombreAsignatura_filtro : '',
+  fechaUltimaModificacionProceso: '',
+  nombreUnidadMenor: nombreUnidadMenor_filtro && route.path === "/principal/personas" ? nombreUnidadMenor_filtro : '',
+  nombreUnidadMayor: nombreUnidadMayor_filtro && route.path === "/principal/personas" ? nombreUnidadMayor_filtro : '',
+  ruta: '',
+});
+
 
 const aplicar = () => {
   if (route.path === "/principal/seguimientoPAF") {
@@ -180,9 +190,53 @@ onMounted(() => {
   if (props.showButton) {
     // Realiza alguna acción si el botón está visible
   }
+
+  const codigoPAF_Filtro = localStorage.getItem('codigoPAF_filtro');
+    const run_Filtro = localStorage.getItem('run_filtro');
+    const codigoAsignatura_Filtro = localStorage.getItem('codigoAsignatura_filtro');
+    const estadoProceso_Filtro = localStorage.getItem('estadoProceso_filtro');
+    const calidad_Filtro = localStorage.getItem('calidad_filtro');
+    const nombreAsignatura_Filtro = localStorage.getItem('nombreAsignatura_filtro');
+    const nombreUnidadMenor_Filtro = localStorage.getItem('nombreUnidadMenor_filtro');
+    const nombreUnidadMayor_Filtro = localStorage.getItem('nombreUnidadMayor_filtro');
+
+  const semestre = localStorage.getItem('semestre');
+  
+  if (semestre) {
+    semestres.value = semestre;
+  }
+  if (codigoPAF_Filtro) {
+    codigoPAF_filtro.value = codigoPAF_Filtro;
+  }
+  if (run_Filtro) {
+    run_filtro.value = run_Filtro;
+  }
+  if (codigoAsignatura_Filtro) {
+    codigoAsignatura_filtro.value = codigoAsignatura_Filtro;
+  }
+  if (estadoProceso_Filtro) {
+    estadoProceso.value = estadoProceso_Filtro;
+  }
+  if (calidad_Filtro) {
+    calidad_filtro.value = calidad_Filtro;
+  }
+  if (nombreAsignatura_Filtro) {
+    nombreAsignatura_filtro.value = nombreAsignatura_Filtro;
+  }
+  if (nombreUnidadMenor_Filtro) {
+    nombreUnidadMenor_filtro.value = nombreUnidadMenor_Filtro;
+  }
+  if (nombreUnidadMayor_Filtro) {
+    nombreUnidadMayor_filtro.value = nombreUnidadMayor_Filtro;
+  }
+  setTimeout(() => {
+    if(!semestre) {
+    window.location.reload(); // Recarga la página completa
+  } 
+    applyFilters();
+  }, 100);
   aplicar();
-  console.log("Página actual:", route.path);
-  resetFilters();
+  applyFilters();
 });
 
 // Desacoplar emisión automática de orden de los filtros
@@ -191,6 +245,9 @@ const applyFilters = () => {
 
   // Filtra campos según las rutas
   if (isSeguimientoPAF.value) {
+    filtersToEmit = Object.fromEntries(
+      Object.entries(filtros.value).filter(([key]) => key === 'nombreUnidadMenor' || key === 'nombreUnidadMayor' || key === 'run' || key === 'semestre' || key === 'estadoProceso')
+    );
     emit('filter', filtersToEmit);
   } else if (isUnidadMayorPAF.value) {
     filtersToEmit = Object.fromEntries(

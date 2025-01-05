@@ -80,13 +80,14 @@
                           v-for="(bloque, idx) in bloquesPorDia(dia, index + 1)"
                           :key="bloque.nombre"
                           class="bloque"
-                          :style="{ backgroundColor: obtenerColorAsignatura(bloque.codigo_asignatura || '', bloque.bloque || '', bloque.seccion || '') }"
+                          :style="{ backgroundColor: bloque.color }"
                         >
                           <label>
                             <input
                               type="checkbox"
                               :value="`${dia}${index + 1}/${bloque.nombre}/${bloque.seccion}/${bloque.ID}/${bloque.cupo}/${bloque.codigo_asignatura}/${bloque.tipo}/${bloque.run}/${bloque.semestre}`"
                               v-model="bloquesSeleccionados"
+                              :disabled="bloque.color === '#FFCC80'"
                             />
                             {{ bloque.nombre }} <br />
                             Sección: {{ bloque.seccion }}
@@ -101,13 +102,14 @@
                       v-for="(bloque, bloqueIndex) in bloquesPorDia(dia, index + 1)"
                       :key="`${bloque.nombre}-${bloqueIndex}`"
                       class="bloque"
-                      :style="{ backgroundColor: obtenerColorAsignatura(bloque.codigo_asignatura || '', bloque.bloque || '', bloque.seccion || '') }"
+                      :style="{ backgroundColor: bloque.color }"
                     >
                       <label>
                         <input
                           type="checkbox"
                           :value="`${dia}${index + 1}/${bloque.nombre}/${bloque.seccion}/${bloque.ID}/${bloque.cupo}/${bloque.codigo_asignatura}/${bloque.tipo}/${bloque.run}/${bloque.semestre}`"
                           v-model="bloquesSeleccionados"
+                          :disabled="bloque.color === '#FFCC80'"
                         />
                         {{ bloque.nombre }} <br /> Sección: {{ bloque.seccion }}
                       </label>
@@ -151,6 +153,7 @@
       <h2 class="sub-title">PAF</h2>
       <div v-if="fichasPAF.length > 0" class="flex flex-wrap">
         <div
+        v-if="Number(detalle) === 2"
           v-for="(p, index) in fichasPAF"
           :key="index"
           class="card"
@@ -163,7 +166,25 @@
           <p><strong>Nombre de Asignatura:</strong> {{ p.NombreAsignatura }}</p>
           <p><strong>Cantidad de Horas PAF:</strong> {{ p.CantidadHorasPAF }}</p>
         </div>
-      </div>
+
+  <div
+    v-if="Number(detalle) === 1"
+    v-for="(paf, index) in fichasAgrupadasPAF"
+    :key="index"
+    class="card"
+    :style="{ backgroundColor: fichaSeleccionadaPAF?.CodigoPaf === paf.CodigoPaf ? '#B3E5FC' : coloresPAF[index % coloresPAF.length], margin: '8px', flex: '1 1 48%' }"
+    @click="fichaSeleccionadaPAF = { ...fichaSeleccionadaPAF, ...paf }"
+  >
+    <p><strong>Código PAF:</strong> {{ paf.CodigoPaf }}</p>
+    <p><strong>Unidad Menor:</strong> {{ paf.NombreUnidadMenor }}</p>
+    <p><strong>Cantidad de Horas PAF:</strong> {{ paf.CantidadHorasPAF }}</p>
+    <div v-for="(asignatura, idx) in paf.Asignaturas" :key="idx">
+      <p><strong>Asignatura {{ idx + 1 }}:</strong></p>
+      <p><strong>Código de Asignatura:</strong> {{ asignatura.CodigoAsignatura }}</p>
+      <p><strong>Nombre de Asignatura:</strong> {{ asignatura.NombreAsignatura }}</p>
+    </div>
+  </div>
+</div>
 
       <h2 class="sub-title">Horario Asignatura</h2>
       <div v-if="fichasAsignaturas.length > 0" class="flex flex-wrap">
@@ -191,8 +212,8 @@ import { onMounted, ref, computed } from 'vue'
 import { useNuxtApp } from '#app'
 
 const historialSeleccionado = computed(() => persona.value.filter((p) => p.ID !== 0) || null);
-console.log(historialSeleccionado)
 
+const detalle = ref('');
 const mostrarDialogo = ref(false);
 const comentario = ref('');
 
@@ -200,7 +221,27 @@ const cancelarEnvio = () => {
   mostrarDialogo.value = false;
   comentario.value = ''; // Limpia el comentario al cancelar
 };
+const fichasAgrupadasPAF = computed(() => {
+  const agrupadas: { [key: number]: { CodigoPaf: number, NombreUnidadMenor: string, CantidadHorasPAF: number, Asignaturas: { CodigoAsignatura: string, NombreAsignatura: string}[] } } = {};
 
+  fichasPAF.value.forEach((p) => {
+    if (!agrupadas[p.CodigoPaf]) {
+      agrupadas[p.CodigoPaf] = {
+        CodigoPaf: p.CodigoPaf,
+        NombreUnidadMenor: p.NombreUnidadMenor,
+        CantidadHorasPAF: p.CantidadHorasPAF,
+        Asignaturas: []
+      };
+    }
+
+    agrupadas[p.CodigoPaf].Asignaturas.push({
+      CodigoAsignatura: p.CodigoAsignatura,
+      NombreAsignatura: p.NombreAsignatura
+    });
+  });
+
+  return Object.values(agrupadas);
+});
 
 // Método para limpiar selecciones
 const limpiarSelecciones = () => {
@@ -361,6 +402,7 @@ interface Persona {
   SemestrePaf: string;
   CantidadHorasPAF: number;
   Run: string;
+  Asignaturas?: { CodigoAsignatura: string; NombreAsignatura: string }[]; // Add the 'Asignaturas' property
 }
 
 interface Horario {
@@ -418,11 +460,9 @@ const bloquesPorDia = (dia: string, modulo: number) => {
   return personaFiltrada.value
     .filter((p) => {
       if (!p.bloque) return false;
+            
 
-            // Excluir bloques asociados con las fichas seleccionadas en 'fichasAsignaturasNo'
-            if (fichasAsignaturasNo.value.some((ficha) => ficha.codigo_asignatura === p.codigo_asignatura && ficha.semestre === p.semestre && ficha.seccion === p.seccion)) {
-        return false;
-      }
+
       // Filtrar por día y módulo
       const bloques = p.bloque.split('-');
       return bloques.some((b) => {
@@ -431,10 +471,21 @@ const bloquesPorDia = (dia: string, modulo: number) => {
         return inicialDia[dia] === diaBloque && parseInt(moduloBloque) === modulo;
       });
     })
-    .map((p) => ({
+    .map((p) => {
+      // Determinar color basado en si el bloque es excluido
+      const esExcluido = fichasAsignaturasNo.value.some((ficha) => 
+        ficha.codigo_asignatura === p.codigo_asignatura && 
+        ficha.semestre === p.semestre && 
+        ficha.seccion === p.seccion
+      );
+      const color = esExcluido 
+        ?  '#FFCC80' // Cambiar esto por el color deseado para bloques excluidos
+        : obtenerColorAsignatura(p.codigo_asignatura, p.bloque || '', p.seccion || '');
+
+      return {
       nombre: p.nombre_asignatura,
       seccion: p.seccion,
-      color: obtenerColorAsignatura(p.codigo_asignatura, p.bloque || '', p.seccion || ''),
+      color: color,
       ID: p.ID,
       cupo: p.Cupo,
       codigo_asignatura: p.codigo_asignatura,
@@ -444,7 +495,8 @@ const bloquesPorDia = (dia: string, modulo: number) => {
       bloque: (p.bloque ?? '').split('-')
         .map(b => `${b.charAt(0)}${b.slice(1)}`) // Mapear para obtener "V3", "M2", etc.
         .join('-')
-    }));
+    };
+    });
 };
 
 const obtenerDatosPersona = async (semestreGuardado: string | null) => {
@@ -453,7 +505,6 @@ const obtenerDatosPersona = async (semestreGuardado: string | null) => {
     // NO DEVUELÑVE LAS PAF LISTAS
 
     const response = await $axios.get(`/api/paf-en-linea/pipelsoft/obtenerContratos/mostrarTodo/${run.value}`);
-    console.log(response.data);
     const response1 = await $axios.get(`/api/paf-en-linea/profesorDB/${run.value.slice(0, -2)}`);
     persona1.value = response1.data;
 
@@ -581,10 +632,16 @@ const result = resultado.map(item => {
 
     const data = resultado[0];
     data.bloque = result;
-    console.log(data);
-    await $axios.post(`/api/paf-en-linea/historial/post/${codigoPAF}/${fichaSeleccionadaPAF.value?.CodigoAsignatura}/${comentario.value}`, data);
+    let Asignatura = fichaSeleccionadaPAF.value?.CodigoAsignatura;
+    if (!Asignatura){
+        Asignatura = fichaSeleccionadaPAF.value?.Asignaturas?.[0]?.CodigoAsignatura;        ;
+    }
+    await $axios.post(`/api/paf-en-linea/historial/post/${codigoPAF}/${Asignatura}/${comentario.value}`, data);
     alert('Datos enviados correctamente.');
     mostrarDialogo.value = false;
+    await $axios.put(`/api/paf-en-linea/historial/${codigoPAF}/actualizarBanderaAceptacion`, {
+      nuevaBanderaAceptacion: 1,
+    });
   } catch (error) {
     console.error('Error al enviar los datos:', error);
     alert('Hubo un error al enviar los datos.');
@@ -598,6 +655,7 @@ const volver = () => {
 }
 
 onMounted(() => {
+  detalle.value = sessionStorage.getItem('detalle') || '';
   obtenerDatosPersona(null)
 })
 const coloresPAF = [

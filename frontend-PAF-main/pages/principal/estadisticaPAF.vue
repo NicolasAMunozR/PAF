@@ -201,7 +201,6 @@ const fetchPafPorUnidadMayor = async () => {
       obtenerSemestres();
     }
     const response = await $axios.get(`/api/paf-en-linea/estadisticas/frecuencia-unidades-mayores/${semestreSeleccionado.value}`);
-    console.log('Cantidad de PAF por unidad mayor:', semestreSeleccionado.value, response.data);
     const unidadesData = response.data;
     pafPorUnidadMayorChartData.value = {
       labels: Object.keys(unidadesData),
@@ -235,7 +234,6 @@ const fetchPafPorUnidadMayor = async () => {
 
           const response = await $axios.get(`/api/paf-en-linea/estadisticas/unidad-mayor/unidades-menores-frecuencia/${label}/${semestreSeleccionado.value}`);
           const unidadesData = response.data;
-          console.log("newDATOSAAAAHHH", unidadesData)
           graficoModalData.value = {
             labels: Object.keys(unidadesData),
             datasets: [
@@ -396,10 +394,8 @@ const configurarGraficos = () => {
             response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-mayores/sin_profesores/${semestreSeleccionado.value}`);
             unidadesData = response.data;
             }
-            
-            console.log("data", response.data)
+          
             labelNuevo = 'Cantidad de PAF por Unidad Mayor';
-            console.log('Cantidad de PAF por Unidad Mayor:', unidadesData);
           } else {
             if (label === 'Profesores con PAF') {
             response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-menores-con-profesores-activos/8_1/${unidadSeleccionada.value}/${semestreSeleccionado.value}`);
@@ -408,7 +404,6 @@ const configurarGraficos = () => {
             response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-menores-sin-profesores-8-2/${unidadSeleccionada.value}/${semestreSeleccionado.value}`);
             unidadesData = response.data.unidades;
             }
-            console.log("data2", response.data)
             labelNuevo = 'Cantidad de PAF por Unidad Menor';
           }
           graficoModalData.value = {
