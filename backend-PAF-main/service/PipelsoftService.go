@@ -340,9 +340,9 @@ func (s *PipelsoftService) GetUnitsByMayor(nombreUnidadMayor string) ([]string, 
 	return menores, nil
 }
 
-func (s *PipelsoftService) GetBySemester(semestre string) ([]models.PipelsoftDTO, error) {
+func (s *PipelsoftService) GetAll() ([]models.PipelsoftDTO, error) {
 	var pipelsofts []models.Pipelsoft
-	err := s.DBPersonal.Where("semestre = ?", semestre).Find(&pipelsofts).Error
+	err := s.DBPersonal.Find(&pipelsofts).Error // Recupera todos los registros sin filtrar por semestre
 	if err != nil {
 		return nil, err
 	}
