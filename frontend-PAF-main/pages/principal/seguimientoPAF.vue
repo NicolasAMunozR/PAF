@@ -26,19 +26,19 @@
           </thead>
           <tbody>
             <tr v-for="(contrato, index) in paginatedData" :key="index">
-              <td>{{ contrato.PipelsoftData.IdPaf }}</td>
-              <td>{{ contrato.PipelsoftData.RunEmpleado }}</td>
-              <td>{{ contrato.PipelsoftData.Jerarquia }}</td>
-              <td>{{ contrato.PipelsoftData.NombreAsignatura }}</td>
-              <td>{{ contrato.PipelsoftData.CodEstado }}</td>
-              <td>{{ contrato.PipelsoftData.DesEstado }}</td>
+              <td>{{ contrato.id_paf }}</td>
+              <td>{{ contrato.run_empleado }}</td>
+              <td>{{ contrato.jerarquia }}</td>
+              <td>{{ Array.isArray(contrato.nombre_asignatura_list) ? contrato.nombre_asignatura_list.join(', ') : contrato.nombre_asignatura_list }}</td>
+              <td>{{ contrato.cod_estado }}</td>
+              <td>{{ contrato.des_estado }}</td>
               <td>
-                {{ new Date(contrato.PipelsoftData.UltimaModificacion).toLocaleDateString() }}
-                {{ new Date(contrato.PipelsoftData.UltimaModificacion).toLocaleTimeString() }} 
+                {{ new Date(contrato.ultima_modificacion).toLocaleDateString() }}
+                {{ new Date(contrato.ultima_modificacion).toLocaleTimeString() }} 
               </td>
-              <td>{{ contrato.PipelsoftData.Semestre }}</td>
+              <td>{{ contrato.semestre }}</td>
               <td>
-                <div v-for="(estado, idx) in contrato.PipelsoftData.historialEstados" :key="idx">
+                <div v-for="(estado, idx) in contrato.historial_estados" :key="idx">
                   <p>
                     <strong>{{ estadoProceso(estado.estado) }}</strong>: 
                     {{ calcularTiempoEnEstado(estado.fechaInicio) }} días
@@ -105,18 +105,18 @@ const sortData = (newSortBy: string, newSortOrder: string) => {
 const filteredPersonas = computed(() => {
   let filtered = contratos.value.filter(contrato => {
     return (
-      (contrato.PipelsoftData.NombreUnidadMenor || '').toLowerCase().includes((filtros.value.nombreUnidadMenor || '').toLowerCase()) &&
-      (contrato.PipelsoftData.NombreUnidadMayor || '').toLowerCase().includes((filtros.value.nombreUnidadMayor || '').toLowerCase()) &&
-      (contrato.PipelsoftData.RunEmpleado || '').toLowerCase().includes((filtros.value.run || '').toLowerCase()) &&
-      (contrato.PipelsoftData.Semestre || '').toLowerCase().includes((filtros.value.semestre || '').toLowerCase()) &&
-      (filtros.value.estadoProceso ? contrato.PipelsoftData.CodEstado?.toString() === filtros.value.estadoProceso : true)
+      (contrato.nombre_unidad_menor || '').toLowerCase().includes((filtros.value.nombreUnidadMenor || '').toLowerCase()) &&
+      (contrato.nombre_unidad_mayor || '').toLowerCase().includes((filtros.value.nombreUnidadMayor || '').toLowerCase()) &&
+      (contrato.run_empleado || '').toLowerCase().includes((filtros.value.run || '').toLowerCase()) &&
+      (contrato.semestre || '').toLowerCase().includes((filtros.value.semestre || '').toLowerCase()) &&
+      (filtros.value.estadoProceso ? contrato.cod_estado?.toString() === filtros.value.estadoProceso : true)
     );
   });
 
   if (sortBy.value) {
     filtered = filtered.sort((a, b) => {
-      const compareA = a.PipelsoftData[sortBy.value];
-      const compareB = b.PipelsoftData[sortBy.value];
+      const compareA = a[sortBy.value];
+      const compareB = b[sortBy.value];
       if (compareA < compareB) return sortOrder.value === 'asc' ? -1 : 1;
       if (compareA > compareB) return sortOrder.value === 'asc' ? 1 : -1;
       return 0;
@@ -148,13 +148,15 @@ const nextPage = () => {
 // Fetch inicial de datos
 const fetchContratos = async () => {
   try {
-    const response = await $axios.get(`/api/paf-en-linea/pipelsoft/contratos`);
+    const response = await $axios.get(`/api/paf-en-linea/pipelsoft/FiltroSemestre/`);
+    console.log(response.data);
     if (response.data && Array.isArray(response.data)) {
       contratos.value = response.data;
       // Supongamos que response.data es el arreglo que has mencionado
 semestreMasActual.value = response.data
-  .map(item => item.PipelsoftData.Semestre) // Extrae el semestre de cada objeto
+  .map(item => item.semestre) // Extrae el semestre de cada objeto
   .sort((a, b) => {
+
     // Convierte los semestres en fechas para poder compararlos
     const [mesA, anioA] = a.split('-');
     const [mesB, anioB] = b.split('-');
