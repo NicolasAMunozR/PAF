@@ -58,4 +58,5 @@ type HistorialPafAceptadas struct {
 
 	BanderaAceptacion int    `gorm:"type:int;null"`
 	Llave             string `gorm:"type:text"`
+	SemestreInicioPaf string `gorm:"type:text"`
 }

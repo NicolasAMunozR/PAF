@@ -102,6 +102,7 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 		Bloque:                  bloquesJSON, // Bloques en JSON
 		BanderaAceptacion:       0,
 		Comentario:              comentario,
+		// añadir el parametro semestre_inicio_paf cuando sepamos a lo que se refiere.
 	}
 
 	// Insertar el nuevo historial en la base de datos
