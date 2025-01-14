@@ -43,3 +43,20 @@ func (h *HistorialPasosPafController) ObtenerHistorialYDuracionesPorIdYRun(c *gi
 
 	c.JSON(http.StatusOK, respuesta)
 }
+
+// GetHistorialPorIdPaf maneja la solicitud para obtener el historial de un `idPaf`.
+func (c *HistorialPasosPafController) GetHistorialPorIdPaf(ctx *gin.Context) {
+	idPaf := ctx.Param("idPaf")
+	if idPaf == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "idPaf es requerido"})
+		return
+	}
+
+	historial, err := c.Service.ObtenerHistorialPorIdPaf(idPaf)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, historial)
+}

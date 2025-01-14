@@ -64,7 +64,12 @@ func setupRoutes(r *gin.Engine) {
 	profesorDBController := controller.NewProfesorDBController(*profesorDBService)
 	r.GET("/api/paf-en-linea/profesorDB/:run", profesorDBController.ObtenerProfesorDBPorRun)
 	r.GET("/api/paf-en-linea/profesores/countNotPipelsoft", profesorDBController.GetCountProfesoresNotInPipelsoft)
+	r.GET("/api/paf-en-linea/profesores/NoContrato", profesorDBController.GetProfesoresNoContrato)
 
+	// Crear servicio y controlador
+	historialPasosPafService := service.NewHistorialPasosPafService(DB.DBPersonal)
+	historialPasosPafController := controller.NewHistorialPasosPafController(historialPasosPafService)
+	r.GET("/api/paf-en-linea/historialPasosPaf/pasosDeLaPaf/:idPaf", historialPasosPafController.GetHistorialPorIdPaf)
 	// Estadísticas
 	estadisticasService := service.NewEstadisticasService(DB.DBPersonal)
 	estadisticasController := controller.NewEstadisticasController(estadisticasService)

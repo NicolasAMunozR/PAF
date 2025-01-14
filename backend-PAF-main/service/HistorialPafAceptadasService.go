@@ -103,6 +103,7 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 		BanderaAceptacion:       0,
 		Comentario:              comentario,
 		// añadir el parametro semestre_inicio_paf cuando sepamos a lo que se refiere.
+		// se trabaja: se obtiene un una tabla que va a llegar
 	}
 
 	// Insertar el nuevo historial en la base de datos

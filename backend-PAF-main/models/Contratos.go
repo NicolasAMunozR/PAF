@@ -15,4 +15,7 @@ type Contrato struct {
 
 	// Horas de contrato, ejemplo: 40
 	Horas int `gorm:"column:horas;type:int;not null" json:"horas"`
+
+	// fecha inicio de contrato
+	// fecha fin de contrato
 }

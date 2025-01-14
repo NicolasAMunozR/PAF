@@ -37,3 +37,15 @@ func (s *HistorialPasosPafService) ObtenerYCalcularPorIdYRun(idPaf, runDocente s
 
 	return historiales, duraciones, nil
 }
+
+// ObtenerHistorialPorIdPaf obtiene todos los registros con el mismo `idPaf`, ordenados por `FechaLlegadaPaf` descendente.
+func (s *HistorialPasosPafService) ObtenerHistorialPorIdPaf(idPaf string) ([]models.HistorialPasosPaf, error) {
+	var historial []models.HistorialPasosPaf
+	err := s.DB.Where("id_paf = ?", idPaf).
+		Order("fecha_llegada_paf DESC").
+		Find(&historial).Error
+	if err != nil {
+		return nil, fmt.Errorf("error al obtener el historial por idPaf: %w", err)
+	}
+	return historial, nil
+}

@@ -42,9 +42,11 @@ func NewEstadisticasService(dbPersonal *gorm.DB) *EstadisticasService {
 func (s *EstadisticasService) ObtenerEstadisticas(semestre string) (*EstadisticasResponse, error) {
 	var resp EstadisticasResponse
 
-	// Contar los RUN únicos en la tabla profesor_dbs
+	// Contar los RUN únicos en la tabla profesor_dbs con filtro por semestre
 	if err := s.DB.Model(&models.ProfesorDB{}).
-		Distinct("run").Count(&resp.TotalProfesores).Error; err != nil {
+		Where("semestre = ?", semestre). // Filtro por semestre
+		Distinct("run").
+		Count(&resp.TotalProfesores).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los profesores únicos por RUN: %w", err)
 	}
 
@@ -74,7 +76,7 @@ func (s *EstadisticasService) ObtenerEstadisticas(semestre string) (*Estadistica
 	// Contar los Run de los profesores que no existen en pipelsofts
 	var profesoresNoEnPipelsoft int64
 	if err := s.DB.Table("contratos").
-		Where("run_docente NOT IN (SELECT run_empleado FROM pipelsofts)").
+		Where("run_docente NOT IN (SELECT run_empleado FROM pipelsofts)"). // Considerar agregar filtro por semestre si aplica
 		Count(&profesoresNoEnPipelsoft).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los profesores que no están en pipelsofts: %w", err)
 	}
