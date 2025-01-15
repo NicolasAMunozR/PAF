@@ -147,6 +147,7 @@
           <p><strong>Bloque:</strong> {{ p.bloque }}</p>
           <p><strong>Cupo:</strong> {{ p.cupo }}</p>
           <p><strong>Sección:</strong> {{ p.seccion }}</p>
+          <p><strong>Estado del Proceso:</strong> {{ p.DesEstado }}</p>
         </div>
       </div>
 
@@ -165,6 +166,7 @@
           <p><strong>Codigo de Asignatura:</strong> {{ p.CodigoAsignatura }}</p>
           <p><strong>Nombre de Asignatura:</strong> {{ p.NombreAsignatura }}</p>
           <p><strong>Cantidad de Horas PAF:</strong> {{ p.CantidadHorasPAF }}</p>
+          <p><strong>Estado del Proceso:</strong> {{ p.DesEstado }}</p>
         </div>
 
   <div
@@ -178,6 +180,7 @@
     <p><strong>Código PAF:</strong> {{ paf.CodigoPaf }}</p>
     <p><strong>Unidad Menor:</strong> {{ paf.NombreUnidadMenor }}</p>
     <p><strong>Cantidad de Horas PAF:</strong> {{ paf.CantidadHorasPAF }}</p>
+    <p><strong>Estado del Proceso:</strong> {{ paf.DesEstado }}</p>
     <div v-for="(asignatura, idx) in paf.Asignaturas" :key="idx">
       <p><strong>Asignatura {{ idx + 1 }}:</strong></p>
       <p><strong>Código de Asignatura:</strong> {{ asignatura.CodigoAsignatura }}</p>
@@ -222,7 +225,7 @@ const cancelarEnvio = () => {
   comentario.value = ''; // Limpia el comentario al cancelar
 };
 const fichasAgrupadasPAF = computed(() => {
-  const agrupadas: { [key: number]: { CodigoPaf: number, NombreUnidadMenor: string, CantidadHorasPAF: number, Asignaturas: { CodigoAsignatura: string, NombreAsignatura: string}[] } } = {};
+  const agrupadas: { [key: number]: { CodigoPaf: number, NombreUnidadMenor: string, CantidadHorasPAF: number, DesEstado: string, Asignaturas: { CodigoAsignatura: string, NombreAsignatura: string}[] } } = {};
 
   fichasPAF.value.forEach((p) => {
     if (!agrupadas[p.CodigoPaf]) {
@@ -230,6 +233,7 @@ const fichasAgrupadasPAF = computed(() => {
         CodigoPaf: p.CodigoPaf,
         NombreUnidadMenor: p.NombreUnidadMenor,
         CantidadHorasPAF: p.CantidadHorasPAF,
+        DesEstado: p.DesEstado,
         Asignaturas: []
       };
     }
@@ -393,6 +397,7 @@ interface Persona {
   semestre?: string; // Add the 'semestre' property
   codigo: string;
   paf: number;
+  DesEstado: string;
   bloque: string;
   cupo: number;
   seccion: string;
@@ -505,7 +510,9 @@ const obtenerDatosPersona = async (semestreGuardado: string | null) => {
     // NO DEVUELÑVE LAS PAF LISTAS
 
     const response = await $axios.get(`/api/paf-en-linea/pipelsoft/obtenerContratos/mostrarTodo/${run.value}`);
-    const response1 = await $axios.get(`/api/paf-en-linea/profesorDB/${run.value.slice(0, -2)}`);
+    console.log(response.data);
+    const rut = typeof run.value === 'string' ? run.value.replace(/^0+(?=\d+-)/, '') : '';
+    const response1 = await $axios.get(`/api/paf-en-linea/profesorDB/${rut.slice(0, -2)}`);
     persona1.value = response1.data;
 
     persona.value = response.data.map((item: any) => {
@@ -529,6 +536,7 @@ const obtenerDatosPersona = async (semestreGuardado: string | null) => {
         SemestrePaf: item.PipelsoftData.Semestre,
         CantidadHorasPAF: item.PipelsoftData.CantidadHorasPaf,
         Run: item.PipelsoftData.RunEmpleado,
+        DesEstado: item.PipelsoftData.DesEstado,
         Bloque: response1.data.bloque,
         Cupo: response1.data.cupo,
         Seccion: response1.data.seccion,

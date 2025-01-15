@@ -158,13 +158,12 @@ const emit = defineEmits<{
   (event: 'sort', sortBy: string, order: string): void;
 }>();
 
-let valor = 0;
 const estadoProceso = ref('B1');
 const filtros = ref({
   codigoPAF: codigoPAF_filtro && route.path === "/principal/personas" ? codigoPAF_filtro : '',
   run: run_filtro && route.path === "/principal/personas" ? run_filtro : '',
   codigoAsignatura: codigoAsignatura_filtro && route.path === "/principal/personas" ? codigoAsignatura_filtro : '',
-  semestre: semestres && valor === 0 ? semestres : '',
+  semestre: semestres ? semestres : '',
   estadoProceso: estadoProceso && route.path === "/principal/personas" ? estadoProceso : '',
   calidad: calidad_filtro && route.path === "/principal/personas" ? calidad_filtro : '',
   nombreAsignatura: nombreAsignatura_filtro && route.path === "/principal/personas" ? nombreAsignatura_filtro : '',
@@ -203,7 +202,12 @@ onMounted(() => {
   const semestre = localStorage.getItem('semestre');
   
   if (semestre) {
+    if(semestre === "todos"){
+      semestres.value = "";
+    }
+    else{
     semestres.value = semestre;
+    }
   }
   if (codigoPAF_Filtro) {
     codigoPAF_filtro.value = codigoPAF_Filtro;
