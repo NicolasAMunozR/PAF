@@ -57,18 +57,24 @@
 
     <!-- Paginación -->
     <div class="pagination">
-      <button 
-        @click="goToPage(currentPage - 1)" 
-        :disabled="currentPage === 1">
-        Anterior
-      </button>
-      <span>Página {{ currentPage }} de {{ totalPages }}</span>
-      <button 
-        @click="goToPage(currentPage + 1)" 
-        :disabled="currentPage === totalPages">
-        Siguiente
-      </button>
-    </div>
+  <button 
+    @click="goToPage(1)" 
+    :disabled="currentPage === 1">
+    «
+  </button>
+  <button 
+    v-for="page in pageNumbers" 
+    :key="page" 
+    :class="{ active: currentPage === page }"
+    @click="goToPage(page)">
+    {{ page }}
+  </button>
+  <button 
+    @click="goToPage(totalPages)" 
+    :disabled="currentPage === totalPages">
+    »
+  </button>
+</div>
   </div>
 </template>
 
@@ -95,6 +101,44 @@ export default {
     };
   },
   computed: {
+    pageNumbers() {
+    const total = this.totalPages;
+    const current = this.currentPage;
+    const range = 5; // Cantidad de páginas a mostrar alrededor de la actual
+    const pages = [];
+
+    if (total <= range * 2 + 1) {
+      // Mostrar todas las páginas si son pocas
+      for (let i = 1; i <= total; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Mostrar solo un rango de páginas alrededor de la actual
+      let start = Math.max(1, current - range);
+      let end = Math.min(total, current + range);
+
+      // Asegurar que el rango siempre muestra la cantidad correcta de páginas
+      if (current <= range) {
+        end = Math.min(total, range * 2 + 1);
+      } else if (current > total - range) {
+        start = Math.max(1, total - range * 2);
+      }
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (start > 1) {
+        pages.unshift(1, '...');
+      }
+
+      if (end < total) {
+        pages.push('...', total);
+      }
+    }
+
+    return pages;
+  },
     // Paginación: calculamos los elementos que se mostrarán según la página
     paginatedData() {
       const startIndex = (this.currentPage - 1) * this.itemsPerPage;
@@ -161,7 +205,6 @@ export default {
 .table-container {
   width: 100%;
   padding: 20px;
-  overflow-x: auto;
   background-color: var(--background-color);
 }
 
@@ -223,29 +266,28 @@ tbody td {
 .hover\:bg-gray-50:hover {
   background-color: #f1f5f9;
 }
-/* Paginación */
 .pagination {
-  margin-top: 20px;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
+  gap: 5px;
 }
 
 .pagination button {
-  padding: 8px 16px;
-  background-color: #EA7600;
-  color: white;
+  padding: 8px 12px;
+  background-color: #f0f0f0;
   border: none;
   border-radius: 4px;
   cursor: pointer;
 }
 
-.pagination button:disabled {
-  background-color: #f0f0f0;
-  cursor: not-allowed;
+.pagination button.active {
+  background-color: #EA7600;
+  color: white;
 }
 
-.pagination span {
-  font-size: 1rem;
+.pagination button:disabled {
+  background-color: #EA7600;
+  cursor: not-allowed;
 }
 </style>

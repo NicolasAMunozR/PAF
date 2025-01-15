@@ -134,7 +134,7 @@
   
   /* Barra superior */
   .header-bar {
-    background-color: #EA7600;
+    background-color: #099b88;
     color: #fff;
     padding: 10px;
     font-family: "Bebas Neue Pro", sans-serif;

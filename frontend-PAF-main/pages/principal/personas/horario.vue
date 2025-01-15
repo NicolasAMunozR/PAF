@@ -31,6 +31,8 @@
   </div>
 </div>
 </div>
+ <div class="container">
+  <div class="table-container">
   <div class="flex flex-wrap" @click="cerrarTodosLosBloques">
     <!-- Tabla de horarios -->
     <div class="w-full md:w-2/3 mt-12 relative">
@@ -45,9 +47,8 @@
           <select id="semestre" v-model="semestreSeleccionado" class="select-input" @click.stop @change="limpiarSelecciones">
             <option v-for="sem in semestres" :key="sem" :value="sem">{{ sem }}</option>
           </select>
-        </div>
-
-        <table class="tabla-horarios">
+        </div>   
+          <table class="tabla-horarios">
           <thead>
             <tr>
               <th>Módulo</th>
@@ -120,15 +121,12 @@
             </tr>
           </tbody>
         </table>
-      </div>
-      <div v-else>
-        <p class="info-text">
-          Cargando datos o no se encontraron registros para el RUN.
-        </p>
+        </div>
       </div>
     </div>
-
+  </div>
     <!-- Fichas y botón de envío -->
+   <div class="fichas-container">
     <div class="w-full md:w-1/3 pl-4 mt-12">
       <h2 class="sub-title">Selecciona PAF y Asignatura</h2>
 
@@ -206,6 +204,7 @@
         </div>
       </div>
     </div>
+   </div>
   </div>
 </template>
 
@@ -273,12 +272,35 @@ const coloresAsignaturas = [
   '#D2691E', '#B0C4DE'
 ];
 
-const obtenerColorAsignatura = (codigoAsignatura: string, bloqueId: string, seccion: string) => {
-  // Combinar el código de la asignatura, el bloque y la sección para garantizar que el color sea único
-  const hash = (codigoAsignatura + bloqueId + seccion).split('')
-    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const colorIndex = hash % coloresAsignaturas.length; // Obtener un índice de color basado en el hash
-  return coloresAsignaturas[colorIndex];
+const asignaturaColoresMap = new Map(); // Mapa para almacenar los colores asignados
+
+const obtenerColorAsignatura = (codigoAsignatura: string, bloqueId: string, seccion: string): string => {
+  // Crear una clave única para la combinación
+  const key = `${codigoAsignatura}-${bloqueId}-${seccion}`;
+
+  // Verificar si ya se ha asignado un color para esta clave
+  if (asignaturaColoresMap.has(key)) {
+    return asignaturaColoresMap.get(key);
+  }
+
+  // Buscar un color disponible que aún no se haya utilizado
+  const availableColors = coloresAsignaturas.filter(color => 
+    ![...asignaturaColoresMap.values()].includes(color)
+  );
+
+  // Asignar el color
+  let color;
+  if (availableColors.length > 0) {
+    color = availableColors[0]; // Usar el primer color disponible
+  } else {
+    // Si todos los colores ya están en uso, se pueden reciclar o manejar de otra manera
+    color = coloresAsignaturas[asignaturaColoresMap.size % coloresAsignaturas.length];
+  }
+
+  // Guardar la asignación en el mapa
+  asignaturaColoresMap.set(key, color);
+
+  return color;
 };
   
 
@@ -314,6 +336,15 @@ const fichasPAF = computed(() =>
     const semestrePafAño = 2000 + parseInt(p.SemestrePaf.split('-')[1], 10); // Convertimos '22' a 2022
     const semestrePafNumber = parseInt(p.SemestrePaf.split('-')[0], 10);
 
+    if(Number(detalle) == 1){
+      return !historialSeleccionado.value.some(h => 
+        h.ID === p.ID
+      ) && semestrePafAño === añoSeleccionado && semestrePafNumber === semestreSeleccionadoNumber 
+      //no mostrar los que tengan igual codigo de paf que fichas agrupadas paf
+       && !fichasAgrupadasPAF.value.some(h => 
+        h.CodigoPaf === p.CodigoPaf)
+      ;}
+
     // Comparamos los semestres y los años
     return !historialSeleccionado.value.some(h => 
       h.ID === p.ID
@@ -336,6 +367,7 @@ const fichasPAFMatch = computed(() =>
     ) && semestrePafAño === añoSeleccionado && semestrePafNumber === semestreSeleccionadoNumber;
   })
 );
+
 
 const fichasAsignaturas = computed(() =>
   persona1.value.filter((p) =>
@@ -445,9 +477,6 @@ const semestres = computed(() => {
   const semestresOrdenados = [...new Set(persona1.value.map(p => p.semestre))]
     .sort((a, b) => (a || '').localeCompare(b || '')); // Comparación lexicográfica adecuada para "AAAA-MM"
 
-  // Seleccionar solo el último semestre
-  const ultimoSemestre = semestresOrdenados[semestresOrdenados.length - 1];
-
   return semestresOrdenados; // O retorna [ultimoSemestre] si solo necesitas el último
 });
 const personaFiltrada = computed(() => persona1.value.filter(p => p.semestre === semestreSeleccionado.value))
@@ -510,7 +539,6 @@ const obtenerDatosPersona = async (semestreGuardado: string | null) => {
     // NO DEVUELÑVE LAS PAF LISTAS
 
     const response = await $axios.get(`/api/paf-en-linea/pipelsoft/obtenerContratos/mostrarTodo/${run.value}`);
-    console.log(response.data);
     const rut = typeof run.value === 'string' ? run.value.replace(/^0+(?=\d+-)/, '') : '';
     const response1 = await $axios.get(`/api/paf-en-linea/profesorDB/${rut.slice(0, -2)}`);
     persona1.value = response1.data;
@@ -676,6 +704,24 @@ const coloresPAF = [
 </script>
 
 <style scoped>
+.container {
+  display: grid;
+  grid-template-columns: 70% 30%;
+  gap: 10px;
+  max-width: 100%;
+}
+
+.tabla-container {
+  max-width: 100%;
+}
+
+.fichas-container {
+  max-width: 150%;
+}
+
+.w-full {
+  width: 100%;
+}
 /* Estilo general */
 .tabla-horarios {
   width: 100%;

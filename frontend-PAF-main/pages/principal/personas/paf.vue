@@ -6,7 +6,6 @@
     </button>
   </div>
   <div class="container">
-    <Filtros @filter="filterData" @sort="sortData" :isPAF="true" :showButton="true" />
         <!-- Mostrar la lista de personas -->
         <div v-if="filteredPersonas.length > 0">
           <div v-for="persona in filteredPersonas" :key="persona.CodigoPaf" class="paf-container">
@@ -43,7 +42,6 @@
 import { useRoute, useRouter } from 'vue-router';
 import { ref, onMounted } from 'vue';
 import { useNuxtApp } from '#app';
-import Filtros from '../../../components/Filtros.vue'
 
 const route = useRoute();
 const router = useRouter();
@@ -150,6 +148,15 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
+.container {
+  display: -ms-grid;
+  gap: 1rem;
+  max-width: 70%;
+  justify-content: center;
+  margin: auto;
+}
+
 /* Contenedor general */
 .info-container {
   margin: auto;
@@ -204,12 +211,5 @@ onMounted(() => {
   font-family: "Bebas Neue Pro", sans-serif;
   color: #EA7600;
   margin-bottom: 16px;
-}
-
-.container {
-  display: grid;
-  grid-template-columns: 1fr 3fr;
-  gap: 1rem;
-  max-width: 100%;
 }
 </style>

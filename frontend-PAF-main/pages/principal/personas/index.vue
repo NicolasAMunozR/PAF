@@ -23,17 +23,6 @@
       />
     </div>
 
-    <!-- Filtro Nombre Asignatura -->
-    <div class="filter-item" >
-      <label for="nombreAsignatura" class="label">Nombre Asignatura</label>
-      <input
-        v-model="nombreAsignatura_filtro"
-        type="text"
-        class="input"
-        placeholder="Filtrar por nombre de asignatura"
-      />
-    </div>
-    
     <!-- Filtro Código de Asignatura -->
     <div class="filter-item" >
       <label for="codigoAsignatura" class="label">Código de Asignatura</label>
@@ -45,38 +34,57 @@
       />
     </div>
 
+    <!-- Filtro Nombre Asignatura -->
+    <div class="filter-item" >
+      <label for="nombreAsignatura" class="label">Nombre Asignatura</label>
+      <select id="nombreAsignatura" v-model="nombreAsignatura_filtro" class="select">
+        <option value="">Todos</option>
+        <option v-for="asi in nombreAsig" :key="asi" :value="asi">
+          {{ asi }}
+        </option>
+    </select>
+    </div>
+
     <!-- Filtro Nombre Unidad Mayor (solo visible si es seguimientoPAF) -->
     <div class="filter-item" >
       <label for="nombreUnidadMayor" class="label">Nombre Unidad Mayor</label>
-      <input
-        v-model="nombreUnidadMayor_filtro"
-        type="text"
-        class="input"
-        placeholder="Filtrar por nombre de unidad mayor"
-      />
+      <select id="nombreUnidadMayor" v-model="nombreUnidadMayor_filtro" class="select">
+      <option value="">Todos</option>
+      <option
+        v-for="may in nombreUnidadMay"
+        :key="may"
+        :value="may"
+      >
+        {{ may }}
+      </option>
+    </select>
     </div>
     
-    <!-- Filtro Nombre Unidad Menor (solo visible si es seguimientoPAF o unidadMayorPAF) -->
-    <div class="filter-item" >
+    <!-- Filtro Nombre Unidad Menor -->
+    <div class="filter-item">
       <label for="nombreUnidadMenor" class="label">Nombre Unidad Menor</label>
-      <input
-        v-model="nombreUnidadMenor_filtro"
-        type="text"
-        class="input"
-        placeholder="Filtrar por nombre de unidad menor"
-      />
+      <select id="nombreUnidadMenor" v-model="nombreUnidadMenor_filtro" class="select">
+        <option value="">Todos</option>
+        <option v-for="men in nombreUnidadMen" :key="men" :value="men">
+          {{ men }}
+        </option>
+      </select>
     </div>
 
     <!-- Filtro semestre -->
     <div class="filter-item">
-      <label for="semestre" class="label">Semestre</label>
-      <input
-        v-model="semestres_filtro"
-        type="text"
-        class="input"
-        placeholder="Filtrar por código Semestre"
-      />
-    </div>
+    <label for="semestre" class="label">Semestre</label>
+    <select id="semestre" v-model="semestres_filtro" class="select">
+      <option value="">Todos</option>
+      <option
+        v-for="sem in semestres"
+        :key="sem"
+        :value="sem"
+      >
+        {{ sem }}
+      </option>
+    </select>
+  </div>
     
     <!-- Filtro Estado de Proceso -->
     <div class="filter-item" >
@@ -112,6 +120,7 @@
         <option value="NombreAsignatura">Nombre de Asignatura</option>
         <option value="CodigoAsignatura">Código de Asignatura</option>
         <option value="Run">Run</option>
+        <option value="CodigoPAF">Código de PAF</option>
         <option value="FechaUltimaModificacionProceso">Última Actualización del Proceso</option>
       </select>
       <button @click="toggleSortOrder" class="btn sort-btn">
@@ -140,7 +149,7 @@ import { ref, computed, onMounted } from 'vue'
 const { $axios } = useNuxtApp() as unknown as { $axios: typeof import('axios').default }
 
 const semestreMasActual = ref('');
-const semestres_filtro = ref(semestreMasActual);
+const semestres_filtro = ref('');
 const codigoPAF_filtro = ref('');
 const run_filtro = ref('');
 const codigoAsignatura_filtro = ref('');
@@ -148,7 +157,7 @@ const calidad_filtro = ref('');
 const nombreAsignatura_filtro = ref('');
 const nombreUnidadMenor_filtro = ref('');
 const nombreUnidadMayor_filtro = ref('');
-const estado_filtro = ref("B1");
+const estado_filtro = ref('');
 const jerarquia_filtro = ref('');
 
 onMounted(async () => {
@@ -206,11 +215,17 @@ onMounted(async () => {
   if (sessionStorage.getItem('codigoAsignatura')) {
     codigoAsignatura_filtro.value = sessionStorage.getItem('codigoAsignatura') || '';
   }
-  if (sessionStorage.getItem('semestre')) {
+  if (sessionStorage.getItem('semestre') || sessionStorage.getItem('semestre') == '') {
     semestres_filtro.value = sessionStorage.getItem('semestre') || '';
   }
-  if (sessionStorage.getItem('estadoProceso')) {
+  else{
+    semestres_filtro.value = semestreMasActual.value;
+  }
+  if (sessionStorage.getItem('estadoProceso') || sessionStorage.getItem('estadoProceso') == '') {
     estado_filtro.value = sessionStorage.getItem('estadoProceso') || '';
+  }
+  else{
+    estado_filtro.value = 'B1';
   }
   if (sessionStorage.getItem('calidad')) {
     calidad_filtro.value = sessionStorage.getItem('calidad') || '';
@@ -291,6 +306,37 @@ interface Persona {
 
 const personas = ref<Persona[]>([]);
 // Removed duplicate declaration of filtros
+const semestres = computed(() => {
+  // Ordenar los semestres y eliminar duplicados
+  const semestresOrdenados = [...new Set(personas.value.map(p => p.SemestrePaf))]
+    .sort((a, b) => (String(a) || '').localeCompare(String(b) || '')); // Comparación lexicográfica adecuada para "AAAA-MM"
+
+  return semestresOrdenados; // O retorna [ultimoSemestre] si solo necesitas el último
+});
+
+const nombreUnidadMay = computed(() => {
+  const nombreUnidadMayor = [...new Set(personas.value.map(p => p.nombreUnidadMayor))]
+    .sort((a, b) => (String(a) || '').localeCompare(String(b) || '')); // Comparación lexicográfica adecuada para "AAAA-MM"
+
+  return nombreUnidadMayor; // O retorna [ultimoSemestre] si
+});
+
+const nombreUnidadMen = computed(() => {
+      return [...new Set(
+        personas.value
+          .filter(p => !nombreUnidadMayor_filtro.value || p.nombreUnidadMayor === nombreUnidadMayor_filtro.value)
+          .map(p => p.nombreUnidadMenor)
+      )].sort((a, b) => String(a).localeCompare(String(b)));
+    });
+
+const nombreAsig = computed(() => {
+  return [...new Set(
+        personas.value
+          .filter(p => (!nombreUnidadMayor_filtro.value || p.nombreUnidadMayor === nombreUnidadMayor_filtro.value) && (!nombreUnidadMenor_filtro.value || p.nombreUnidadMenor === nombreUnidadMenor_filtro.value))
+          .map(p => p.NombreAsignatura)
+      )].sort((a, b) => String(a).localeCompare(String(b)));
+    });
+
 
 const filteredPersonas = computed(() => {
   let filtered = personas.value.filter(persona => {
@@ -407,6 +453,7 @@ const resetFilters = () => {
   sortOrder.value = 'asc'; // Resetear dirección de ordenamiento
   emit('filter', filtros1.value);
   emit('sort', sortBy.value, sortOrder.value);
+  applyFilters();
 };
 
 // Cambiar dirección de ordenamiento
@@ -418,8 +465,8 @@ const toggleSortOrder = () => {
 <style scoped>
 .container {
   display: grid;
-  grid-template-columns: 1fr 3fr;
-  gap: 1rem;
+  grid-template-columns: 25% 75%;
+
   max-width: 100%;
 }
 
@@ -453,12 +500,15 @@ const toggleSortOrder = () => {
   background-color: var(--background-color);
   border-radius: 8px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
 }
 
 /* Estilos de los elementos de filtro */
 .filter-item, .sort-item {
   display: flex;
   flex-direction: column;
+  position: relative; /* Necesario para aplicar z-index */
+  z-index: 10; /* Ajusta el valor según la necesidad */
 }
 
 .label {

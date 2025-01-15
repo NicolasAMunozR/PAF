@@ -7,27 +7,23 @@
         v-if="$route.path !== '/profesorPAF'"
         class="menu-button"
       >
-        <svg
-          v-if="!isMenuOpen"
-          xmlns="http://www.w3.org/2000/svg"
-          class="icon"
-          viewBox="0 0 24 24"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-        <svg
-          v-else
-          xmlns="http://www.w3.org/2000/svg"
-          class="icon"
-          viewBox="0 0 24 24"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
+      <svg
+  v-if="!isMenuOpen"
+  class="hamburger-icon"
+>
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+</svg>
+<svg
+  v-else
+  class="hamburger-icon"
+>
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+</svg>
       </button>
-
       <div class="header-container">
         <h1 class="header-title">PAF - Sistema de Gestión</h1>
       </div>
+
 
       <button @click="logout" class="logout-button">Cerrar sesión</button>
     </div>
@@ -108,11 +104,70 @@ export default {
 </script>
 
 <style scoped>
-/* Contenedor principal */
-.main-container {
-  display: flex;
-  flex-direction: column;
+.menu-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
 }
+
+.hamburger-icon {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  position: relative;
+  cursor: pointer;
+}
+
+.hamburger-icon path {
+  stroke: white;
+  stroke-width: 3;
+}
+
+.hamburger-icon path:nth-child(1) {
+  transform: translateY(0px);
+}
+
+.hamburger-icon path:nth-child(2) {
+  transform: translateY(6px); /* Ajusta la distancia entre las líneas */
+}
+
+.hamburger-icon path:nth-child(3) {
+  transform: translateY(12px); /* Ajusta la distancia entre las líneas */
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 50px;
+  left: 10px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  min-width: 150px;
+}
+
+.dropdown-menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dropdown-menu li {
+  padding: 10px;
+}
+
+.dropdown-menu li a {
+  text-decoration: none;
+  color: #333;
+  display: block;
+}
+
+.dropdown-menu li a:hover {
+  background-color: #f0f0f0;
+}
+
 
 /* Barra superior */
 .top-bar {
@@ -120,7 +175,7 @@ export default {
   top: 0;
   left: 0;
   width: 100%;
-  background-color: #EA7600;
+  background-color: #099b88;
   color: white;
   padding: 1rem;
   z-index: 50;
@@ -128,12 +183,14 @@ export default {
   justify-content: space-between;
   align-items: center;
   height: 4rem;
+  position: relative;
+  z-index: 1; /* Menor que el del menú */
 }
 
 .header-container {
   flex: 1;
   display: flex;
-  justify-content: center;
+  justify-content: left;
 }
 
 .header-title {
@@ -142,22 +199,6 @@ export default {
   font-weight: bold;
 }
 
-/* Botones */
-.menu-button,
-.logout-button {
-  background-color: #394049;
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.menu-button:hover,
-.logout-button:hover {
-  background-color: #C8102E;
-}
 
 /* Superposición detrás del menú */
 .overlay {
@@ -203,14 +244,4 @@ export default {
   transition: background-color 0.3s;
 }
 
-.menu-link:hover {
-  background-color: #C8102E;
-}
-
-/* Contenido */
-.content {
-  padding: 20px;
-  margin-top: 4rem; /* Espaciado dinámico igual a la altura de la barra superior */
-  flex: 1;
-}
 </style>
