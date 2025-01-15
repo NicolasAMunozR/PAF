@@ -93,7 +93,7 @@
         <option value="F1">Estado: Aprobada por RRHH</option>
         <option value="F9">Estado: Rechazada por RRHH</option>
         <option value="A9">Estado: Anulada</option>
-      </select>
+      </select> 
     </div>
     
     <!-- Filtro Categoría -->
