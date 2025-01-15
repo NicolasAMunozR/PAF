@@ -241,7 +241,6 @@ const filteredPersonas = computed(() => {
 const fetchContratos = async () => {
   try {
     const response = await $axios.get(`/api/paf-en-linea/pipelsoft/unidadMayor/${UnidadMayor.value}`);
-    console.log(response.data);
     if (response.data && Array.isArray(response.data)) {
       contratos.value = response.data;
       // Supongamos que response.data es el arreglo que has mencionado

@@ -128,6 +128,7 @@
     <!-- Fichas y botón de envío -->
    <div class="fichas-container">
     <div class="w-full md:w-1/3 pl-4 mt-12">
+    <br /><br /><br /><br />
       <h2 class="sub-title">Selecciona PAF y Asignatura</h2>
 
       <h2 class="sub-title">PAF con Asignatura</h2>
@@ -214,6 +215,7 @@ import { onMounted, ref, computed } from 'vue'
 import { useNuxtApp } from '#app'
 
 const historialSeleccionado = computed(() => persona.value.filter((p) => p.ID !== 0) || null);
+const historialNoSeleccionado = computed(() => persona.value.filter((p) => p.ID === 0) || null);
 
 const detalle = ref('');
 const mostrarDialogo = ref(false);
@@ -336,15 +338,11 @@ const fichasPAF = computed(() =>
     const semestrePafAño = 2000 + parseInt(p.SemestrePaf.split('-')[1], 10); // Convertimos '22' a 2022
     const semestrePafNumber = parseInt(p.SemestrePaf.split('-')[0], 10);
 
-    if(Number(detalle) == 1){
+    if(Number(detalle.value) === 1){
       return !historialSeleccionado.value.some(h => 
-        h.ID === p.ID
-      ) && semestrePafAño === añoSeleccionado && semestrePafNumber === semestreSeleccionadoNumber 
-      //no mostrar los que tengan igual codigo de paf que fichas agrupadas paf
-       && !fichasAgrupadasPAF.value.some(h => 
-        h.CodigoPaf === p.CodigoPaf)
-      ;}
-
+      h.CodigoPaf === p.CodigoPaf
+    )&& semestrePafAño === añoSeleccionado && semestrePafNumber === semestreSeleccionadoNumber
+    }
     // Comparamos los semestres y los años
     return !historialSeleccionado.value.some(h => 
       h.ID === p.ID

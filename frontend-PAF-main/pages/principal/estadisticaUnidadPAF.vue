@@ -174,7 +174,6 @@ const obtenerSemestres = async () => {
       }
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
       const response = await $axios.get(`/api/paf-en-linea/estadisticas/unidad-mayor/${UnidadMayor.value}/${semestreSeleccionado.value}`);
-      console.log(response.data);
       cantidadPersonasSai.value = response.data.total_profesores;
       cantidadPafUnicas.value = response.data.total_pipelsoft_unicos;
     } catch (error) {
@@ -189,7 +188,6 @@ const obtenerSemestres = async () => {
       }
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
       const response = await $axios.get(`/api/paf-en-linea/estadisticas/6/${UnidadMayor.value}/${UnidadMenor.value}/${semestreSeleccionado.value}`);
-      console.log(response.data);
       cantidadPersonasSai.value = response.data.total_profesores;
       cantidadPafUnicas.value = response.data.total_pipelsoft_unicos;
     } catch (error) {

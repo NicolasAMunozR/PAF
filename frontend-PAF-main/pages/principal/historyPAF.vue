@@ -375,6 +375,7 @@ const resetFilters = () => {
   sortOrder.value = 'asc'; // Resetear dirección de ordenamiento
   emit('filter', filtros1.value);
   emit('sort', sortBy.value, sortOrder.value);
+  applyFilters();
 };
 
 // Cambiar dirección de ordenamiento
