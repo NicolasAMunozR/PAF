@@ -37,33 +37,42 @@ func NewEstadisticasService(dbPersonal *gorm.DB) *EstadisticasService {
 		DB: dbPersonal,
 	}
 }
-
-// ObtenerEstadisticas obtiene las estadísticas generales de los profesores y Pipelsofts
 func (s *EstadisticasService) ObtenerEstadisticas(semestre string) (*EstadisticasResponse, error) {
 	var resp EstadisticasResponse
 
+	// Normalizar el formato del semestre
+	var formato1, formato2 string
+	if len(semestre) == 7 && semestre[4] == '-' { // Formato "2023-01"
+		anio := semestre[:4]
+		mes := semestre[5:]
+		formato1 = fmt.Sprintf("%d-%s", removeLeadingZero(mes), anio[2:])
+		formato2 = semestre
+	} else if len(semestre) == 4 && semestre[1] == '-' { // Formato "1-23"
+		mes := "0" + string(semestre[0])
+		anio := "20" + semestre[2:]
+		formato1 = semestre
+		formato2 = fmt.Sprintf("%s-%s", anio, mes)
+	} else {
+		return nil, fmt.Errorf("formato de semestre inválido: %s", semestre)
+	}
+
 	// Contar los RUN únicos en la tabla profesor_dbs con filtro por semestre
 	if err := s.DB.Model(&models.ProfesorDB{}).
-		Where("semestre = ?", semestre). // Filtro por semestre
+		Where("semestre = ? OR semestre = ?", formato1, formato2).
 		Distinct("run").
 		Count(&resp.TotalProfesores).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los profesores únicos por RUN: %w", err)
 	}
 
-	// Contar todos los registros en la tabla pipelsofts, aplicando filtro por semestre si se proporciona
-	query := s.DB.Model(&models.Pipelsoft{})
-	if semestre != "" {
-		query = query.Where("semestre = ?", semestre)
-	}
+	// Contar todos los registros en la tabla pipelsofts, aplicando filtro por semestre
+	query := s.DB.Model(&models.Pipelsoft{}).Where("semestre = ? OR semestre = ?", formato1, formato2)
 	if err := query.Count(&resp.TotalPipelsoft).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los registros en pipelsofts: %w", err)
 	}
 
 	// Contar los registros únicos de Run en la tabla pipelsofts, aplicando filtro por semestre
-	queryUnicos := s.DB.Model(&models.Pipelsoft{}).Distinct("run_empleado")
-	if semestre != "" {
-		queryUnicos = queryUnicos.Where("semestre = ?", semestre)
-	}
+	queryUnicos := s.DB.Model(&models.Pipelsoft{}).Distinct("run_empleado").
+		Where("semestre = ? OR semestre = ?", formato1, formato2)
 	if err := queryUnicos.Count(&resp.TotalPipelsoftUnicos).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los registros únicos de Run en pipelsofts: %w", err)
 	}
@@ -76,7 +85,7 @@ func (s *EstadisticasService) ObtenerEstadisticas(semestre string) (*Estadistica
 	// Contar los Run de los profesores que no existen en pipelsofts
 	var profesoresNoEnPipelsoft int64
 	if err := s.DB.Table("contratos").
-		Where("run_docente NOT IN (SELECT run_empleado FROM pipelsofts)"). // Considerar agregar filtro por semestre si aplica
+		Where("run_docente NOT IN (SELECT run_empleado FROM pipelsofts)").
 		Count(&profesoresNoEnPipelsoft).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los profesores que no están en pipelsofts: %w", err)
 	}
@@ -89,22 +98,21 @@ func (s *EstadisticasService) ObtenerEstadisticas(semestre string) (*Estadistica
 		resp.ProfesoresNoEnPipelsoftPct = float64(profesoresNoEnPipelsoft) / float64(resp.TotalProfesores) * 100
 	}
 
-	// Contar los registros en pipelsofts por cada EstadoProceso (código de estado como string)
+	// Contar los registros en pipelsofts por cada EstadoProceso
 	resp.EstadoProcesoCount = make(map[string]int)
 	resp.EstadoProcesoPct = make(map[string]float64)
 
 	// Los códigos de estado definidos
 	estados := []string{
-		"Sin Solicitar", "Enviada al Interesado", "Enviada al Validador", "Aprobada por Validador", "Rechazada por Validador", "Aprobada por Dir. Pregrado", "Rechazada por Dir. de Pregrado", "Aprobada por RRHH", "Rechazada por RRHH", "Anulada",
+		"Sin Solicitar", "Enviada al Interesado", "Enviada al Validador", "Aprobada por Validador", "Rechazada por Validador",
+		"Aprobada por Dir. Pregrado", "Rechazada por Dir. de Pregrado", "Aprobada por RRHH", "Rechazada por RRHH", "Anulada",
 	}
 
-	// Contar registros por cada estado, aplicando filtro por semestre si se proporciona
+	// Contar registros por cada estado, aplicando filtro por semestre
 	for _, estado := range estados {
 		var count int64
-		queryEstado := s.DB.Model(&models.Pipelsoft{}).Where("des_estado = ?", estado)
-		if semestre != "" {
-			queryEstado = queryEstado.Where("semestre = ?", semestre)
-		}
+		queryEstado := s.DB.Model(&models.Pipelsoft{}).
+			Where("des_estado = ? AND (semestre = ? OR semestre = ?)", estado, formato1, formato2)
 		if err := queryEstado.Count(&count).Error; err != nil {
 			return nil, fmt.Errorf("error al contar los registros de pipelsofts con estado %s: %w", estado, err)
 		}
@@ -117,6 +125,14 @@ func (s *EstadisticasService) ObtenerEstadisticas(semestre string) (*Estadistica
 	}
 
 	return &resp, nil
+}
+
+// removeLeadingZero elimina un cero inicial de un mes si está presente
+func removeLeadingZero(mes string) int {
+	if mes[0] == '0' {
+		return int(mes[1] - '0')
+	}
+	return int(mes[0]-'0')*10 + int(mes[1]-'0') // Caso raro, solo por seguridad
 }
 
 // ContarRegistrosPorNombreUnidadMayor cuenta los registros en Pipelsoft que coinciden con el nombre de la unidad Mayor
