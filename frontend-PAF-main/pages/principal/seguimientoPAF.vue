@@ -216,14 +216,6 @@ const sortOrder = ref('asc');
 // Paginación
 const currentPage = ref(1);
 const itemsPerPage = 10; // Número de elementos por página
-const isFirstLoad = ref(true);
-
-const filterData = (newFilters: any) => {
-  
-    filtros.value = { ...newFilters }; // Si no es la primera carga, no modificamos el semestre
-  
-  currentPage.value = 1; // Resetear la página al filtrar
-};
 
 const sortData = (key: string) => {
   if (sortBy.value === key) {

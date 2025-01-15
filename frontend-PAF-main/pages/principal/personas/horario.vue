@@ -663,7 +663,6 @@ const resultado = Object.entries(grouped).map(([rest, bloques]) => {
 const result = resultado.map(item => {
   return item.bloque[0];
 });
-
     const data = resultado[0];
     data.bloque = result;
     let Asignatura = fichaSeleccionadaPAF.value?.CodigoAsignatura;

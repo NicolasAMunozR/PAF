@@ -180,15 +180,12 @@
 import { ref, computed, onMounted, defineEmits } from 'vue';
 const { $axios } = useNuxtApp() as unknown as { $axios: typeof import('axios').default };
 
-const rut = ref('');
-const route = useRoute();
 const semestreMasActual = ref('');
 const semestres_filtro = ref('');
 const run_filtro = ref('');
 const nombreUnidadMenor_filtro = ref('');
 const nombreUnidadMayor_filtro = ref('');
 const estado_filtro = ref('');
-let valor = true;
 const mostrar = ref(false);
 const UnidadMayor = ref('');
 const UnidadMenor = ref('');
@@ -289,7 +286,6 @@ semestreMasActual.value = response.data
 const fetchContratos1 = async () => {
   try {
     const response = await $axios.get(`/api/paf-en-linea/pipelsoft/Filtro/unidadMenor/${UnidadMenor.value}`);
-    valor = false;
     if (response.data && Array.isArray(response.data)) {
       contratos.value = response.data;
       // Supongamos que response.data es el arreglo que has mencionado
@@ -375,13 +371,6 @@ const semestres = computed(() => {
     .sort((a, b) => (String(a) || '').localeCompare(String(b) || '')); // Comparación lexicográfica adecuada para "AAAA-MM"
 
   return semestresOrdenados; // O retorna [ultimoSemestre] si solo necesitas el último
-});
-
-const nombreUnidadMay = computed(() => {
-  const nombreUnidadMayor = [...new Set(contratos.value.map(p => p.nombre_unidad_mayor))]
-    .sort((a, b) => (String(a) || '').localeCompare(String(b) || '')); // Comparación lexicográfica adecuada para "AAAA-MM"
-
-  return nombreUnidadMayor; // O retorna [ultimoSemestre] si
 });
 
 const nombreUnidadMen = computed(() => {
@@ -487,10 +476,6 @@ const resetFilters = () => {
   applyFilters();
 };
 
-// Cambiar dirección de ordenamiento
-const toggleSortOrder = () => {
-  sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
-};
 // Calcular tiempo en estado
 const calcularTiempoEnEstado = (fechaInicio: string): number => {
   const fechaActual = new Date();
@@ -511,7 +496,6 @@ const sortData = (key: string) => {
 
 </script>
 
-  
   <style scoped>
   /* Contenedor principal */
   .container {

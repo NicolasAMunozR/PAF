@@ -658,25 +658,24 @@ onMounted(async () => {
 }
 .grafico {
   display: flex;
-  justify-content: center;  /* Centra horizontalmente */
-  align-items: center;      /* Centra verticalmente */
-  height: 500px;            /* Hace que el contenedor ocupe el 100% de la altura de la ventana */
-  width: 100%;              /* Asegura que el contenedor ocupe el 100% del ancho */
+  justify-content: center;  
+  align-items: center;    
+  height: 500px;            
+  width: 100%;              
 }
 
 .pie-chart1 {
   margin: 2rem;
-  width: 80%;  /* Ajusta el ancho para que sea más flexible */
-  max-width: 500px;  /* Establece un tamaño máximo */
-  height: auto;  /* Asegura que el gráfico se ajuste proporcionalmente */
+  width: 80%; 
+  max-width: 500px; 
+  height: auto;
 }
 
 .bar-chart {
   margin: 2rem;
-  max-width: 100%;  /* Aumenté el ancho para las barras */
+  max-width: 100%;  
 }
 
-/* Estados */
 .estado-linea {
   display: flex;
   gap: 0.2rem;
@@ -699,43 +698,43 @@ onMounted(async () => {
 }
 
 .estado-Anulada {
-  background-color: #394049; /* Verde claro */
+  background-color: #394049; 
 }
 
 .estado-Aprobada-por-Dir--Pregrado {
-  background-color: #76095b; /* Naranja claro */
+  background-color: #76095b; 
 }
 
 .estado-Aprobada-por-RRHH {
-  background-color: #6d8a0c; /* Morado claro */
+  background-color: #6d8a0c; 
 }
 
 .estado-Aprobada-por-Validador {
-  background-color: #0db58b; /* Gris oscuro */
+  background-color: #0db58b;
 }
 
 .estado-Enviada-al-Interesado {
-  background-color: #42A5F5; /* Naranja oscuro */
+  background-color: #42A5F5; 
 }
 
 .estado-Enviada-al-Validador {
-  background-color: #C8102E; /* Rojo */
+  background-color: #C8102E; 
 }
 
 .estado-Rechazada-por-Dir--de-Pregrado {
-  background-color: #EA7600; /* Azul claro */
+  background-color: #EA7600; 
 }
 
 .estado-Rechazada-por-RRHH {
-  background-color: #AB47BC; /* Verde agua */
+  background-color: #AB47BC;
 }
 
 .estado-Rechazada-por-Validador {
-  background-color: #FFA726; /* Verde oliva */
+  background-color: #FFA726; 
 }
 
 .estado-Sin-Solicitar {
-  background-color: #66BB6A; /* Morado oscuro */
+  background-color: #66BB6A; 
 }
 
 .detalles-container {

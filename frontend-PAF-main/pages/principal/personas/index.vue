@@ -158,7 +158,6 @@ const nombreAsignatura_filtro = ref('');
 const nombreUnidadMenor_filtro = ref('');
 const nombreUnidadMayor_filtro = ref('');
 const estado_filtro = ref('');
-const jerarquia_filtro = ref('');
 
 onMounted(async () => {
   try {
@@ -245,20 +244,7 @@ onMounted(async () => {
   }
 });
 
-const filtros = ref({
-  codigoPAF: '',
-  run: '',
-  codigoAsignatura: '',
-  semestre: semestreMasActual,
-  estadoProceso: '',
-  calidad: '',
-  nombreAsignatura: '',
-  fechaUltimaModificacionProceso: '',
-  nombreUnidadMenor: '',
-  nombreUnidadMayor: '',
-  ruta: '',
-  jerarquia: '',
-});
+
 const filtros1 = ref({
   codigoPAF: '',
   run: '',
@@ -368,34 +354,14 @@ const filteredPersonas = computed(() => {
 });
 
 
-const shouldShowTable = ref(true);
-
-const sortData = (newSortBy: string, newSortOrder: string) => {
-  sortBy.value = newSortBy;
-  sortOrder.value = newSortOrder;
-};
-
-
-
-//filtros 
-
-const props = defineProps<{
-  showButton: boolean; // Define el tipo de la propiedad
-}>();
-
 const sortBy = ref('nombres');
 const sortOrder = ref('asc');
 
-const route = useRoute();
-const isSeguimientoPAF = ref(false);
-const isUnidadMayorPAF = ref(false);
-const isPaf = ref(false);
 const emit = defineEmits<{
   (event: 'filter', filters: any): void;
   (event: 'sort', sortBy: string, order: string): void;
 }>();
 
-const estadoProceso = ref('B1');
 const applyFilters = () => {
   filtros1.value = {
   codigoPAF: codigoPAF_filtro.value,
