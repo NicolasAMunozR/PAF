@@ -109,7 +109,9 @@ const obtenerSemestres = async () => {
     // Extraer los semestres únicos de la respuesta
     const semestres = response.data.map(item => item.PipelsoftData.Semestre);
     // Filtrar y ordenar los semestres en base al año (YY) y mes (MM)
-    const semestresUnicos = [...new Set(semestres)].sort((a, b) => {
+    const semestresUnicos = [...new Set(semestres)]  
+    .filter(semestre => typeof semestre === 'string' && semestre.includes('-')) // Filtrar valores válidos
+    .sort((a, b) => {
       const [monthA, yearA] = a.split('-'); // Obtener mes y año de "MM-YY"
       const [monthB, yearB] = b.split('-');
       
@@ -174,6 +176,8 @@ const obtenerSemestres = async () => {
       }
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
       const response = await $axios.get(`/api/paf-en-linea/estadisticas/unidad-mayor/${UnidadMayor.value}/${semestreSeleccionado.value}`);
+      console.log(response.data);
+      console.log(UnidadMayor.value);
       cantidadPersonasSai.value = response.data.total_profesores;
       cantidadPafUnicas.value = response.data.total_pipelsoft_unicos;
     } catch (error) {
@@ -188,6 +192,9 @@ const obtenerSemestres = async () => {
       }
       //const response = await $axios.get(`/contratos/${response1.data.unidadMayor}`);
       const response = await $axios.get(`/api/paf-en-linea/estadisticas/6/${UnidadMayor.value}/${UnidadMenor.value}/${semestreSeleccionado.value}`);
+      console.log(response.data);
+      console.log(UnidadMayor.value);
+      console.log(UnidadMenor.value);
       cantidadPersonasSai.value = response.data.total_profesores;
       cantidadPafUnicas.value = response.data.total_pipelsoft_unicos;
     } catch (error) {
