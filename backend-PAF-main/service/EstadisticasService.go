@@ -61,8 +61,6 @@ func (s *EstadisticasService) ObtenerEstadisticas(semestre string) (*Estadistica
 		anio := "20" + semestre[2:]
 		formato1 = semestre
 		formato2 = fmt.Sprintf("%s-%s", anio, mes)
-	} else {
-		return nil, fmt.Errorf("formato de semestre inválido: %s", semestre)
 	}
 
 	// Contar los RUN únicos en la tabla profesor_dbs con filtro por semestre
@@ -81,7 +79,7 @@ func (s *EstadisticasService) ObtenerEstadisticas(semestre string) (*Estadistica
 
 	// Contar los registros únicos de Run en la tabla pipelsofts, aplicando filtro por semestre
 	queryUnicos := s.DB.Model(&models.Pipelsoft{}).Distinct("run_empleado").
-		Where("semestre = ? OR semestre = ? OR semestre", formato1, formato2, semestre)
+		Where("semestre = ? OR semestre = ? OR semestre = ?", formato1, formato2, semestre)
 	if err := queryUnicos.Count(&resp.TotalPipelsoftUnicos).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los registros únicos de Run en pipelsofts: %w", err)
 	}
@@ -253,8 +251,6 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidadMayor(unidadMayor stri
 		anio := "20" + semestre[2:]
 		formato1 = semestre
 		formato2 = fmt.Sprintf("%s-%s", anio, mes)
-	} else {
-		return nil, fmt.Errorf("formato de semestre inválido: %s", semestre)
 	}
 
 	// Validar que el parámetro unidadMayor no esté vacío
@@ -698,8 +694,6 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMe
 		anio := "20" + semestre[2:]
 		formato1 = semestre
 		formato2 = fmt.Sprintf("%s-%s", anio, mes)
-	} else {
-		return nil, fmt.Errorf("formato de semestre inválido: %s", semestre)
 	}
 
 	// Validar parámetros obligatorios
