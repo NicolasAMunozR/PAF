@@ -58,7 +58,7 @@ func (s *EstadisticasService) ObtenerEstadisticas(semestre string) (*Estadistica
 
 	// Contar los RUN únicos en la tabla profesor_dbs con filtro por semestre
 	if err := s.DB.Model(&models.ProfesorDB{}).
-		Where("semestre = ? OR semestre = ?", formato1, formato2).
+		Where("semestre = ? OR semestre = ? OR semestre = ?", formato1, formato2, semestre).
 		Distinct("run").
 		Count(&resp.TotalProfesores).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los profesores únicos por RUN: %w", err)
