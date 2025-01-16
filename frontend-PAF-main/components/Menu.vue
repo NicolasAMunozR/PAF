@@ -175,7 +175,7 @@ export default {
   top: 0;
   left: 0;
   width: 100%;
-  background-color: #099b88;
+  background-color: #00a499;
   color: white;
   padding: 1rem;
   z-index: 50;
