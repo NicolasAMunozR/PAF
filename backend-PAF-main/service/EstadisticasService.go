@@ -42,18 +42,20 @@ func (s *EstadisticasService) ObtenerEstadisticas(semestre string) (*Estadistica
 
 	// Normalizar el formato del semestre
 	var formato1, formato2 string
-	if len(semestre) == 7 && semestre[4] == '-' { // Formato "2023-01"
-		anio := semestre[:4]
-		mes := semestre[5:]
-		formato1 = fmt.Sprintf("%d-%s", removeLeadingZero(mes), anio[2:])
-		formato2 = semestre
-	} else if len(semestre) == 4 && semestre[1] == '-' { // Formato "1-23"
-		mes := "0" + string(semestre[0])
-		anio := "20" + semestre[2:]
-		formato1 = semestre
-		formato2 = fmt.Sprintf("%s-%s", anio, mes)
-	} else {
-		return nil, fmt.Errorf("formato de semestre inválido: %s", semestre)
+	if len(semestre) == 5 {
+		if len(semestre) == 7 && semestre[4] == '-' { // Formato "2023-01"
+			anio := semestre[:4]
+			mes := semestre[5:]
+			formato1 = fmt.Sprintf("%d-%s", removeLeadingZero(mes), anio[2:])
+			formato2 = semestre
+		} else if len(semestre) == 4 && semestre[1] == '-' { // Formato "1-23"
+			mes := "0" + string(semestre[0])
+			anio := "20" + semestre[2:]
+			formato1 = semestre
+			formato2 = fmt.Sprintf("%s-%s", anio, mes)
+		} else {
+			return nil, fmt.Errorf("formato de semestre inválido: %s", semestre)
+		}
 	}
 
 	// Contar los RUN únicos en la tabla profesor_dbs con filtro por semestre
@@ -223,6 +225,23 @@ func (s *EstadisticasService) ContarRegistrosExcluyendoEstados(semestre string) 
 func (s *EstadisticasService) ObtenerEstadisticasPorUnidadMayor(unidadMayor string, semestre string) (*EstadisticasResponse, error) {
 	var resp EstadisticasResponse
 
+	// Normalizar el formato del semestre
+	var formato1, formato2 string
+	if len(semestre) == 5 {
+		if len(semestre) == 7 && semestre[4] == '-' { // Formato "2023-01"
+			anio := semestre[:4]
+			mes := semestre[5:]
+			formato1 = fmt.Sprintf("%d-%s", removeLeadingZero(mes), anio[2:])
+			formato2 = semestre
+		} else if len(semestre) == 4 && semestre[1] == '-' { // Formato "1-23"
+			mes := "0" + string(semestre[0])
+			anio := "20" + semestre[2:]
+			formato1 = semestre
+			formato2 = fmt.Sprintf("%s-%s", anio, mes)
+		} else {
+			return nil, fmt.Errorf("formato de semestre inválido: %s", semestre)
+		}
+	}
 	// Validar que el parámetro unidadMayor no esté vacío
 	if unidadMayor == "" {
 		return nil, fmt.Errorf("el parámetro 'unidad-mayor' es obligatorio")
@@ -231,7 +250,7 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidadMayor(unidadMayor stri
 	// Construir una consulta base con los filtros dinámicos
 	query := s.DB.Model(&models.Pipelsoft{}).Where("nombre_unidad_mayor = ?", unidadMayor)
 	if semestre != "" {
-		query = query.Where("semestre = ?", semestre)
+		query = query.Where("semestre = ? OR semestre = ? OR semestre = ?", semestre, formato1, formato2)
 	}
 
 	// Contar los registros en pipelsofts que coincidan con la unidad mayor y semestre
@@ -278,7 +297,8 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidadMayor(unidadMayor stri
 	}
 
 	// Contar la cantidad de profesores en la tabla contratos que tengan la misma unidad mayor y semestre
-	queryContratos := s.DB.Model(&models.Contrato{}).Where("unidad_mayor = ?", unidadMayor)
+	// cambios
+	queryContratos := s.DB.Model(&models.ProfesorDB{}).Where("unidad_mayor = ?", unidadMayor)
 	if err := queryContratos.Count(&resp.TotalProfesores).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los profesores en la tabla contratos para la unidad mayor %s y semestre %s: %w", unidadMayor, semestre, err)
 	}
@@ -642,6 +662,24 @@ func (s *EstadisticasService) ObtenerUnidadesMayoresPorCodEstadoPAF(codEstadoPAF
 func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMenor, semestre string) (*EstadisticasResponse, error) {
 	var resp EstadisticasResponse
 
+	// Normalizar el formato del semestre
+	var formato1, formato2 string
+	if len(semestre) == 5 {
+		if len(semestre) == 7 && semestre[4] == '-' { // Formato "2023-01"
+			anio := semestre[:4]
+			mes := semestre[5:]
+			formato1 = fmt.Sprintf("%d-%s", removeLeadingZero(mes), anio[2:])
+			formato2 = semestre
+		} else if len(semestre) == 4 && semestre[1] == '-' { // Formato "1-23"
+			mes := "0" + string(semestre[0])
+			anio := "20" + semestre[2:]
+			formato1 = semestre
+			formato2 = fmt.Sprintf("%s-%s", anio, mes)
+		} else {
+			return nil, fmt.Errorf("formato de semestre inválido: %s", semestre)
+		}
+
+	}
 	// Validar parámetros obligatorios
 	if unidadMayor == "" {
 		return nil, fmt.Errorf("el parámetro 'unidadMayor' es obligatorio")
@@ -654,7 +692,7 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMe
 	// Crear una consulta base con filtros dinámicos
 	query := s.DB.Model(&models.Pipelsoft{}).Where("nombre_unidad_mayor = ? AND nombre_unidad_menor = ?", unidadMayor, unidadMenor)
 	if semestre != "" {
-		query = query.Where("semestre = ?", semestre)
+		query = query.Where("semestre = ? OR semestre =? OR semestre = ?", semestre, formato1, formato2)
 	}
 
 	// Contar los registros totales
@@ -698,7 +736,7 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMe
 	}
 
 	// Contar la cantidad de profesores en la tabla contratos
-	queryContratos := s.DB.Model(&models.Contrato{}).Where("unidad_mayor = ? AND unidad_menor = ?", unidadMayor, unidadMenor)
+	queryContratos := s.DB.Model(&models.ProfesorDB{}).Where("unidad_mayor = ? AND unidad_menor = ?", unidadMayor, unidadMenor)
 	if err := queryContratos.Count(&resp.TotalProfesores).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los profesores en la tabla contratos: %w", err)
 	}

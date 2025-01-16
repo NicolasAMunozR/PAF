@@ -81,6 +81,7 @@ func setupRoutes(r *gin.Engine) {
 		estadisticas.GET("/frecuencia-unidades-mayores/:semestre", estadisticasController.ObtenerFrecuenciaNombreUnidadMayor)
 		estadisticas.GET("/PafActivas/:semestre", estadisticasController.ContarRegistrosPorCodEstado)
 		estadisticas.GET("/pafActivas/unidad-mayor/:unidadMayor/:semestre", estadisticasController.ObtenerPafActivasPorUnidadHandler)
+		// problema
 		estadisticas.GET("/unidad-mayor/:unidad-mayor/:semestre", estadisticasController.ObtenerEstadisticasPorUnidadMayorHandler)
 		estadisticas.GET("/unidad-mayor/unidades-menores-frecuencia/:unidad-mayor/:semestre", estadisticasController.ObtenerFrecuenciaNombreUnidadMenorPorUnidadMayorHandler)
 		estadisticas.GET("/obtener-y-comparar-runs", estadisticasController.ObtenerYCompararRunsHandler)
@@ -91,6 +92,7 @@ func setupRoutes(r *gin.Engine) {
 		estadisticas.GET("/unidades-mayores/profesores-filtrados/:semestre", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosHandler)
 		estadisticas.GET("/unidades-mayores/profesores-codestado/:semestre", estadisticasController.ObtenerUnidadesMayoresConProfesoresFiltradosPAFActivos)
 		estadisticas.GET("/profesores/estado/:codEstadoPAF/:semestre", estadisticasController.ObtenerUnidadesMayoresPorCodEstadoPAF)
+		//problema
 		estadisticas.GET("/6/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ObtenerEstadisticasPorUnidad)
 		estadisticas.GET("/7/:unidadMayor/:unidadMenor/:semestre", estadisticasController.ContarRegistrosPorUnidadMayorYUnidadMenor)
 
