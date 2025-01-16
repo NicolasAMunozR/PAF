@@ -43,19 +43,26 @@ func (s *EstadisticasService) ObtenerEstadisticas(semestre string) (*Estadistica
 	// Normalizar el formato del semestre
 	var formato1, formato2 string
 	if len(semestre) == 5 {
-		if len(semestre) == 7 && semestre[4] == '-' { // Formato "2023-01"
-			anio := semestre[:4]
-			mes := semestre[5:]
-			formato1 = fmt.Sprintf("%d-%s", removeLeadingZero(mes), anio[2:])
-			formato2 = semestre
-		} else if len(semestre) == 4 && semestre[1] == '-' { // Formato "1-23"
-			mes := "0" + string(semestre[0])
-			anio := "20" + semestre[2:]
+		if len(semestre) == 5 && semestre[2] == '-' { // Formato "1-23"
+			mes := string(semestre[0]) + string(semestre[1])
+			anio := "20" + semestre[3:]
 			formato1 = semestre
 			formato2 = fmt.Sprintf("%s-%s", anio, mes)
-		} else {
-			return nil, fmt.Errorf("formato de semestre inválido: %s", semestre)
 		}
+
+	}
+	if len(semestre) == 7 && semestre[4] == '-' { // Formato "2023-01"
+		anio := semestre[:4]
+		mes := semestre[5:]
+		formato1 = fmt.Sprintf("%d-%s", removeLeadingZero(mes), anio[2:])
+		formato2 = semestre
+	} else if len(semestre) == 4 && semestre[1] == '-' { // Formato "1-23"
+		mes := "0" + string(semestre[0])
+		anio := "20" + semestre[2:]
+		formato1 = semestre
+		formato2 = fmt.Sprintf("%s-%s", anio, mes)
+	} else {
+		return nil, fmt.Errorf("formato de semestre inválido: %s", semestre)
 	}
 
 	// Contar los RUN únicos en la tabla profesor_dbs con filtro por semestre
@@ -228,20 +235,28 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidadMayor(unidadMayor stri
 	// Normalizar el formato del semestre
 	var formato1, formato2 string
 	if len(semestre) == 5 {
-		if len(semestre) == 7 && semestre[4] == '-' { // Formato "2023-01"
-			anio := semestre[:4]
-			mes := semestre[5:]
-			formato1 = fmt.Sprintf("%d-%s", removeLeadingZero(mes), anio[2:])
-			formato2 = semestre
-		} else if len(semestre) == 4 && semestre[1] == '-' { // Formato "1-23"
-			mes := "0" + string(semestre[0])
-			anio := "20" + semestre[2:]
+		if len(semestre) == 5 && semestre[2] == '-' { // Formato "1-23"
+			mes := string(semestre[0]) + string(semestre[1])
+			anio := "20" + semestre[3:]
 			formato1 = semestre
 			formato2 = fmt.Sprintf("%s-%s", anio, mes)
-		} else {
-			return nil, fmt.Errorf("formato de semestre inválido: %s", semestre)
 		}
 	}
+
+	if len(semestre) == 7 && semestre[4] == '-' { // Formato "2023-01"
+		anio := semestre[:4]
+		mes := semestre[5:]
+		formato1 = fmt.Sprintf("%d-%s", removeLeadingZero(mes), anio[2:])
+		formato2 = semestre
+	} else if len(semestre) == 4 && semestre[1] == '-' { // Formato "1-23"
+		mes := "0" + string(semestre[0])
+		anio := "20" + semestre[2:]
+		formato1 = semestre
+		formato2 = fmt.Sprintf("%s-%s", anio, mes)
+	} else {
+		return nil, fmt.Errorf("formato de semestre inválido: %s", semestre)
+	}
+
 	// Validar que el parámetro unidadMayor no esté vacío
 	if unidadMayor == "" {
 		return nil, fmt.Errorf("el parámetro 'unidad-mayor' es obligatorio")
@@ -665,21 +680,28 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMe
 	// Normalizar el formato del semestre
 	var formato1, formato2 string
 	if len(semestre) == 5 {
-		if len(semestre) == 7 && semestre[4] == '-' { // Formato "2023-01"
-			anio := semestre[:4]
-			mes := semestre[5:]
-			formato1 = fmt.Sprintf("%d-%s", removeLeadingZero(mes), anio[2:])
-			formato2 = semestre
-		} else if len(semestre) == 4 && semestre[1] == '-' { // Formato "1-23"
-			mes := "0" + string(semestre[0])
-			anio := "20" + semestre[2:]
+		if len(semestre) == 5 && semestre[2] == '-' { // Formato "1-23"
+			mes := string(semestre[0]) + string(semestre[1])
+			anio := "20" + semestre[3:]
 			formato1 = semestre
 			formato2 = fmt.Sprintf("%s-%s", anio, mes)
-		} else {
-			return nil, fmt.Errorf("formato de semestre inválido: %s", semestre)
 		}
-
 	}
+
+	if len(semestre) == 7 && semestre[4] == '-' { // Formato "2023-01"
+		anio := semestre[:4]
+		mes := semestre[5:]
+		formato1 = fmt.Sprintf("%d-%s", removeLeadingZero(mes), anio[2:])
+		formato2 = semestre
+	} else if len(semestre) == 4 && semestre[1] == '-' { // Formato "1-23"
+		mes := "0" + string(semestre[0])
+		anio := "20" + semestre[2:]
+		formato1 = semestre
+		formato2 = fmt.Sprintf("%s-%s", anio, mes)
+	} else {
+		return nil, fmt.Errorf("formato de semestre inválido: %s", semestre)
+	}
+
 	// Validar parámetros obligatorios
 	if unidadMayor == "" {
 		return nil, fmt.Errorf("el parámetro 'unidadMayor' es obligatorio")
