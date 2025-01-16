@@ -65,14 +65,14 @@ func (s *EstadisticasService) ObtenerEstadisticas(semestre string) (*Estadistica
 	}
 
 	// Contar todos los registros en la tabla pipelsofts, aplicando filtro por semestre
-	query := s.DB.Model(&models.Pipelsoft{}).Where("semestre = ? OR semestre = ?", formato1, formato2)
+	query := s.DB.Model(&models.Pipelsoft{}).Where("semestre = ? OR semestre = ? OR semestre = ?", formato1, formato2, semestre)
 	if err := query.Count(&resp.TotalPipelsoft).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los registros en pipelsofts: %w", err)
 	}
 
 	// Contar los registros únicos de Run en la tabla pipelsofts, aplicando filtro por semestre
 	queryUnicos := s.DB.Model(&models.Pipelsoft{}).Distinct("run_empleado").
-		Where("semestre = ? OR semestre = ?", formato1, formato2)
+		Where("semestre = ? OR semestre = ? OR semestre", formato1, formato2, semestre)
 	if err := queryUnicos.Count(&resp.TotalPipelsoftUnicos).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los registros únicos de Run en pipelsofts: %w", err)
 	}
@@ -112,7 +112,7 @@ func (s *EstadisticasService) ObtenerEstadisticas(semestre string) (*Estadistica
 	for _, estado := range estados {
 		var count int64
 		queryEstado := s.DB.Model(&models.Pipelsoft{}).
-			Where("des_estado = ? AND (semestre = ? OR semestre = ?)", estado, formato1, formato2)
+			Where("des_estado = ? AND (semestre = ? OR semestre = ? OR semestre = ?)", estado, formato1, formato2, semestre)
 		if err := queryEstado.Count(&count).Error; err != nil {
 			return nil, fmt.Errorf("error al contar los registros de pipelsofts con estado %s: %w", estado, err)
 		}
