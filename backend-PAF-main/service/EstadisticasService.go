@@ -309,7 +309,7 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidadMayor(unidadMayor stri
 
 	// Contar la cantidad de profesores en la tabla contratos que tengan la misma unidad mayor y semestre
 	// cambios
-	queryContratos := s.DB.Model(&models.ProfesorDB{}).Where("unidad_mayor = ?", unidadMayor)
+	queryContratos := s.DB.Model(&models.Contrato{}).Where("unidad_mayor = ?", unidadMayor)
 	if err := queryContratos.Count(&resp.TotalProfesores).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los profesores en la tabla contratos para la unidad mayor %s y semestre %s: %w", unidadMayor, semestre, err)
 	}
@@ -752,7 +752,7 @@ func (s *EstadisticasService) ObtenerEstadisticasPorUnidad(unidadMayor, unidadMe
 	}
 
 	// Contar la cantidad de profesores en la tabla contratos
-	queryContratos := s.DB.Model(&models.ProfesorDB{}).Where("unidad_mayor = ? AND unidad_menor = ?", unidadMayor, unidadMenor)
+	queryContratos := s.DB.Model(&models.Contrato{}).Where("unidad_mayor = ? AND unidad_menor = ?", unidadMayor, unidadMenor)
 	if err := queryContratos.Count(&resp.TotalProfesores).Error; err != nil {
 		return nil, fmt.Errorf("error al contar los profesores en la tabla contratos: %w", err)
 	}
