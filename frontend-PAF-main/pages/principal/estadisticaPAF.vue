@@ -1,13 +1,5 @@
 <template>
   <!-- Detalles de la unidad seleccionada -->
-  <div v-if="unidadSeleccionada" class="unidad-seleccionada">
-      <h4 class="subtitulo">Unidad Seleccionada: {{ unidadSeleccionada }}</h4>
-      <p style="text-align: center;">Cantidad de PAF en esta unidad: <strong>{{ detalleUnidadSeleccionada }}</strong></p>
-      <!-- Botón para recargar los datos -->
-      <button @click="recargarPagina" class="btn-recargar">Recargar Datos Iniciales</button>
-    </div>
-    <br />
-    <br />
     <div>
       <h1 class="titulo-principal">Datos SAI y PAF</h1>
       <h1>Semestre seleccionado: <select v-model="semestreSeleccionado" @change="obtenerSemestres">
@@ -16,13 +8,22 @@
       </option>
     </select>
     </h1>
+    <div v-if="unidadSeleccionada" class="unidad-seleccionada">
+      <h4 class="subtitulo">Unidad Mayor Seleccionada: {{ unidadSeleccionada }}</h4>
+      <!-- Botón para recargar los datos -->
+      <button @click="recargarPagina" class="btn-recargar">Recargar Datos Iniciales</button>
+    </div>
+    <br />
     <!-- Cantidades -->
+    <p class="cantidad-text">Cantidad de PAF: <strong>{{ totalPafPipelsoft }}</strong></p>
     <p class="cantidad-text">Cantidad de docentes: <strong>{{ cantidadPersonasSai }}</strong></p>
-    <p class="cantidad-text">Cantidad de PAF únicas: <strong>{{ cantidadPafUnicas }}</strong></p>
+    <p class="cantidad-text">Cantidad de docentes con PAF: <strong>{{ cantidadPafUnicas }}</strong></p>
+    <p class="cantidad-text">Cantidad de PAF activas: <strong>{{ cantidadPafActivas }}</strong></p>
+    <p class="cantidad-text">Cantidad de PAF inactivas: <strong>{{ (totalPafPipelsoft - cantidadPafActivas) }}</strong></p>
+    <p class="cantidad-text">se entiende por activa que no se encuente rechazada, anulada o sin solicitar</p>
     <br />
+    <p class="cantidad-text"> Estados de la PAF:</p>
     <br />
-    <br />
-
     <!-- Estado de avance -->
     <div class="estado-linea">
       <template v-for="(cantidad, estado, index) in cantidadPafPorEstado" :key="'estado-' + estado">
@@ -41,22 +42,12 @@
     <div v-if="estadoSeleccionado !== null" class="detalles-container">
       <h4 class="subtitulo">Detalles del Estado {{ estadoSeleccionado }}</h4>
       <p class="detalle-text">Cantidad de PAF en este estado: <strong>{{ cantidadPafPorEstado[estadoSeleccionado] }}</strong></p>
-      <p class="detalle-text">Promedio de tiempo en estado:
-        <strong>
-          {{
-            promedioTiempoPorEstado[estadoSeleccionado]
-              ? promedioTiempoPorEstado[estadoSeleccionado].toFixed(2)
-              : 'N/A'
-          }}
-        </strong>
-        días
-      </p>
     </div>
 
     <!-- Gráficos -->
     <div v-if="profesoresChartData && pafChartData" class="grafico-container">
       <div class="pie-chart">
-        <h4 class="subtitulo">Profesores con y sin PAF</h4>
+        <h4 class="subtitulo">Profesores con PAF y sin PAF</h4>
         <Pie :data="profesoresChartData" :options="profesoresChartData.options" />
       </div>
       <div class="pie-chart">
@@ -96,6 +87,7 @@ import { Pie } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale, BarElement } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Bar } from 'vue-chartjs'; // Importar gráfico de barras
+import { isConstructorDeclaration } from 'typescript';
 
 const { $axios } = useNuxtApp();
 
@@ -104,6 +96,7 @@ ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale,
 const mostrarModal = ref(false); // Controla si el modal está visible
 const graficoModalData = ref(null); // Datos para el gráfico en el modal
 const cantidadPersonasSai = ref(0);
+const totalPafPipelsoft = ref(0);
 const cantidadPafActivas = ref(0);
 const cantidadPafUnicas = ref(0);
 const cantidadPafPorEstado = ref({});
@@ -148,11 +141,12 @@ const obtenerSemestres = async () => {
     if (semestreSeleccionado.value === '') {
       semestreSeleccionado.value = semestresUnicos[semestresUnicos.length - 1];  // Seleccionar el semestre más reciente (último semestre)
     }
-
-      fetchCantidadPersonasSai();
-      fetchCantidadPafSai();
-      fetchCantidadPafPorEstado();
-      fetchPafPorUnidadMayor();
+    await Promise.all([
+      fetchCantidadPersonasSai(),
+      fetchCantidadPafSai(),
+      fetchCantidadPafPorEstado(),
+      fetchPafPorUnidadMayor(),
+      ]);
       configurarGraficos();
   } catch (error) {
     console.error('Error al obtener los semestres:', error);
@@ -165,7 +159,7 @@ const fetchCantidadPersonasSai = async () => {
       obtenerSemestres();
     }
     const response = await $axios.get(`/api/paf-en-linea/estadisticas/${semestreSeleccionado.value}`);
-    console.log(response.data);
+    totalPafPipelsoft.value = response.data.total_pipelsoft;
     cantidadPersonasSai.value = response.data.total_profesores;
     cantidadPafUnicas.value = response.data.total_pipelsoft_unicos;
   } catch (error) {
@@ -250,6 +244,7 @@ const fetchPafPorUnidadMayor = async () => {
           mostrarModal.value = true;
           const response1 = await $axios.get(`/api/paf-en-linea/estadisticas/unidad-mayor/${label}/${semestreSeleccionado.value}`);
           cantidadPersonasSai.value = response1.data.total_profesores;
+          totalPafPipelsoft.value = response1.data.total_pipelsoft;
           cantidadPafUnicas.value = response1.data.total_pipelsoft_unicos;
           const response2 = await $axios.get(`/api/paf-en-linea/estadisticas/pafActivas/unidad-mayor/${label}/${semestreSeleccionado.value}`);
           cantidadPafActivas.value = response2.data.totalRegistros;
@@ -356,12 +351,14 @@ const configurarGraficos = () => {
     align: 'center',
     anchor: 'center',
   };
-
   profesoresChartData.value = {
-    labels: ['Profesores con PAF', 'Profesores sin PAF'],
+    labels: [
+    `Profesores con PAF (${cantidadPafUnicas.value})`,
+    `Profesores sin PAF (${cantidadPersonasSai.value - cantidadPafUnicas.value})`
+  ],
     datasets: [
       {
-        label: 'Porcentaje de PAF',
+        label: 'Porcentaje de PAF', 
         data: [
           ((cantidadPafUnicas.value / cantidadPersonasSai.value) * 100).toFixed(2),
           ((cantidadPersonasSai.value - cantidadPafUnicas.value) / cantidadPersonasSai.value * 100).toFixed(2),
@@ -386,27 +383,29 @@ const configurarGraficos = () => {
           if (!label || label.trim() === '') {
             throw new Error('El label está vacío. No se puede realizar la consulta.');
           }
+          console.log("label", label);
           let response = null;
           let unidadesData = null;
           let labelNuevo = "";
           if(unidadSeleccionada.value === null) {
-            if (label === 'Profesores con PAF') {
+            if (label === `Profesores con PAF (${cantidadPafUnicas.value})`) {
             response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-mayores/cant_profesores/${semestreSeleccionado.value}`);
             unidadesData = response.data.unidadesMayores;
-            } else if (label === 'Profesores sin PAF') {
+            } else if (label === `Profesores sin PAF (${cantidadPersonasSai.value - cantidadPafUnicas.value})`) {
             response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-mayores/sin_profesores/${semestreSeleccionado.value}`);
             unidadesData = response.data;
             }
-          
+            console.log("1", response.data);
             labelNuevo = 'Cantidad de PAF por Unidad Mayor';
           } else {
-            if (label === 'Profesores con PAF') {
+            if (label === `Profesores con PAF (${cantidadPafUnicas.value})`) {
             response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-menores-con-profesores-activos/8_1/${unidadSeleccionada.value}/${semestreSeleccionado.value}`);
             unidadesData = response.data;
-            } else if (label === 'Profesores sin PAF') {
+            } else if (label === `Profesores sin PAF (${cantidadPersonasSai.value - cantidadPafUnicas.value})`) {
             response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-menores-sin-profesores-8-2/${unidadSeleccionada.value}/${semestreSeleccionado.value}`);
             unidadesData = response.data.unidades;
             }
+            console.log("2", response.data);
             labelNuevo = 'Cantidad de PAF por Unidad Menor';
           }
           graficoModalData.value = {
@@ -471,15 +470,15 @@ const configurarGraficos = () => {
         },
       },
   };
-
   pafChartData.value = {
-    labels: ['Profesores con PAF activas', 'Profesores sin PAF activas'],
+    labels: [`Profesores con PAF activas (${cantidadPafActivas.value})`, 
+             `Profesores sin PAF activas (${totalPafPipelsoft.value - cantidadPafActivas.value})`],
     datasets: [
       {
         label: 'Porcentaje de Profesores por estado',
         data: [
-          ((cantidadPafActivas.value / cantidadPersonasSai.value) * 100).toFixed(2),
-          ((cantidadPersonasSai.value - cantidadPafActivas.value) / cantidadPersonasSai.value * 100).toFixed(2),
+          ((cantidadPafActivas.value / totalPafPipelsoft.value) * 100).toFixed(2),
+          ((totalPafPipelsoft.value - cantidadPafActivas.value) / totalPafPipelsoft.value * 100).toFixed(2),
         ],
         backgroundColor: ['#42A5F5', '#EF5350'],
       },
@@ -504,23 +503,25 @@ const configurarGraficos = () => {
           let unidadesData2 = null;
           let labelNuevo = "";
           if(unidadSeleccionada.value === null) {
-            if (label === 'Profesores con PAF activas') {
+            if (label === `Profesores con PAF activas (${cantidadPafActivas.value})`) {
 
             response2 = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-mayores/profesores-filtrados/${semestreSeleccionado.value}`);
-            } else if (label === 'Profesores sin PAF activas') {
+            } else if (label === `Profesores sin PAF activas (${totalPafPipelsoft.value - cantidadPafActivas.value})`) {
 
             response2 = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-mayores/profesores-codestado/${semestreSeleccionado.value}`);
             }
+            console.log("3", response2.data); 
             unidadesData2 = response2.data;
             labelNuevo = 'Cantidad de PAF por Unidad Mayor';
           } else {
-            if (label === 'Profesores con PAF activas') {
+            if (label === `Profesores con PAF activas (${cantidadPafActivas.value})`) {
 
             response2 = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-menores-sin-profesores/8_3/${unidadSeleccionada.value}/${semestreSeleccionado.value}`);
             unidadesData2 = response2.data.unidades;
-            } else if (label === 'Profesores sin PAF activas') {
+            } else if (label === `Profesores sin PAF activas (${totalPafPipelsoft.value - cantidadPafActivas.value})`) {
 
             response2 = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-menores-con-profesores-paf-activos/8_4/${unidadSeleccionada.value}/${semestreSeleccionado.value}`);
+            console.log("4", response2.data);
             unidadesData2 = response2.data;
           }
           labelNuevo = 'Cantidad de PAF por Unidad Menor';
@@ -631,7 +632,6 @@ onMounted(async () => {
   margin-top: 1.5rem;
   color: #394049;
   font-family: "Bebas Neue Pro", sans-serif;
-  text-align: center;
 }
 
 .cantidad-text {
@@ -772,8 +772,5 @@ onMounted(async () => {
     background-color: #e51e1e;
   }
 
-.unidad-seleccionada{
-  justify-content: center;
-  text-align: center;
-}
+
 </style>
