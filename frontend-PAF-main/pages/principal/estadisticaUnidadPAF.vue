@@ -7,9 +7,9 @@
       </option>
     </select>
     </h1>
-    <h1 class="subtitulo"> Unidad Mayor: {{ UnidadMayor }}</h1>
+    <h1 class="cantidad-text"> Unidad Mayor: {{ UnidadMayor }}</h1>
     <div v-if="unidadSeleccionada" class="unidad-seleccionada">
-      <h4 class="subtitulo">Unidad Menor Seleccionada: {{ unidadSeleccionada }}</h4>
+      <h4 class="cantidad-text">Unidad Menor Seleccionada: {{ unidadSeleccionada }}</h4>
       <!-- Botón para recargar los datos -->
       <button @click="recargarPagina" class="btn-recargar">Recargar Datos Iniciales</button>
     </div>
@@ -69,15 +69,83 @@
         <h4 class="subtitulo">Cantidad de PAF por Unidad Mayor</h4>
         <Bar :data="pafPorUnidadMayorChartData" :options="pafPorUnidadMayorChartData.options" />
       </div>
-      <!-- Modal para el gráfico dinámico -->
-      <div v-if="mostrarModal" class="modal-overlay">
+    </div>
+       <!-- Modal para el gráfico dinámico -->
+    <div v-if="modalAbierto === 1" class="modal-overlay">
       <div class="modal-content">
-        <h3 class="modal-title">Detalles de {{ unidadSeleccionada }}</h3>
+        <h3 class="modal-title">Detalles de:</h3>
         <Bar v-if="graficoModalData" :data="graficoModalData" />
+        <div v-if="mostrarBotonModal === true" class="boton-lista">
+          <button @click="obtenerListaProfesoresSinPaf" class="btn-lista">Obtener lista de profesores</button>
+          <br />
+        </div>
         <button @click="cerrarModal" class="modal-close-button">Cerrar</button>
       </div>
     </div>
-    </div>
+        <div  v-if="modalAbierto === 2" class="modal-overlay">
+          <div class="modal-content">
+      <div v-if="listaProfesores.length > 0 || listaProfesores !== null" class="lista-profesores">
+        <h2>Contratos Relacionados</h2>
+        <table class="w-full text-sm bg-white shadow-lg rounded-lg overflow-hidden">
+      <thead>
+        <tr>
+          <th class="col-medium">
+            Run
+          </th>
+          <th class="col-small">
+            Sección
+          </th>
+          <th class="col-large">
+            Nombre de Asignatura
+          </th>
+          <th class="col-small">
+            Codigo de Asignatura
+          </th>
+          <th class="col-medium">
+            Semestre
+          </th>
+          <th class="col-small">
+            Bloque
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(contrato, index) in paginatedData" :key="index">
+          <td>{{ contrato.run }}</td>
+          <td>{{ contrato.seccion }}</td>
+          <td>{{ contrato.nombre_asignatura }}</td>
+          <td>{{ contrato.codigo_asignatura }}</td>
+          <td>{{ contrato.semestre }}</td>
+          <td>{{ contrato.bloque }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+         <!-- Paginación -->
+         <div class="pagination">
+          <button 
+            @click="goToPage(1)" 
+            :disabled="currentPage === 1">
+            «
+          </button>
+          <button 
+            v-for="page in pageNumbers" 
+            :key="page" 
+            :class="{ active: currentPage === page }"
+            @click="goToPage(Number(page))">
+            <span v-if="page === '...'">...</span>
+            <span v-else>{{ page }}</span>
+          </button>
+          <button 
+            @click="goToPage(totalPages)" 
+            :disabled="currentPage === totalPages">
+            »
+          </button>
+        </div>
+        <button @click="cerrarModal" class="modal-close-button">Cerrar</button>
+      </div>
+      </div>
+        </div>
   </template>
   
   <script setup>
@@ -168,6 +236,91 @@ const obtenerSemestres = async () => {
   const unidadSeleccionada = ref(null); // Unidad seleccionada
   const detalleUnidadSeleccionada = ref(null); // Detalles de la unidad seleccionada
   const valor = ref(null);
+  const mostrarBotonModal = ref(false);
+const valores = ref(false);
+const listaProfesores = ref([]);
+
+const modalAbierto = ref(null);
+
+    const abrirModal = (modal) => {
+      modalAbierto.value = modal;
+    };
+
+// Paginación
+const currentPage = ref(1);
+const itemsPerPage = 8; // Número de elementos por página
+
+const sortData = (key) => {
+  if (sortBy.value === key) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortBy.value = key;
+    sortOrder.value = 'asc';
+  }
+  currentPage.value = 1; // Resetear a la primera página
+};
+
+// Computed para la paginación
+const totalPages = computed(() => {
+  return Math.ceil(listaProfesores.value.length / itemsPerPage);
+});
+
+const paginatedData = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return listaProfesores.value.slice(start, end);
+});
+
+
+const pageNumbers = computed(() => {
+  const total = totalPages.value;
+  const current = currentPage.value;
+  const range = 2; // Cantidad de páginas a mostrar alrededor de la actual
+  const pages = [];
+
+  if (total <= range * 2 + 5) {
+    for (let i = 1; i <= total; i++) {
+      pages.push(i);
+    }
+  } else {
+    let start = Math.max(1, current - range);
+    let end = Math.min(total, current + range);
+
+    if (current <= range + 1) {
+      end = Math.min(total, range * 2 + 3);
+    } else if (current > total - range - 1) {
+      start = Math.max(1, total - range * 2 - 2);
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    if (start > 1) {
+      pages.unshift(1, '...');
+    }
+
+    if (end < total) {
+      pages.push('...', total);
+    }
+  }
+
+  return pages;
+});
+
+const goToPage = (page) => {
+  if (typeof page === 'number') {
+    currentPage.value = page;
+  }
+};
+
+const cerrarModal = () => {
+  modalAbierto.value = null;
+  mostrarModal.value = false;
+  graficoModalData.value = null; // Limpiar datos del gráfico
+};
+
+
 
   const fetchCantidadPersonasSai = async () => {
     try {
@@ -202,11 +355,6 @@ const obtenerSemestres = async () => {
 
 const recargarPagina = () => {
   window.location.reload(); // Recarga la página completa
-};
-
-const cerrarModal = () => {
-  mostrarModal.value = false;
-  graficoModalData.value = null; // Limpiar datos del gráfico
 };
 
   const fetchCantidadPafSai = async () => {
@@ -363,7 +511,8 @@ const cerrarModal = () => {
           if (!label || label.trim() === '') {
             throw new Error('El label está vacío. No se puede realizar la consulta.');
           }
-
+          modalAbierto.value = 1;
+          mostrarModal.value = true;
           unidadSeleccionada.value = label;
           detalleUnidadSeleccionada.value = value;
           const response1 = await $axios.get(`/api/paf-en-linea/estadisticas/6/${UnidadMayor.value}/${label}/${semestreSeleccionado.value}`);
@@ -410,6 +559,19 @@ const cerrarModal = () => {
     }
   };
   
+  const obtenerListaProfesoresSinPaf = async () => {
+  try {
+    const response = await $axios.get('/api/paf-en-linea/profesores/NoContrato');
+    console.log("asdasdasdasdasd2", response);
+    listaProfesores.value = response.data.profesores_sin_contrato;
+    console.log('Lista de profesores sin PAF:', listaProfesores.value);
+    valor.value = true;
+    modalAbierto.value = 2;
+  } catch (error) {
+    console.error('Error al obtener la lista de profesores sin PAF:', error);
+  }
+};
+
   const configurarGraficos = () => {
     const commonDatalabelsOptions = {
       formatter: (value) => (parseFloat(value) > 0 ? `${value}%` : ''), // Mostrar solo si el porcentaje es mayor que 0
@@ -453,12 +615,14 @@ const cerrarModal = () => {
           }
           let response = null;
           let unidadesData = null;
+          let mostrarBoton = false;
           let labelNuevo = "";
           if(unidadSeleccionada.value === null) {
             if (label === `Profesores con PAF (${cantidadPafUnicas.value})`) {
             response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-menores-con-profesores-activos/8_1/${UnidadMayor.value}/${semestreSeleccionado.value}`);
             } else if (label === `Profesores sin PAF (${cantidadPersonasSai.value - cantidadPafUnicas.value})`) {
               response = await $axios.get(`/api/paf-en-linea/estadisticas/unidades-menores-sin-profesores-8-2/${UnidadMayor.value}/${semestreSeleccionado.value}`);
+              mostrarBoton = true;
             }
             unidadesData = response.data;
             labelNuevo = "Cantidad de PAF por Unidad Menor";
@@ -469,6 +633,7 @@ const cerrarModal = () => {
             } else if (label === `Profesores sin PAF (${cantidadPersonasSai.value - cantidadPafUnicas.value})`) {
               // CAMBIAR AQUÍ
             response = await $axios.get(`/api/paf-en-linea/estadisticas/unidadesmenores/sinprofesores/${UnidadMayor.value}/${unidadSeleccionada.value}/${semestreSeleccionado.value}`);
+            mostrarBoton = true;
             }
 
             unidadesData = response.data;
@@ -485,6 +650,8 @@ const cerrarModal = () => {
             ],
           };
           mostrarModal.value = true;
+          modalAbierto.value = 1;
+          mostrarBotonModal.value = mostrarBoton;
         },
       },
     };
@@ -515,6 +682,7 @@ const cerrarModal = () => {
           if (!label || label.trim() === '') {
             throw new Error('El label está vacío. No se puede realizar la consulta.');
           }
+          mostrarBotonModal.value = false;
           let response = null;
           let unidadesData = null;
           if(unidadSeleccionada.value === null) {
@@ -534,6 +702,7 @@ const cerrarModal = () => {
               },
             ],
           };
+          modalAbierto.value = 1;
           mostrarModal.value = true;
         },
       },
@@ -569,6 +738,7 @@ const cerrarModal = () => {
           if (!label || label.trim() === '') {
             throw new Error('El label está vacío. No se puede realizar la consulta.');
           }
+          mostrarBotonModal.value = false;
           let response = null;
           let unidadesData = null;
           let labelNuevo = "";
@@ -603,6 +773,7 @@ const cerrarModal = () => {
               },
             ],
           };
+          modalAbierto.value = 1;
           mostrarModal.value = true;
         },
       },
@@ -644,7 +815,8 @@ const cerrarModal = () => {
         },
       },
     };
-  
+    modalAbierto.value = 1;
+    mostrarModal.value = true;
     // Gráfico de PAF por Estado
     pafPorEstadoChartData.value = {
       labels: Object.keys(cantidadPafPorEstado.value), // Estados
@@ -665,7 +837,8 @@ const cerrarModal = () => {
         },
       },
     };
-  
+    modalAbierto.value = 1;
+    mostrarModal.value = true;
     pafChartData.value = {
       labels: [`Profesores con PAF activas (${cantidadPafActivas.value})`, 
              `Profesores sin PAF activas (${totalPafPipelsoft.value - cantidadPafActivas.value})`],
@@ -689,6 +862,8 @@ const cerrarModal = () => {
         },
       },
     };
+    modalAbierto.value = 1;
+    mostrarModal.value = true;
   };
 
   const mostrarDetalles = (estado) => {
@@ -759,6 +934,7 @@ const cerrarModal = () => {
     margin-top: 1.5rem;
     color: #394049;
     font-family: "Bebas Neue Pro", sans-serif;
+    text-align: center;
   }
   
   .cantidad-text {

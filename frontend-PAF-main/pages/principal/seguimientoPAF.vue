@@ -202,14 +202,6 @@ const nombreUnidadMayor_filtro = ref('');
 const estado_filtro = ref('');
 const contratos = ref<any[]>([]);
 const errorMessage = ref('');
-const filtros = ref({
-  nombreUnidadMayor: '',
-  nombreUnidadMenor: '',
-  run: '',
-  semestre: '',
-  estadoProceso: '',
-  ruta: '/seguimientoPAF',
-});
 const sortBy = ref('');
 const sortOrder = ref('asc');
 
