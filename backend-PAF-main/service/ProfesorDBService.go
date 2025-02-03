@@ -8,11 +8,15 @@ import (
 )
 
 type ProfesorDBService struct {
-	DBPersonal *gorm.DB // Conexión a la base de datos DBPersonal
+	DBPersonal       *gorm.DB // Conexión a la base de datos DBPersonal
+	AuditoriaService *AuditoriaService
 }
 
-func NewProfesorDBService(dbPersonal *gorm.DB) *ProfesorDBService {
-	return &ProfesorDBService{DBPersonal: dbPersonal}
+func NewProfesorDBService(dbPersonal *gorm.DB, auditoriaService *AuditoriaService) *ProfesorDBService {
+	return &ProfesorDBService{
+		DBPersonal:       dbPersonal,
+		AuditoriaService: auditoriaService,
+	}
 }
 
 // ObtenerProfesoresPorCodigoAsignatura obtiene todos los profesores con el mismo código de asignatura en la DB DBPersonal
@@ -89,38 +93,55 @@ func (s *ProfesorDBService) GetCountProfesoresNotInPipelsoft() (int, error) {
 	return count, nil
 }
 
-// ObtenerProfesoresSinContratoYNoAcademico obtiene:
-// 1. Profesores en `ProfesorDB` que no tienen contrato.
-// 2. Profesores en `ProfesorDB` asociados a contratos donde la `Planta` es distinta de "ACADÉMICO".
-func (s *ProfesorDBService) ObtenerProfesoresSinContratoYNoAcademico() (map[string]interface{}, error) {
-	// 1. Profesores que no tienen contrato
+func (s *ProfesorDBService) ObtenerProfesoresSinContratoYNoAcademico(semestre string) ([]models.ProfesorDB, error) {
+	// Mapa para almacenar profesores únicos
+	profesoresUnicos := make(map[string]models.ProfesorDB)
+
+	// 1️⃣ Obtener profesores sin contrato usando LEFT JOIN para mejorar rendimiento
 	var profesoresSinContrato []models.ProfesorDB
 	err := s.DBPersonal.Raw(`
-		SELECT * 
-		FROM profesor_dbs 
-		WHERE run NOT IN (SELECT run_docente FROM contratos)
-	`).Scan(&profesoresSinContrato).Error
+		SELECT p.* 
+		FROM profesor_dbs p
+		LEFT JOIN contratos c ON p.run = c.run_docente
+		WHERE p.semestre = ? AND c.run_docente IS NULL
+	`, semestre).Scan(&profesoresSinContrato).Error
 	if err != nil {
 		return nil, fmt.Errorf("error al obtener profesores sin contrato: %w", err)
 	}
 
-	// 2. Profesores asociados a contratos donde `Planta` es distinta de "ACADÉMICO"
+	// Agregar profesores al mapa para evitar duplicados
+	for _, profesor := range profesoresSinContrato {
+		profesoresUnicos[profesor.RUN] = profesor
+	}
+
+	// 2️⃣ Obtener profesores con contrato pero que NO son "ACADÉMICO", usando DISTINCT
 	var profesoresNoAcademico []models.ProfesorDB
 	err = s.DBPersonal.Raw(`
-		SELECT p.*
+		SELECT DISTINCT p.* 
 		FROM profesor_dbs p
 		JOIN contratos c ON p.run = c.run_docente
-		WHERE c.planta != 'ACADÉMICO'
-	`).Scan(&profesoresNoAcademico).Error
+		WHERE c.planta != 'ACADÉMICO' 
+		AND p.semestre = ? 
+	`, semestre).Scan(&profesoresNoAcademico).Error
 	if err != nil {
 		return nil, fmt.Errorf("error al obtener profesores no académicos: %w", err)
 	}
 
-	// Consolidar resultados en un mapa
-	resultado := map[string]interface{}{
-		"profesores_sin_contrato": profesoresSinContrato,
-		"profesores_no_academico": profesoresNoAcademico,
+	// Agregar al mapa (evitando duplicados)
+	for _, profesor := range profesoresNoAcademico {
+		profesoresUnicos[profesor.RUN] = profesor
 	}
 
-	return resultado, nil
+	// 3️⃣ Convertir mapa a lista para retornar
+	profesoresFinal := make([]models.ProfesorDB, 0, len(profesoresUnicos))
+	for _, profesor := range profesoresUnicos {
+		profesoresFinal = append(profesoresFinal, profesor)
+	}
+
+	err = s.AuditoriaService.RegistrarAuditoria("21.218.928-6", "MEH", "PRUEBA")
+	if err != nil {
+		fmt.Println("Error registrando auditoría:", err)
+	}
+
+	return profesoresFinal, nil
 }

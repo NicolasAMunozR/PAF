@@ -41,13 +41,23 @@ func (ctrl *ProfesorDBController) GetCountProfesoresNotInPipelsoft(ctx *gin.Cont
 	ctx.JSON(http.StatusOK, gin.H{"count": count})
 }
 
-// GetProfesores maneja la solicitud para obtener profesores según las reglas definidas.
 func (c *ProfesorDBController) GetProfesoresNoContrato(ctx *gin.Context) {
-	resultado, err := c.Service.ObtenerProfesoresSinContratoYNoAcademico()
+	// Obtener el semestre desde la URL
+	semestre := ctx.Param("semestre")
+
+	// Validar que el semestre no esté vacío
+	if semestre == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'semestre' es requerido"})
+		return
+	}
+
+	// Llamar al servicio con el semestre como argumento
+	resultado, err := c.Service.ObtenerProfesoresSinContratoYNoAcademico(semestre)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
+	// Enviar la respuesta con los profesores filtrados
 	ctx.JSON(http.StatusOK, resultado)
 }
