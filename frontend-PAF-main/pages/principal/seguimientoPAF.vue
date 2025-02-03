@@ -87,49 +87,49 @@
         <table>
       <thead>
         <tr>
-          <th @click="sortData('id_paf')">
+          <th @click="sortData('id_paf')" class="col-small">
             Código PAF
             <span>
               {{ sortBy === 'id_paf' ? (sortOrder === 'asc' ? '▲' : '▼') : '-' }}
             </span>
           </th>
-          <th @click="sortData('run_empleado')">
+          <th @click="sortData('run_empleado')" class="col-medium">
             Run
             <span>
               {{ sortBy === 'run_empleado' ? (sortOrder === 'asc' ? '▲' : '▼') : '-' }}
             </span>
           </th>
-          <th @click="sortData('jerarquia')">
+          <th @click="sortData('jerarquia')" class="col-small">
             Jerarquia
             <span>
               {{ sortBy === 'jerarquia' ? (sortOrder === 'asc' ? '▲' : '▼') : '-' }}
             </span>
           </th>
-          <th @click="sortData('nombre_asignatura_list')">
+          <th @click="sortData('nombre_asignatura_list')" class="col-large">
             Nombre de Asignatura
             <span>
               {{ sortBy === 'nombre_asignatura_list' ? (sortOrder === 'asc' ? '▲' : '▼') : '-' }}
             </span>
           </th>
-          <th @click="sortData('cod_estado')">
+          <th @click="sortData('cod_estado')" class="col-small">
             Estado del Proceso
             <span>
               {{ sortBy === 'cod_estado' ? (sortOrder === 'asc' ? '▲' : '▼') : '-' }}
             </span>
           </th>
-          <th @click="sortData('des_estado')">
+          <th @click="sortData('des_estado')" class="col-medium">
             Descripción del Proceso
             <span>
               {{ sortBy === 'des_estado' ? (sortOrder === 'asc' ? '▲' : '▼') : '-' }}
             </span>
           </th>
-          <th @click="sortData('ultima_modificacion')">
+          <th @click="sortData('ultima_modificacion')" class="col-small">
             Fecha de la última Actualización de Estado
             <span>
               {{ sortBy === 'ultima_modificacion' ? (sortOrder === 'asc' ? '▲' : '▼') : '-' }}
             </span>
           </th>
-          <th @click="sortData('semestre')">
+          <th @click="sortData('semestre')" class="col-small">
             Semestre
             <span>
               {{ sortBy === 'semestre' ? (sortOrder === 'asc' ? '▲' : '▼') : '-' }}
@@ -202,14 +202,6 @@ const nombreUnidadMayor_filtro = ref('');
 const estado_filtro = ref('');
 const contratos = ref<any[]>([]);
 const errorMessage = ref('');
-const filtros = ref({
-  nombreUnidadMayor: '',
-  nombreUnidadMenor: '',
-  run: '',
-  semestre: '',
-  estadoProceso: '',
-  ruta: '/seguimientoPAF',
-});
 const sortBy = ref('');
 const sortOrder = ref('asc');
 
@@ -512,19 +504,35 @@ table {
 }
 
 th, td {
-  padding: 10px;
-  text-align: left;
-  border: 1px solid #ddd;
+  height: 130px; /* Ajusta la altura de cada celda */
+  padding: 5px;
+  text-align: center; /* Centra el texto horizontalmente */
+  vertical-align: middle; /* Centra el texto verticalmente */
+  border: 1px solid #ddd; /* Añade un borde a las celdas */
 }
 
 th {
-  background-color: #394049;
-  color: white;
+  background-color: #394049; /* Color de fondo para las cabeceras */
+  color: white; /* Color del texto de las cabeceras */
+  cursor: pointer; /* Muestra un cursor de mano al pasar sobre las cabeceras para indicar que son clicables */
 }
 
-.error {
-  color: #C8102E; /* Color institucional para errores */
-  font-weight: bold;
+td {
+  overflow: hidden; /* Oculta el texto que excede el ancho de la celda */
+  text-overflow: ellipsis; /* Muestra puntos suspensivos si el texto es demasiado largo */
+}
+
+/* Ancho específico para columnas */
+.col-small {
+  width: 80px; /* Ancho menor para columnas pequeñas */
+}
+
+.col-medium {
+  width: 150px; /* Ancho medio para columnas estándar */
+}
+
+.col-large {
+  width: 350px; /* Ancho mayor para columnas grandes */
 }
 
 /*filtros */
