@@ -257,29 +257,6 @@ const goToPage = (page) => {
   }
 };
 
-const cargarProfesores = async () => {
-  try {
-    // Llamada a la API con parámetros de paginación
-    const response = await $axios.get('/api/paf-en-linea/profesores/NoContrato', {
-      params: {
-        page: paginaActual.value, // Página actual
-        size: tamanoPagina.value, // Tamaño de la página
-      },
-    });
-
-    profesores.value = response.data.profesores; // Datos de la página actual
-    totalProfesores.value = response.data.total; // Total de registros (viene de la API)
-  } catch (error) {
-    console.error('Error al cargar la lista de profesores:', error);
-  }
-};
-
-const cambiarPagina = (nuevaPagina) => {
-  if (nuevaPagina > 0 && nuevaPagina <= paginasTotales.value) {
-    paginaActual.value = nuevaPagina;
-    cargarProfesores(); // Cargar los datos de la nueva página
-  }
-};
 // Función para obtener los semestres de la respuesta de la API
 const obtenerSemestres = async () => {
   try {
@@ -512,7 +489,11 @@ const fetchPromedioTiempoPorEstado = async () => {
 
 const obtenerListaProfesoresSinPaf = async () => {
   try {
-    const response = await $axios.get('/api/paf-en-linea/profesores/NoContrato');
+    const response = await $axios.get(`/api/paf-en-linea/profesores/NoContrato/${semestreSeleccionado.value}`);
+    if( response.data.length === 0) {
+      alert("No hay contratos relacionados");
+      return;
+    }
     console.log("asdasdasdasdasd2", response);
     listaProfesores.value = response.data.profesores_sin_contrato;
     console.log('Lista de profesores sin PAF:', listaProfesores.value);

@@ -561,7 +561,11 @@ const recargarPagina = () => {
   
   const obtenerListaProfesoresSinPaf = async () => {
   try {
-    const response = await $axios.get('/api/paf-en-linea/profesores/NoContrato');
+    const response = await $axios.get(`/api/paf-en-linea/profesores/NoContrato/${semestreSeleccionado.value}`);
+    if( response.data.length === 0) {
+      alert("No hay contratos relacionados");
+      return;
+    }
     console.log("asdasdasdasdasd2", response);
     listaProfesores.value = response.data.profesores_sin_contrato;
     console.log('Lista de profesores sin PAF:', listaProfesores.value);
