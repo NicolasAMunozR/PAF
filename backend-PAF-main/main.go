@@ -127,6 +127,25 @@ func setupRoutes(r *gin.Engine) {
 	usuariosService := service.NewUsuariosService(DB.DBPersonal)
 	usuariosController := controller.NewUsuariosController(usuariosService)
 	r.GET("/api/paf-en-linea/usuario/rut/:run", usuariosController.GetUsuariosByRun)
+
+	// Crear servicio y controlador para Archivos
+	archivoService := service.NewArchivoService(DB.DBPersonal)
+	archivoController := controller.NewArchivoController(archivoService)
+
+	archivoRoutes := r.Group("/api/paf-en-linea/archivo")
+	{
+		archivoRoutes.POST("/generar/:run", archivoController.GenerarPDFHandler)
+		// Ruta para descargar el archivo PDF
+		archivoRoutes.GET("/archivo/:id/descargar", archivoController.DescargarArchivo)
+		archivoRoutes.GET("/archivo/generar/Automatico/:semestre", archivoController.CreaRContratoHandler)
+		archivoRoutes.PUT("/archivo/:id/comentario", archivoController.AgregarComentarioHandler)
+		archivoRoutes.POST("/archivo/:id/subir", archivoController.SubirArchivoHandler)
+		// Definir las rutas
+		archivoRoutes.GET("/archivo/:id/lista", archivoController.ObtenerListaArchivosHandler)
+		archivoRoutes.PUT("/archivo/modificar/:archivoAdjuntoID", archivoController.ModificarArchivoHandler)
+		archivoRoutes.GET("/archivos-adjuntos/:rut", archivoController.GetArchivosAdjuntosByRutHandler)
+		archivoRoutes.GET("/descargar-archivo-adjunto/:id", archivoController.DownloadArchivoHandler)
+	}
 }
 
 // Middleware común
