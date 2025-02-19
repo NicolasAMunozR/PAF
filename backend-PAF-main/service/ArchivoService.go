@@ -951,42 +951,42 @@ func parseFechaS(fechaStr string) time.Time {
 //ObtenerProfesoresQueNoSePuedeGenerarContrato
 //FALTA FILTRAR POR PLANTA
 
-func ObtenerProfesoresQueNoSePuedeGenerarContrato(db *gorm.DB, unidadMayor string) ([]models.ProfesorDB, []models.ProfesorDB, []models.ProfesorDB, []models.ProfesorDB, error) {
+func ObtenerProfesoresQueNoSePuedeGenerarContrato(db *gorm.DB) ([]models.ProfesorDB, []models.ProfesorDB, []models.ProfesorDB, error) {
 	var profesores []models.ProfesorDB
 	var rutsPipelsoft []string
 	var rutsArchivo []string
 
-	// Obtener RUNs de la tabla Pipelsoft filtrados por unidadMayor
-	rows, err := db.Table("pipelsofts").Where("nombre_unidad_mayor = ?", unidadMayor).Select("run_empleado").Rows()
+	// Obtener RUNs de la tabla Pipelsoft
+	rows, err := db.Table("pipelsofts").Select("run_empleado").Rows()
 	if err != nil {
-		return nil, nil, nil, nil, fmt.Errorf("error obteniendo RUNs de Pipelsoft: %v", err)
+		return nil, nil, nil, fmt.Errorf("error obteniendo RUNs de Pipelsoft: %v", err)
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		var run string
 		if err := rows.Scan(&run); err != nil {
-			return nil, nil, nil, nil, fmt.Errorf("error escaneando datos de Pipelsoft: %v", err)
+			return nil, nil, nil, fmt.Errorf("error escaneando datos de Pipelsoft: %v", err)
 		}
 		rutsPipelsoft = append(rutsPipelsoft, run)
 	}
 
 	// Obtener todos los profesores (sin filtro por unidad mayor)
 	if err := db.Find(&profesores).Error; err != nil {
-		return nil, nil, nil, nil, fmt.Errorf("error obteniendo profesores de ProfesorDB: %v", err)
+		return nil, nil, nil, fmt.Errorf("error obteniendo profesores de ProfesorDB: %v", err)
 	}
 
 	// Obtener todos los RUTs de la tabla archivo
 	archivoRows, err := db.Table("archivos").Select("celula_identidad").Rows()
 	if err != nil {
-		return nil, nil, nil, nil, fmt.Errorf("error obteniendo RUTs de la tabla archivo: %v", err)
+		return nil, nil, nil, fmt.Errorf("error obteniendo RUTs de la tabla archivo: %v", err)
 	}
 	defer archivoRows.Close()
 
 	for archivoRows.Next() {
 		var rut string
 		if err := archivoRows.Scan(&rut); err != nil {
-			return nil, nil, nil, nil, fmt.Errorf("error escaneando datos de la tabla archivo: %v", err)
+			return nil, nil, nil, fmt.Errorf("error escaneando datos de la tabla archivo: %v", err)
 		}
 		rutsArchivo = append(rutsArchivo, rut)
 	}
@@ -1013,11 +1013,6 @@ func ObtenerProfesoresQueNoSePuedeGenerarContrato(db *gorm.DB, unidadMayor strin
 			continue
 		}
 
-		// Si el RUT está en rutsConContrato, no lo agregamos a las otras listas
-		if containsRut(rutsConContrato, profesor.RUN) {
-			continue
-		}
-
 		if setPipelsoft[profesor.RUN] {
 			// Agregar a los que pueden generar contrato
 			rutsContratables = append(rutsContratables, profesor)
@@ -1026,8 +1021,8 @@ func ObtenerProfesoresQueNoSePuedeGenerarContrato(db *gorm.DB, unidadMayor strin
 		}
 	}
 
-	// Retornar las listas, aunque estén vacías
-	return rutsNoComunes, nil, rutsContratables, rutsConContrato, nil
+	// Retornar las listas
+	return rutsNoComunes, rutsContratables, rutsConContrato, nil
 }
 
 // Función para verificar si un RUT está en la lista de rutsConContrato
