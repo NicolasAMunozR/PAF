@@ -4,10 +4,10 @@
       <thead class="bg-primary-color text-white">
         <tr>
           <th class="px-4 py-3 text-left font-semibold">Código de la PAF</th>
-          <th class="px-4 py-3 text-left font-semibold">Código de la Asignatura</th>
+          <th v-if = "show" class="px-4 py-3 text-left font-semibold">Código de la Asignatura</th>
           <th class="px-4 py-3 text-left font-semibold">Run</th>
-          <th class="px-4 py-3 text-left font-semibold">Nombre de Asignatura</th>
-          <th class="px-4 py-3 text-left font-semibold">Estado de Proceso</th>
+          <th v-if = "show"  class="px-4 py-3 text-left font-semibold">Nombre de Asignatura</th>
+          <th v-if = "show" class="px-4 py-3 text-left font-semibold">Estado de Proceso</th>
           <th v-if="showButton" class="px-4 py-3 text-left font-semibold">Sección</th>
           <th v-if="showButton" class="px-4 py-3 text-left font-semibold">Cupos</th>
           <th class="px-4 py-3 text-left font-semibold">Semestre de PAF</th>
@@ -90,6 +90,10 @@ export default {
       default: true
     },
     showButton: {
+      type: Boolean,
+      default: true
+    },
+    show: {
       type: Boolean,
       default: true
     }

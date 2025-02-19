@@ -32,7 +32,7 @@ type Archivo struct {
 	Funcion     string `gorm:"type:text"` //preguntar
 	Jerarquia   string `gorm:"type:text"` //preguntar
 	Asignatura  string `gorm:"type:text"` //preguntar o desde el sai
-	NumeroHoras int    `gorm:"type:int"`  //SAI
+	NumeroHoras string `gorm:"type:text"` //SAI
 	Categoria   string `gorm:"type:text"` //preguntar
 	Calidad     string `gorm:"type:text"` //preguntar
 	//cargo o actividad desempeñada en otro cargo publico

@@ -145,6 +145,7 @@ func setupRoutes(r *gin.Engine) {
 		archivoRoutes.PUT("/archivo/modificar/:archivoAdjuntoID", archivoController.ModificarArchivoHandler)
 		archivoRoutes.GET("/archivos-adjuntos/:rut", archivoController.GetArchivosAdjuntosByRutHandler)
 		archivoRoutes.GET("/descargar-archivo-adjunto/:id", archivoController.DownloadArchivoHandler)
+		archivoRoutes.GET("/profesores/sin-contrato/:unidad_mayor", archivoController.ObtenerProfesoresQueNoSePuedeGenerarContrato)
 	}
 }
 

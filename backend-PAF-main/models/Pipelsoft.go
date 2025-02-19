@@ -38,7 +38,7 @@ type Pipelsoft struct {
 	DesEstado string `gorm:"type:text"`
 	Llave     string `gorm:"type:text"`
 	Veces     string `gorm:"type:text"`
-
+	Planta    string `gorm:"type:text"`
 	//añadir dos campos solicitados
 	// y posiblemente añadir mas logica de negocio
 

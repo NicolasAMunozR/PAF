@@ -272,3 +272,32 @@ func (c *ArchivoController) DownloadArchivoHandler(ctx *gin.Context) {
 	// Enviar los datos del archivo
 	ctx.Data(http.StatusOK, "application/pdf", archivo.Datos)
 }
+
+//ObtenerProfesoresQueNoSePuedeGenerarContrato
+
+// ObtenerProfesoresHandler maneja la solicitud para obtener los profesores que no pueden generar contrato.
+func (c *ArchivoController) ObtenerProfesoresQueNoSePuedeGenerarContrato(ctx *gin.Context) {
+	// Obtener el parámetro 'unidad_mayor' desde la URL
+	unidadMayor := ctx.Param("unidad_mayor")
+
+	// Validar que el parámetro 'unidad_mayor' no esté vacío
+	if unidadMayor == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'unidad_mayor' es requerido"})
+		return
+	}
+
+	// Llamar al servicio para obtener los profesores filtrados por la unidad mayor
+	rutsNoComunes, rutsAcademicos, rutsContratables, rutsConContrato, err := service.ObtenerProfesoresQueNoSePuedeGenerarContrato(c.Service.DB, unidadMayor)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Responder con las listas de profesores
+	ctx.JSON(http.StatusOK, gin.H{
+		"profesores_no_comunes":   rutsNoComunes,
+		"profesores_academicos":   rutsAcademicos,
+		"profesores_contratables": rutsContratables,
+		"profesores_con_contrato": rutsConContrato,
+	})
+}
