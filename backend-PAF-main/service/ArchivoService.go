@@ -951,24 +951,26 @@ func parseFechaS(fechaStr string) time.Time {
 //ObtenerProfesoresQueNoSePuedeGenerarContrato
 //FALTA FILTRAR POR PLANTA
 
-func ObtenerProfesoresQueNoSePuedeGenerarContrato(db *gorm.DB) ([]models.ProfesorDB, []models.ProfesorDB, []models.ProfesorDB, error) {
+// Definir estructura extendida de ProfesorDB con UnidadMayor
+type ProfesorConUnidad struct {
+	models.ProfesorDB
+	UnidadMayor *string `json:"unidad_mayor"` // Nuevo campo opcional
+}
+
+func ObtenerProfesoresQueNoSePuedeGenerarContrato(db *gorm.DB) ([]ProfesorConUnidad, []ProfesorConUnidad, []ProfesorConUnidad, error) {
 	var profesores []models.ProfesorDB
-	var rutsPipelsoft []string
+	var pipelsofts []models.Pipelsoft
 	var rutsArchivo []string
 
-	// Obtener RUNs de la tabla Pipelsoft
-	rows, err := db.Table("pipelsofts").Select("run_empleado").Rows()
-	if err != nil {
-		return nil, nil, nil, fmt.Errorf("error obteniendo RUNs de Pipelsoft: %v", err)
+	// Obtener todos los datos de Pipelsoft
+	if err := db.Find(&pipelsofts).Error; err != nil {
+		return nil, nil, nil, fmt.Errorf("error obteniendo datos de Pipelsoft: %v", err)
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		var run string
-		if err := rows.Scan(&run); err != nil {
-			return nil, nil, nil, fmt.Errorf("error escaneando datos de Pipelsoft: %v", err)
-		}
-		rutsPipelsoft = append(rutsPipelsoft, run)
+	// Crear un mapa para asociar RUN -> NombreUnidadMayor
+	mapPipelsoft := make(map[string]*string) // Puntero para permitir nil
+	for _, p := range pipelsofts {
+		mapPipelsoft[p.RunEmpleado] = &p.NombreUnidadMayor
 	}
 
 	// Obtener todos los profesores (sin filtro por unidad mayor)
@@ -976,7 +978,7 @@ func ObtenerProfesoresQueNoSePuedeGenerarContrato(db *gorm.DB) ([]models.Profeso
 		return nil, nil, nil, fmt.Errorf("error obteniendo profesores de ProfesorDB: %v", err)
 	}
 
-	// Obtener todos los RUTs de la tabla archivo
+	// Obtener todos los RUTs de la tabla archivo (profesores con contrato)
 	archivoRows, err := db.Table("archivos").Select("celula_identidad").Rows()
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("error obteniendo RUTs de la tabla archivo: %v", err)
@@ -987,6 +989,96 @@ func ObtenerProfesoresQueNoSePuedeGenerarContrato(db *gorm.DB) ([]models.Profeso
 		var rut string
 		if err := archivoRows.Scan(&rut); err != nil {
 			return nil, nil, nil, fmt.Errorf("error escaneando datos de la tabla archivo: %v", err)
+		}
+		rutsArchivo = append(rutsArchivo, rut)
+	}
+
+	// Convertir listas en conjuntos (map) para búsqueda rápida
+	setArchivo := make(map[string]bool)
+	for _, rut := range rutsArchivo {
+		setArchivo[rut] = true
+	}
+
+	var rutsNoComunes []ProfesorConUnidad
+	var rutsContratables []ProfesorConUnidad
+	var rutsConContrato []ProfesorConUnidad
+
+	for _, profesor := range profesores {
+		// Crear objeto extendido con UnidadMayor
+		profesorExtendido := ProfesorConUnidad{
+			ProfesorDB:  profesor,
+			UnidadMayor: nil, // Por defecto es nil
+		}
+
+		// Si el profesor está en Pipelsoft, asignar NombreUnidadMayor
+		if unidad, exists := mapPipelsoft[profesor.RUN]; exists {
+			profesorExtendido.UnidadMayor = unidad
+		}
+
+		// Si el profesor ya tiene contrato, agregar a rutsConContrato
+		if setArchivo[profesor.RUN] {
+			rutsConContrato = append(rutsConContrato, profesorExtendido)
+			continue
+		}
+
+		// Si está en Pipelsoft, puede generar contrato
+		if _, exists := mapPipelsoft[profesor.RUN]; exists {
+			rutsContratables = append(rutsContratables, profesorExtendido)
+		} else {
+			rutsNoComunes = append(rutsNoComunes, profesorExtendido)
+		}
+	}
+
+	// Retornar las listas con la UnidadMayor incluida cuando aplique
+	return rutsNoComunes, rutsContratables, rutsConContrato, nil
+}
+
+// Función para verificar si un RUT está en la lista de rutsConContrato
+func containsRut(rutsConContrato []models.ProfesorDB, rut string) bool {
+	for _, profesor := range rutsConContrato {
+		if profesor.RUN == rut {
+			return true
+		}
+	}
+	return false
+}
+
+func ObtenerProfesoresQueNoSePuedeGenerarContratoUnidadMayor(db *gorm.DB, unidadMayor string) ([]models.ProfesorDB, []models.ProfesorDB, []models.ProfesorDB, []models.ProfesorDB, error) {
+	var profesores []models.ProfesorDB
+	var rutsPipelsoft []string
+	var rutsArchivo []string
+
+	// Obtener RUNs de la tabla Pipelsoft filtrados por unidadMayor
+	rows, err := db.Table("pipelsofts").Where("nombre_unidad_mayor = ?", unidadMayor).Select("run_empleado").Rows()
+	if err != nil {
+		return nil, nil, nil, nil, fmt.Errorf("error obteniendo RUNs de Pipelsoft: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var run string
+		if err := rows.Scan(&run); err != nil {
+			return nil, nil, nil, nil, fmt.Errorf("error escaneando datos de Pipelsoft: %v", err)
+		}
+		rutsPipelsoft = append(rutsPipelsoft, run)
+	}
+
+	// Obtener todos los profesores (sin filtro por unidad mayor)
+	if err := db.Find(&profesores).Error; err != nil {
+		return nil, nil, nil, nil, fmt.Errorf("error obteniendo profesores de ProfesorDB: %v", err)
+	}
+
+	// Obtener todos los RUTs de la tabla archivo
+	archivoRows, err := db.Table("archivos").Select("celula_identidad").Rows()
+	if err != nil {
+		return nil, nil, nil, nil, fmt.Errorf("error obteniendo RUTs de la tabla archivo: %v", err)
+	}
+	defer archivoRows.Close()
+
+	for archivoRows.Next() {
+		var rut string
+		if err := archivoRows.Scan(&rut); err != nil {
+			return nil, nil, nil, nil, fmt.Errorf("error escaneando datos de la tabla archivo: %v", err)
 		}
 		rutsArchivo = append(rutsArchivo, rut)
 	}
@@ -1013,6 +1105,11 @@ func ObtenerProfesoresQueNoSePuedeGenerarContrato(db *gorm.DB) ([]models.Profeso
 			continue
 		}
 
+		// Si el RUT está en rutsConContrato, no lo agregamos a las otras listas
+		if containsRut(rutsConContrato, profesor.RUN) {
+			continue
+		}
+
 		if setPipelsoft[profesor.RUN] {
 			// Agregar a los que pueden generar contrato
 			rutsContratables = append(rutsContratables, profesor)
@@ -1021,16 +1118,6 @@ func ObtenerProfesoresQueNoSePuedeGenerarContrato(db *gorm.DB) ([]models.Profeso
 		}
 	}
 
-	// Retornar las listas
-	return rutsNoComunes, rutsContratables, rutsConContrato, nil
-}
-
-// Función para verificar si un RUT está en la lista de rutsConContrato
-func containsRut(rutsConContrato []models.ProfesorDB, rut string) bool {
-	for _, profesor := range rutsConContrato {
-		if profesor.RUN == rut {
-			return true
-		}
-	}
-	return false
+	// Retornar las listas, aunque estén vacías
+	return rutsNoComunes, nil, rutsContratables, rutsConContrato, nil
 }
