@@ -147,6 +147,7 @@ func setupRoutes(r *gin.Engine) {
 		archivoRoutes.GET("/descargar-archivo-adjunto/:id", archivoController.DownloadArchivoHandler)
 		archivoRoutes.GET("/profesores/sin-contrato", archivoController.ObtenerProfesoresQueNoSePuedeGenerarContrato)
 		archivoRoutes.GET("/profesores/sin-contrato/:unidad_mayor", archivoController.ObtenerProfesoresQueNoSePuedeGenerarContratoUnidadMayor)
+		archivoRoutes.POST("/generarContratos/SinDatos/", archivoController.GenerarPDFSinDatos)
 	}
 }
 

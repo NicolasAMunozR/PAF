@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/NicolasAMunozR/PAF/backend-PAF/models"
 	"github.com/NicolasAMunozR/PAF/backend-PAF/service"
 	"github.com/gin-gonic/gin"
 )
@@ -316,4 +317,65 @@ func (c *ArchivoController) ObtenerProfesoresQueNoSePuedeGenerarContratoUnidadMa
 		"profesores_contratables": rutsContratables,
 		"profesores_con_contrato": rutsConContrato,
 	})
+}
+
+func (c *ArchivoController) GenerarPDFSinDatos(ctx *gin.Context) {
+	var request models.Archivo1
+
+	// Decodificar JSON en la estructura
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos"})
+		return
+	}
+
+	// Llamar al servicio para crear el PDF
+	err := service.CrearPDFSinData(
+		c.Service.DB,
+		request.UnidadMayor,
+		request.UnidadMenor,
+		request.NumeroCentroDeCostos,
+		request.CelulaIdentidad,
+		request.LugarNacimiento,
+		request.FechaYHoraNacimiento,
+		request.ApellidoP,
+		request.ApellidoM,
+		request.Nombres,
+		request.Nacionalidad,
+		request.Domicio,
+		request.Correo,
+		request.Titulo,
+		request.Institucion,
+		request.FechaObtencion,
+		request.NumeroSemestre,
+		request.GradoAcademico,
+		request.InstitucionGradoAcademico,
+		request.FechaObtencionGradoAcademico,
+		request.TipoIngreso,
+		request.Cargo,
+		request.Nivel,
+		request.Grado,
+		request.Rango,
+		request.Funcion,
+		request.Jerarquia,
+		request.Asignatura,
+		request.NumeroHoras,
+		request.Categoria,
+		request.Calidad,
+		request.LugarDesempeño,
+		request.CargoOtroPublico,
+		request.GradoOtroPublico,
+		request.NivelOtroPublico,
+		request.RangoOtroPublico,
+		request.NumeroHorasOtroPublico,
+		request.CalidadOtroPublico,
+		request.FechaInicioContrato,
+		request.FechaFinContrato,
+	)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "PDF generado correctamente"})
 }

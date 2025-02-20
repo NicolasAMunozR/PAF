@@ -699,7 +699,7 @@ func CrearPDFSinData(db *gorm.DB, UnidadMayor string, UnidadMenor string, Numero
 	pdf.Ln(6)
 
 	pdf.CellFormat(50, 6, "Numero Centro de Costos", "1", 0, "L", true, 0, "")
-	pdf.CellFormat(130, 6, "SOY UN PLACEHOLDER", "1", 0, "L", true, 0, "")
+	pdf.CellFormat(130, 6, archivo.NumeroCentroDeCostos, "1", 0, "L", true, 0, "")
 	pdf.Ln(6)
 
 	pdf.CellFormat(50, 6, "UnidadMenor", "1", 0, "L", true, 0, "")
@@ -781,12 +781,12 @@ func CrearPDFSinData(db *gorm.DB, UnidadMayor string, UnidadMenor string, Numero
 	pdf.SetXY(x2+150, y2)
 	pdf.MultiCell(30, 5, "Ingreso a la\n \nUSACH", "1", "C", true)
 
-	pdf.CellFormat(30, 5, "PALCEHOLDER", "1", 0, "L", true, 0, "")
-	pdf.CellFormat(30, 5, "PALCEHOLDER", "1", 0, "L", true, 0, "")
-	pdf.CellFormat(30, 5, "PALCEHOLDER", "1", 0, "L", true, 0, "")
-	pdf.CellFormat(30, 5, "PALCEHOLDER", "1", 0, "L", true, 0, "")
-	pdf.CellFormat(30, 5, "PALCEHOLDER", "1", 0, "L", true, 0, "")
-	pdf.CellFormat(30, 5, "PALCEHOLDER", "1", 0, "L", true, 0, "")
+	pdf.CellFormat(30, 5, "", "1", 0, "L", true, 0, "")
+	pdf.CellFormat(30, 5, "", "1", 0, "L", true, 0, "")
+	pdf.CellFormat(30, 5, "", "1", 0, "L", true, 0, "")
+	pdf.CellFormat(30, 5, "", "1", 0, "L", true, 0, "")
+	pdf.CellFormat(30, 5, "", "1", 0, "L", true, 0, "")
+	pdf.CellFormat(30, 5, "", "1", 0, "L", true, 0, "")
 	//-----------------------------------------------------------------------------
 
 	//------------------------------IDENTIFICACION DEL CARGO------------------------
