@@ -59,6 +59,7 @@ func (ctrl *ArchivoController) DescargarArchivo(c *gin.Context) {
 	c.Data(http.StatusOK, "application/pdf", pdfData)
 }
 
+// FALTA AÑADIR LOS PROFESORES ACADEMICO
 // CreaRContratoHandler maneja la solicitud para obtener los profesores no comunes y académicos sin contrato, filtrando por semestre.
 func (c *ArchivoController) CreaRContratoHandler(ctx *gin.Context) {
 	// Obtener el semestre desde la URL
@@ -71,7 +72,7 @@ func (c *ArchivoController) CreaRContratoHandler(ctx *gin.Context) {
 	}
 
 	// Llamar al servicio con el semestre proporcionado
-	rutsNoComunes, rutsAcademicos, err := service.CreaRContratoAutomaticamentePorSemestre(c.Service.DB, semestre)
+	rutsNoComunes, err := service.CreaRContratoAutomaticamentePorSemestre(c.Service.DB, semestre)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -80,7 +81,6 @@ func (c *ArchivoController) CreaRContratoHandler(ctx *gin.Context) {
 	// Responder con ambas listas en la respuesta JSON
 	ctx.JSON(http.StatusOK, gin.H{
 		"profesores que no se genero paf": rutsNoComunes,
-		"profesores ACADEMICOS":           rutsAcademicos,
 	})
 }
 

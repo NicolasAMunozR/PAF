@@ -386,7 +386,7 @@ func (s *ArchivoService) GetArchivoPDF(id uint) ([]byte, error) {
 }
 
 // Obtiene ruts desde el SAI y los compara con pipelsoft, si un rut presente en el sai esta presente en pipelsoft se revisa la planta, si no es academico se crea un contrato
-
+/*
 func CreaRContratoAutomaticamentePorSemestre(db *gorm.DB, semestre string) ([]models.ProfesorDB, []models.ProfesorDB, error) {
 	var profesores []models.ProfesorDB
 	var rutsPipelsoft []string
@@ -436,6 +436,50 @@ func CreaRContratoAutomaticamentePorSemestre(db *gorm.DB, semestre string) ([]mo
 	}
 
 	return rutsNoComunes, rutsAcademicos, nil
+}
+*/
+
+func CreaRContratoAutomaticamentePorSemestre(db *gorm.DB, semestre string) ([]models.ProfesorDB, error) {
+	var profesores []models.ProfesorDB
+	var rutsPipelsoft []string
+
+	// Obtener RUNs de la tabla Pipelsoft
+	rows, err := db.Table("pipelsofts").Select("run_empleado").Rows()
+	if err != nil {
+		return nil, fmt.Errorf("error obteniendo RUNs de Pipelsoft: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var run string
+		if err := rows.Scan(&run); err != nil {
+			return nil, fmt.Errorf("error escaneando datos de Pipelsoft: %v", err)
+		}
+		rutsPipelsoft = append(rutsPipelsoft, run)
+	}
+
+	// Obtener todos los profesores del semestre solicitado
+	if err := db.Where("semestre = ?", semestre).Find(&profesores).Error; err != nil {
+		return nil, fmt.Errorf("error obteniendo profesores de ProfesorDB para el semestre %s: %v", semestre, err)
+	}
+
+	// Convertir listas en conjuntos (map) para búsqueda rápida
+	setPipelsoft := make(map[string]bool)
+	for _, rut := range rutsPipelsoft {
+		setPipelsoft[rut] = true
+	}
+
+	var rutsNoComunes []models.ProfesorDB
+
+	for _, profesor := range profesores {
+		if setPipelsoft[profesor.RUN] {
+			CrearPDF(db, profesor.RUN) // Generar contrato para los profesores en Pipelsoft
+		} else {
+			rutsNoComunes = append(rutsNoComunes, profesor)
+		}
+	}
+
+	return rutsNoComunes, nil
 }
 
 // AgregarComentario agrega un comentario a un archivo identificado por su ID
