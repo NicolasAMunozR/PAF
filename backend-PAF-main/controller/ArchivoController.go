@@ -329,7 +329,7 @@ func (c *ArchivoController) GenerarPDFSinDatos(ctx *gin.Context) {
 	}
 
 	// Llamar al servicio para crear el PDF
-	err := service.CrearPDFSinData(
+	id, err := service.CrearPDFSinData(
 		c.Service.DB,
 		request.UnidadMayor,
 		request.UnidadMenor,
@@ -377,5 +377,7 @@ func (c *ArchivoController) GenerarPDFSinDatos(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "PDF generado correctamente"})
+	ctx.JSON(http.StatusOK, gin.H{"message": "PDF generado correctamente",
+		"id": id,
+	})
 }

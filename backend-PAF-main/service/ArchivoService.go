@@ -604,7 +604,7 @@ func (s *ArchivoService) GetArchivoAdjuntoByID(id uint) (*models.ArchivoAdjunto,
 	return &archivoAdjunto, nil
 }
 
-func CrearPDFSinData(db *gorm.DB, UnidadMayor string, UnidadMenor string, NumeroCentroDeCostos string, CelulaIdentidad string, LugarNacimiento string, FechaYHoraNacimiento string, ApellidoP string, ApellidoM string, Nombres string, Nacionalidad string, Domicio string, Correo string, Titulo string, Institucion string, FechaObtencion string, NumeroSemestre string, GradoAcademico string, InstitucionGradoAcademico string, FechaObtencionGradoAcademico string, TipoIngreso string, Cargo string, Nivel string, Grado string, Rango string, Funcion string, Jerarquia string, Asignatura string, NumeroHoras string, Categoria string, Calidad string, LugarDesempeño string, CargoOtroPublico string, GradoOtroPublico string, NivelOtroPublico string, RangoOtroPublico string, NumeroHorasOtroPublico int, CalidadOtroPublico string, FechaInicioContrato string, FechaFinContrato string) error {
+func CrearPDFSinData(db *gorm.DB, UnidadMayor string, UnidadMenor string, NumeroCentroDeCostos string, CelulaIdentidad string, LugarNacimiento string, FechaYHoraNacimiento string, ApellidoP string, ApellidoM string, Nombres string, Nacionalidad string, Domicio string, Correo string, Titulo string, Institucion string, FechaObtencion string, NumeroSemestre string, GradoAcademico string, InstitucionGradoAcademico string, FechaObtencionGradoAcademico string, TipoIngreso string, Cargo string, Nivel string, Grado string, Rango string, Funcion string, Jerarquia string, Asignatura string, NumeroHoras string, Categoria string, Calidad string, LugarDesempeño string, CargoOtroPublico string, GradoOtroPublico string, NivelOtroPublico string, RangoOtroPublico string, NumeroHorasOtroPublico int, CalidadOtroPublico string, FechaInicioContrato string, FechaFinContrato string) (int, error) {
 	// Obtener datos del empleado
 
 	archivo := models.Archivo{
@@ -966,16 +966,16 @@ func CrearPDFSinData(db *gorm.DB, UnidadMayor string, UnidadMenor string, Numero
 	var pdfBuffer bytes.Buffer
 	err := pdf.Output(&pdfBuffer)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	// Guardar en la BD
 	archivo.ArchivoPDF = pdfBuffer.Bytes()
 	if err := db.Create(&archivo).Error; err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return int(archivo.ID), nil
 }
 
 func parseFecha(FechaObtencion string) {
