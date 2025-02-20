@@ -3,27 +3,30 @@
     <table class="w-full text-sm bg-white shadow-lg rounded-lg overflow-hidden">
       <thead class="bg-primary-color text-white">
         <tr>
-          <th class="px-4 py-3 text-left font-semibold">Código de la PAF</th>
-          <th v-if = "show" class="px-4 py-3 text-left font-semibold">Código de la Asignatura</th>
+          <th v-if="contratos" class="px-4 py-3 text-left font-semibold">Código de la PAF</th>
+          <th class="px-4 py-3 text-left font-semibold">Código de la Asignatura</th>
           <th class="px-4 py-3 text-left font-semibold">Run</th>
-          <th v-if = "show"  class="px-4 py-3 text-left font-semibold">Nombre de Asignatura</th>
-          <th v-if = "show" class="px-4 py-3 text-left font-semibold">Estado de Proceso</th>
-          <th v-if="showButton" class="px-4 py-3 text-left font-semibold">Sección</th>
+          <th class="px-4 py-3 text-left font-semibold">Nombre de Asignatura</th>
+          <th v-if="contratos" class="px-4 py-3 text-left font-semibold">Estado de Proceso</th>
+          <th v-if="show" class="px-4 py-3 text-left font-semibold">Cantidad de horas</th>
+          <th v-if="showButton || show" class="px-4 py-3 text-left font-semibold">Sección</th>
           <th v-if="showButton" class="px-4 py-3 text-left font-semibold">Cupos</th>
           <th class="px-4 py-3 text-left font-semibold">Semestre de PAF</th>
           <th v-if="showButton" class="px-4 py-3 text-left font-semibold">Comentarios</th>
           <th v-if="showButtons" class="px-4 py-3 text-left font-semibold">Opciones</th>
           <th v-if="showButton" class="px-4 py-3 text-left font-semibold">Opciones</th>
+          <th v-if="show" class="px-4 py-3 text-left font-semibold">Opciones</th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
         <tr v-for="persona in paginatedData" :key="persona.Id" :class="persona.rowClass" class="hover:bg-gray-50 transition-colors">
-          <td class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoPAF }} {{ persona.IdPaf }}</td>
+          <td v-if="contratos" class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoPAF }} {{ persona.IdPaf }}</td>
           <td class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoAsignatura }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.Run }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.NombreAsignatura }} {{ persona.nombre_asignatura }}</td>
-          <td class="px-4 py-3 text-gray-700">{{ persona.DesEstado }}</td>
-          <td v-if="showButton" class="px-4 py-3 text-gray-700">{{ persona.seccion }}</td>
+          <td v-if="contratos" class="px-4 py-3 text-gray-700">{{ persona.DesEstado }}</td>
+          <td v-if="show" class="px-4 py-3 text-gray-700">{{ persona.CantidadHoras }}</td>
+          <td v-if="showButton || show" class="px-4 py-3 text-gray-700">{{ persona.seccion }}</td>
           <td v-if="showButton" class="px-4 py-3 text-gray-700">{{ persona.Cupo }} {{ persona.cupo }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.Semestre }} {{ persona.SemestrePaf }}</td>
           <td v-if="showButton" class="px-4 py-3 text-gray-700">{{ persona.Comentario }}</td>
@@ -50,6 +53,9 @@
             <br>
             <br>
             <button @click="deletePAF(persona.IdPaf)" class="buttons">Eliminar</button>
+          </td>
+          <td v-if="show" class="px-4 py-3">
+            <NuxtLink :to="`/principal/creacionContratoPAF/formularioContrato`" class="button">Formulario</NuxtLink>
           </td>
         </tr>
       </tbody>
@@ -95,8 +101,12 @@ export default {
     },
     show: {
       type: Boolean,
+      default: false
+    },
+    contratos: {
+      type: Boolean,
       default: true
-    }
+    },
   },
   data() {
     return {
