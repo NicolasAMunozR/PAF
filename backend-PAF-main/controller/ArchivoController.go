@@ -381,3 +381,20 @@ func (c *ArchivoController) GenerarPDFSinDatos(ctx *gin.Context) {
 		"id": id,
 	})
 }
+
+// Endpoint para buscar archivos por célula de identidad (RUT del docente)
+func (c *ArchivoController) GetArchivoPorCelula(ctx *gin.Context) {
+	celulaIdentidad := ctx.Param("celulaIdentidad") // Capturar parámetro de la URL
+
+	archivos, err := c.Service.BuscarArchivoPorCelula(celulaIdentidad)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al buscar los archivos"})
+		return
+	}
+	if len(archivos) == 0 {
+		ctx.JSON(http.StatusNotFound, gin.H{"message": "No se encontraron archivos para este RUT"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, archivos)
+}

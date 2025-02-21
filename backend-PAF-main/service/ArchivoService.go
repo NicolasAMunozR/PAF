@@ -1165,3 +1165,13 @@ func ObtenerProfesoresQueNoSePuedeGenerarContratoUnidadMayor(db *gorm.DB, unidad
 	// Retornar las listas, aunque estén vacías
 	return rutsNoComunes, nil, rutsContratables, rutsConContrato, nil
 }
+
+// Buscar todos los archivos por célula de identidad (RUT del docente)
+func (s *ArchivoService) BuscarArchivoPorCelula(celulaIdentidad string) ([]models.Archivo, error) {
+	var archivos []models.Archivo
+	result := s.DB.Where("celula_identidad = ?", celulaIdentidad).Find(&archivos)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return archivos, nil
+}
