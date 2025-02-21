@@ -1,0 +1,40 @@
+func CreaRContratoAutomaticamentePorSemestre(db *gorm.DB, semestre string) ([]models.ProfesorDB, error) {
+	var profesores []models.ProfesorDB
+	var pipelsoftRecords []models.Pipelsoft
+
+	// Obtener todos los registros de Pipelsoft
+	if err := db.Find(&pipelsoftRecords).Error; err != nil {
+		return nil, fmt.Errorf("error obteniendo datos de Pipelsoft: %v", err)
+	}
+
+	// Mapear los registros de Pipelsoft por RUN
+	mapPipelsoft := make(map[string][]models.Pipelsoft)
+	for _, record := range pipelsoftRecords {
+		mapPipelsoft[record.RunEmpleado] = append(mapPipelsoft[record.RunEmpleado], record)
+	}
+
+	// Obtener todos los profesores del semestre solicitado
+	if err := db.Where("semestre = ?", semestre).Find(&profesores).Error; err != nil {
+		return nil, fmt.Errorf("error obteniendo profesores de ProfesorDB para el semestre %s: %v", semestre, err)
+	}
+
+	var rutsNoComunes []models.ProfesorDB
+
+	// Iterar sobre cada profesor
+	for _, profesor := range profesores {
+		if matches, existe := mapPipelsoft[profesor.RUN]; existe {
+			// Para cada coincidencia en Pipelsoft, generar un contrato
+			for _, match := range matches {
+				err := GenerarContrato(db, profesor, match)
+				if err != nil {
+					fmt.Printf("Error generando contrato para RUN %s: %v\n", profesor.RUN, err)
+				}
+			}
+		} else {
+			// Si no hay coincidencias, agregar a la lista de ruts no comunes
+			rutsNoComunes = append(rutsNoComunes, profesor)
+		}
+	}
+
+	return rutsNoComunes, nil
+}
