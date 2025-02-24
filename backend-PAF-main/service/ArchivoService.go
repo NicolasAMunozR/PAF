@@ -441,21 +441,17 @@ func CreaRContratoAutomaticamentePorSemestre(db *gorm.DB, semestre string) ([]mo
 
 func CreaRContratoAutomaticamentePorSemestre(db *gorm.DB, semestre string) ([]models.ProfesorDB, error) {
 	var profesores []models.ProfesorDB
-	var rutsPipelsoft []string
+	var pipelsoftRecords []models.Pipelsoft
 
-	// Obtener RUNs de la tabla Pipelsoft
-	rows, err := db.Table("pipelsofts").Select("run_empleado").Rows()
-	if err != nil {
-		return nil, fmt.Errorf("error obteniendo RUNs de Pipelsoft: %v", err)
+	// Obtener todos los registros de Pipelsoft
+	if err := db.Find(&pipelsoftRecords).Error; err != nil {
+		return nil, fmt.Errorf("error obteniendo datos de Pipelsoft: %v", err)
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		var run string
-		if err := rows.Scan(&run); err != nil {
-			return nil, fmt.Errorf("error escaneando datos de Pipelsoft: %v", err)
-		}
-		rutsPipelsoft = append(rutsPipelsoft, run)
+	// Mapear los registros de Pipelsoft por RUN
+	mapPipelsoft := make(map[string][]models.Pipelsoft)
+	for _, record := range pipelsoftRecords {
+		mapPipelsoft[record.RunEmpleado] = append(mapPipelsoft[record.RunEmpleado], record)
 	}
 
 	// Obtener todos los profesores del semestre solicitado
@@ -463,18 +459,32 @@ func CreaRContratoAutomaticamentePorSemestre(db *gorm.DB, semestre string) ([]mo
 		return nil, fmt.Errorf("error obteniendo profesores de ProfesorDB para el semestre %s: %v", semestre, err)
 	}
 
-	// Convertir listas en conjuntos (map) para búsqueda rápida
-	setPipelsoft := make(map[string]bool)
-	for _, rut := range rutsPipelsoft {
-		setPipelsoft[rut] = true
-	}
-
 	var rutsNoComunes []models.ProfesorDB
 
+	// Iterar sobre cada profesor
 	for _, profesor := range profesores {
-		if setPipelsoft[profesor.RUN] {
-			CrearPDF(db, profesor.RUN) // Generar contrato para los profesores en Pipelsoft
+		if matches, existe := mapPipelsoft[profesor.RUN]; existe {
+			// Para cada coincidencia en Pipelsoft, generar un contrato
+			for _, match := range matches {
+				_, err := CrearPDFSinData(
+					db, match.NombreUnidadMayor, match.NombreUnidadMenor, match.NumeroCentroDeCostos,
+					match.RunEmpleado, match.LugarNacimiento, match.FechaYHoraNacimiento, match.PrimerApp,
+					match.SegundoApp, match.Nombres, match.Nacionalidad, match.Domicilio, match.Correo,
+					match.Titulo, match.Institucion, match.FechaObtencion, match.NumeroSemestre,
+					match.GradoAcademico, match.InstitucionGradoAcademico, match.FechaObtencionGradoAcademico,
+					match.TipoIngreso, match.Cargo, match.Nivel, match.Grado, match.Rango, match.Funcion,
+					match.Jerarquia, match.Asignatura, match.NumeroHoras, match.Categoria, match.Calidad,
+					match.LugarDesempeño, match.CargoOtroPublico, match.GradoOtroPublico, match.NivelOtroPublico,
+					match.RangoOtroPublico, match.NumeroHorasOtroPublico, match.CalidadOtroPublico,
+					match.FechaInicioContrato.GoString(), match.FechaFinContrato.GoString(),
+				)
+
+				if err != nil {
+					fmt.Printf("Error generando contrato para RUN %s: %v\n", profesor.RUN, err)
+				}
+			}
 		} else {
+			// Si no hay coincidencias, agregar a la lista de ruts no comunes
 			rutsNoComunes = append(rutsNoComunes, profesor)
 		}
 	}

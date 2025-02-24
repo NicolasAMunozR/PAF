@@ -65,8 +65,9 @@ type Pipelsoft struct {
 	GradoOtroPublico             string `gorm:"type:text"`
 	NivelOtroPublico             string `gorm:"type:text"`
 	RangoOtroPublico             string `gorm:"type:text"`
-	NumeroHorasOtroPublico       string `gorm:"type:text"`
+	NumeroHorasOtroPublico       int    `gorm:"type:int"`
 	CalidadOtroPublico           string `gorm:"type:text"`
+	FechaYHoraNacimiento         string `gorm:"type:text"`
 
 	//añadir dos campos solicitados
 	// y posiblemente añadir mas logica de negocio
