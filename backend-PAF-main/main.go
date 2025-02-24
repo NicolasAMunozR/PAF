@@ -137,7 +137,7 @@ func setupRoutes(r *gin.Engine) {
 		archivoRoutes.POST("/generar/:run", archivoController.GenerarPDFHandler)
 		// Ruta para descargar el archivo PDF
 		archivoRoutes.GET("/archivo/:id/descargar", archivoController.DescargarArchivo)
-		archivoRoutes.GET("/archivo/generar/Automatico/:semestre", archivoController.CreaRContratoHandler)
+		archivoRoutes.GET("/archivo/generar/Automatico/:unidadMenor", archivoController.CreaRContratoHandler)
 		archivoRoutes.PUT("/archivo/:id/comentario", archivoController.AgregarComentarioHandler)
 		archivoRoutes.POST("/archivo/:id/subir", archivoController.SubirArchivoHandler)
 		// Definir las rutas

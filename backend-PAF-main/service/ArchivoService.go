@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/NicolasAMunozR/PAF/backend-PAF/models"
@@ -439,31 +441,51 @@ func CreaRContratoAutomaticamentePorSemestre(db *gorm.DB, semestre string) ([]mo
 }
 */
 
-func CreaRContratoAutomaticamentePorSemestre(db *gorm.DB, semestre string) ([]models.ProfesorDB, error) {
+// Función para normalizar RUTs
+func normalizarRUT(rut string) string {
+	// Eliminar ceros a la izquierda
+	rut = strings.TrimLeft(rut, "0")
+
+	// Si tiene un guion, eliminarlo junto con todo lo que esté después
+	re := regexp.MustCompile(`-.*$`)
+	rut = re.ReplaceAllString(rut, "")
+
+	return rut
+}
+
+func CreaRContratoAutomaticamentePorUnidad(db *gorm.DB, unidadMenor string) ([]models.ProfesorDB, error) {
 	var profesores []models.ProfesorDB
 	var pipelsoftRecords []models.Pipelsoft
 
-	// Obtener todos los registros de Pipelsoft
-	if err := db.Find(&pipelsoftRecords).Error; err != nil {
-		return nil, fmt.Errorf("error obteniendo datos de Pipelsoft: %v", err)
+	// Obtener los registros de Pipelsoft filtrados por nombre_unidad_menor
+	if err := db.Where("nombre_unidad_menor = ?", unidadMenor).Find(&pipelsoftRecords).Error; err != nil {
+		return nil, fmt.Errorf("error obteniendo datos de Pipelsoft con unidad menor %s: %v", unidadMenor, err)
 	}
 
-	// Mapear los registros de Pipelsoft por RUN
+	// Mapear los registros de Pipelsoft por RUT normalizado
 	mapPipelsoft := make(map[string][]models.Pipelsoft)
 	for _, record := range pipelsoftRecords {
-		mapPipelsoft[record.RunEmpleado] = append(mapPipelsoft[record.RunEmpleado], record)
+		rutNormalizado := normalizarRUT(record.RunEmpleado)
+		mapPipelsoft[rutNormalizado] = append(mapPipelsoft[rutNormalizado], record)
 	}
 
-	// Obtener todos los profesores del semestre solicitado
-	if err := db.Where("semestre = ?", semestre).Find(&profesores).Error; err != nil {
-		return nil, fmt.Errorf("error obteniendo profesores de ProfesorDB para el semestre %s: %v", semestre, err)
+	// Obtener todos los profesores cuyos RUT existen en Pipelsoft
+	var ruts []string
+	for run := range mapPipelsoft {
+		ruts = append(ruts, run)
+	}
+
+	if err := db.Where("run IN (?)", ruts).Find(&profesores).Error; err != nil {
+		return nil, fmt.Errorf("error obteniendo profesores de ProfesorDB con RUNs en Pipelsoft: %v", err)
 	}
 
 	var rutsNoComunes []models.ProfesorDB
 
 	// Iterar sobre cada profesor
 	for _, profesor := range profesores {
-		if matches, existe := mapPipelsoft[profesor.RUN]; existe {
+		rutNormalizadoProfesor := normalizarRUT(profesor.RUN)
+
+		if matches, existe := mapPipelsoft[rutNormalizadoProfesor]; existe {
 			// Para cada coincidencia en Pipelsoft, generar un contrato
 			for _, match := range matches {
 				_, err := CrearPDFSinData(

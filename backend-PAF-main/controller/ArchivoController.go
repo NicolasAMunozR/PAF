@@ -63,17 +63,17 @@ func (ctrl *ArchivoController) DescargarArchivo(c *gin.Context) {
 // FALTA AÑADIR LOS PROFESORES ACADEMICO
 // CreaRContratoHandler maneja la solicitud para obtener los profesores no comunes y académicos sin contrato, filtrando por semestre.
 func (c *ArchivoController) CreaRContratoHandler(ctx *gin.Context) {
-	// Obtener el semestre desde la URL
-	semestre := ctx.Param("semestre")
+	// Obtener el unidadMenor desde la URL
+	unidadMenor := ctx.Param("unidadMenor")
 
-	// Validar que el semestre no esté vacío
-	if semestre == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'semestre' es requerido"})
+	// Validar que el unidadMenor no esté vacío
+	if unidadMenor == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El parámetro 'unidadMenor' es requerido"})
 		return
 	}
 
-	// Llamar al servicio con el semestre proporcionado
-	rutsNoComunes, err := service.CreaRContratoAutomaticamentePorSemestre(c.Service.DB, semestre)
+	// Llamar al servicio con el unidadMenorproporcionado
+	rutsNoComunes, err := service.CreaRContratoAutomaticamentePorUnidad(c.Service.DB, unidadMenor)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
