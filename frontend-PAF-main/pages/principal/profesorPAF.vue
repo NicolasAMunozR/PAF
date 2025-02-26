@@ -17,6 +17,9 @@
             <th>Nombre de Asignatura</th>
             <th>Estado del Proceso</th>
             <th>Descripción del Proceso</th>
+            <th>Semestre</th>
+            <th>Unidad Mayor</th>
+            <th>Unidad Menor</th>
             <th>Fecha de la Última Actualización de Estado</th>
             <th>Historial de Estados</th>
           </tr>
@@ -28,6 +31,9 @@
             <td>{{ contrato.PipelsoftData.NombreAsignatura }}</td>
             <td>{{ contrato.PipelsoftData.CodEstado }}</td>
             <td>{{ contrato.PipelsoftData.DesEstado }}</td>
+            <td>{{ contrato.PipelsoftData.Semestre }}</td>
+            <td>{{ contrato.PipelsoftData.NombreUnidadMayor }}</td>
+            <td>{{ contrato.PipelsoftData.NombreUnidadMenor }}</td>
             <td>
               {{ new Date(contrato.PipelsoftData.UltimaModificacion).toLocaleDateString() }}
               {{ new Date(contrato.PipelsoftData.UltimaModificacion).toLocaleTimeString() }} 
@@ -88,6 +94,7 @@ const fetchProfesorYContratos = async () => {
 
   try {
     const contratosResponse = await $axios.get(`/api/paf-en-linea/pipelsoft/contratos-run/${run.value}`);
+    console.log(contratosResponse.data);
     if (contratosResponse.data && Array.isArray(contratosResponse.data)) {
       contratos.value = contratosResponse.data;
       errorMessage.value = "";

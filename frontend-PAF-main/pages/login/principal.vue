@@ -53,8 +53,8 @@
         selectedRole: "",
         errorMessage: "",
         roleOptions: [
-          //{ value: "profesor", label: "Profesor" },
-          { value: "personal-dei", label: "Personal del Dei" },
+          { value: "profesor", label: "Docente" },
+          { value: "personal-dei", label: "Personal del Dipre" },
           { value: "encargado", label: "Encargado" },
         ],
       };
@@ -69,12 +69,22 @@
   if (this.run && this.selectedRole) {
     sessionStorage.setItem("rut", this.run); // Guardar en sesión
     try {
+      let response;
       // Accede a $axios desde el contexto del componente
-      const response = await this.$axios.get(`/api/paf-en-linea/usuario/rut/${this.run}`);
+      if (this.selectedRole === "profesor") {
+        response = await this.$axios.get(`/api/paf-en-linea/pipelsoft/contratos-run/${this.run}`);
+      }
+      else if (this.selectedRole === "personal-dei" || this.selectedRole === "encargado") {
+        response = await this.$axios.get(`/api/paf-en-linea/usuario/rut/${this.run}`);
+      }
       if (!response.data || response.data.length === 0) {
         this.errorMessage = "Usuario no encontrado.";
         return;
       }
+      if (this.selectedRole === "profesor") {
+        // Redirigir a la página de seguimiento de contratos
+        this.$router.push(`principal/profesorPAF?run=${this.run}`);
+      } 
       // Verificar cada caso en el array
       const userMatch = response.data.find(user =>
         user.Rol === this.selectedRole &&
@@ -104,7 +114,8 @@
           this.$router.push(`principal/unidadMayorPAF?UnidadMayor=${userMatch.UnidadMayor}&UnidadMenor=${userMatch.UnidadMenor}`)
         }
         } 
-      } else {
+      } 
+       else {
         this.errorMessage = "El rol seleccionado no coincide con los usuarios disponibles.";
       }
     } catch (error) {
