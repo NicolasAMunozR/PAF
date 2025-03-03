@@ -94,3 +94,56 @@ func (h *HistorialPafAceptadasController) EliminarHistorialHandler(c *gin.Contex
 	// Responder con 204 No Content si la eliminación fue exitosa
 	c.Status(http.StatusNoContent)
 }
+
+// ExportExcel genera y envía un archivo Excel con los datos
+// ExportarExcelHandler genera y envía un archivo Excel con los datos
+func (h *HistorialPafAceptadasController) ExportarExcelHandler(c *gin.Context) {
+	historiales, err := h.Service.ObtenerTodosLosHistoriales()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener datos"})
+		return
+	}
+
+	if len(historiales) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "No hay historiales para exportar"})
+		return
+	}
+
+	// Convertir models.HistorialPafAceptadas a service.HistorialPafAceptadas
+	var serviceHistoriales []service.HistorialPafAceptadas
+	for _, h := range historiales {
+		serviceHistoriales = append(serviceHistoriales, service.HistorialPafAceptadas{
+			Run:                      h.Run,
+			IdPaf:                    h.IdPaf,
+			FechaInicioContrato:      h.FechaInicioContrato,
+			FechaFinContrato:         h.FechaFinContrato,
+			CodigoAsignatura:         h.CodigoAsignatura,
+			NombreAsignatura:         h.NombreAsignatura,
+			CantidadHoras:            h.CantidadHoras,
+			Jerarquia:                h.Jerarquia,
+			Calidad:                  h.Calidad,
+			SemestrePaf:              h.SemestrePaf,
+			DesEstado:                h.DesEstado,
+			EstadoProceso:            h.EstadoProceso,
+			ProfesorRun:              h.ProfesorRun,
+			Semestre:                 h.Semestre,
+			Tipo:                     h.Tipo,
+			ProfesorCodigoAsignatura: h.ProfesorCodigoAsignatura,
+			Seccion:                  h.Seccion,
+			Cupo:                     h.Cupo,
+			UltimaModificacion:       h.UltimaModificacion,
+			Comentario:               h.Comentario,
+			Llave:                    h.Llave,
+			SemestreInicioPaf:        h.SemestreInicioPaf,
+		})
+	}
+
+	filePath := "historial.xlsx"
+	err = service.GenerateExcel(serviceHistoriales, filePath)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al generar Excel"})
+		return
+	}
+
+	c.FileAttachment(filePath, "historial.xlsx")
+}

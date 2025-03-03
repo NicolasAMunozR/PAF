@@ -26,6 +26,7 @@ func setupRoutes(r *gin.Engine) {
 		historialRoutes.GET("", historialController.ObtenerTodosLosHistorialesHandler)
 		historialRoutes.DELETE("/:codigo_paf", historialController.EliminarHistorialHandler)
 		historialRoutes.PUT("/:codigoPAF/actualizarBanderaAceptacion", historialController.ActualizarBanderaAceptacion)
+		historialRoutes.GET("/importarExcel", historialController.ExportarExcelHandler)
 	}
 
 	// Pipelsoft

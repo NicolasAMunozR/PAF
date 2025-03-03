@@ -1,13 +1,17 @@
 package service
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/NicolasAMunozR/PAF/backend-PAF/models"
+	"github.com/xuri/excelize/v2"
 	"gorm.io/gorm"
 )
 
@@ -234,4 +238,101 @@ func (s *HistorialPafAceptadasService) ActualizarBanderaAceptacion(codigoPAF str
 	// Log exitoso
 	log.Printf("BanderaAceptacion actualizada a %d y EstadoProceso cambiado a %s para el historial con codigoPAF %s", nuevaBanderaAceptacion, historial.EstadoProceso, codigoPAF)
 	return nil
+}
+
+// FUNCIONES PARA EXPORTAR EN EXCEL Y CSV
+
+// HistorialPafAceptadas representa la estructura del modelo
+type HistorialPafAceptadas struct {
+	gorm.Model
+	Run                      string
+	IdPaf                    int
+	FechaInicioContrato      time.Time
+	FechaFinContrato         time.Time
+	CodigoAsignatura         string
+	NombreAsignatura         string
+	CantidadHoras            int
+	Jerarquia                string
+	Calidad                  string
+	SemestrePaf              string
+	DesEstado                string
+	EstadoProceso            string
+	ProfesorRun              string
+	Semestre                 string
+	Tipo                     string
+	ProfesorCodigoAsignatura string
+	Seccion                  string
+	Cupo                     int
+	UltimaModificacion       time.Time
+	Comentario               string
+	Llave                    string
+	SemestreInicioPaf        string
+}
+
+// GetAllHistorial obtiene todos los registros de la base de datos
+func GetAllHistorial(db *gorm.DB) ([]HistorialPafAceptadas, error) {
+	var historial []HistorialPafAceptadas
+	result := db.Find(&historial)
+	return historial, result.Error
+}
+
+// GenerateCSV genera un archivo CSV con los datos obtenidos
+func GenerateCSV(historial []HistorialPafAceptadas, filePath string) error {
+	file, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	// Escribir encabezados
+	headers := []string{"Run", "IdPaf", "FechaInicioContrato", "FechaFinContrato", "CodigoAsignatura", "NombreAsignatura", "CantidadHoras", "Jerarquia", "Calidad", "SemestrePaf", "DesEstado", "EstadoProceso", "ProfesorRun", "Semestre", "Tipo", "ProfesorCodigoAsignatura", "Seccion", "Cupo", "UltimaModificacion", "Comentario", "Llave", "SemestreInicioPaf"}
+	writer.Write(headers)
+
+	// Escribir datos
+	for _, h := range historial {
+		row := []string{
+			h.Run, fmt.Sprintf("%d", h.IdPaf), h.FechaInicioContrato.Format("2006-01-02"), h.FechaFinContrato.Format("2006-01-02"),
+			h.CodigoAsignatura, h.NombreAsignatura, fmt.Sprintf("%d", h.CantidadHoras), h.Jerarquia, h.Calidad, h.SemestrePaf,
+			h.DesEstado, h.EstadoProceso, h.ProfesorRun, h.Semestre, h.Tipo, h.ProfesorCodigoAsignatura,
+			h.Seccion, fmt.Sprintf("%d", h.Cupo), h.UltimaModificacion.Format("2006-01-02 15:04:05"), h.Comentario, h.Llave, h.SemestreInicioPaf,
+		}
+		writer.Write(row)
+	}
+
+	return nil
+}
+
+// GenerateExcel genera un archivo Excel con los datos obtenidos
+func GenerateExcel(historial []HistorialPafAceptadas, filePath string) error {
+	f := excelize.NewFile()
+	sheetName := "Historial"
+	f.SetSheetName("Sheet1", sheetName)
+
+	// Encabezados
+	headers := []string{"Run", "IdPaf", "FechaInicioContrato", "FechaFinContrato", "CodigoAsignatura", "NombreAsignatura", "CantidadHoras", "Jerarquia", "Calidad", "SemestrePaf", "DesEstado", "EstadoProceso", "ProfesorRun", "Semestre", "Tipo", "ProfesorCodigoAsignatura", "Seccion", "Cupo", "UltimaModificacion", "Comentario", "Llave", "SemestreInicioPaf"}
+
+	for col, header := range headers {
+		cell := fmt.Sprintf("%c1", 'A'+col)
+		f.SetCellValue(sheetName, cell, header)
+	}
+
+	// Datos
+	for row, h := range historial {
+		values := []interface{}{
+			h.Run, h.IdPaf, h.FechaInicioContrato.Format("2006-01-02"), h.FechaFinContrato.Format("2006-01-02"),
+			h.CodigoAsignatura, h.NombreAsignatura, h.CantidadHoras, h.Jerarquia, h.Calidad, h.SemestrePaf,
+			h.DesEstado, h.EstadoProceso, h.ProfesorRun, h.Semestre, h.Tipo, h.ProfesorCodigoAsignatura,
+			h.Seccion, h.Cupo, h.UltimaModificacion.Format("2006-01-02 15:04:05"), h.Comentario, h.Llave, h.SemestreInicioPaf,
+		}
+
+		for col, value := range values {
+			cell := fmt.Sprintf("%c%d", 'A'+col, row+2)
+			f.SetCellValue(sheetName, cell, value)
+		}
+	}
+
+	return f.SaveAs(filePath)
 }
