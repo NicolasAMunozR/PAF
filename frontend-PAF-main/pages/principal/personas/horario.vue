@@ -86,7 +86,7 @@
                           <label>
                             <input
                               type="checkbox"
-                              :value="`${dia}${index + 1}/${bloque.nombre}/${bloque.seccion}/${bloque.ID}/${bloque.cupo}/${bloque.codigo_asignatura}/${bloque.tipo}/${bloque.run}/${bloque.semestre}`"
+                              :value="`${dia}${index + 1}./.${bloque.nombre}./.${bloque.seccion}./.${bloque.ID}./.${bloque.cupo}./.${bloque.codigo_asignatura}./.${bloque.tipo}./.${bloque.run}./.${bloque.semestre}`"
                               v-model="bloquesSeleccionados"
                               :disabled="bloque.color === '#FFCC80'"
                             />
@@ -108,7 +108,7 @@
                       <label>
                         <input
                           type="checkbox"
-                          :value="`${dia}${index + 1}/${bloque.nombre}/${bloque.seccion}/${bloque.ID}/${bloque.cupo}/${bloque.codigo_asignatura}/${bloque.tipo}/${bloque.run}/${bloque.semestre}`"
+                          :value="`${dia}${index + 1}./.${bloque.nombre}./.${bloque.seccion}./.${bloque.ID}./.${bloque.cupo}./.${bloque.codigo_asignatura}./.${bloque.tipo}./.${bloque.run}./.${bloque.semestre}`"
                           v-model="bloquesSeleccionados"
                           :disabled="bloque.color === '#FFCC80'"
                         />
@@ -366,6 +366,7 @@ const fichasPAFMatch = computed(() =>
   })
 );
 
+//probar rut 29173299-7
 
 const fichasAsignaturas = computed(() =>
   persona1.value.filter((p) =>
@@ -618,6 +619,7 @@ const enviarSeleccion = async () => {
   try {
     const codigoPAF = fichaSeleccionadaPAF.value?.CodigoPaf; // Ajustar si el código es otro campo
     const bloquesSeleccionadosString = computed(() => bloquesSeleccionados.value.join(','))
+    console.log(bloquesSeleccionadosString.value);
     let lista = bloquesSeleccionadosString.value.split(',').map(item => {
     return item
         .replace("Lunes", "L")
@@ -631,20 +633,21 @@ const enviarSeleccion = async () => {
 const grouped: { [key: string]: string[] } = {};
 
 lista.forEach(item => {
-  const partes = item.split('/');
+  console.log(item);
+  const partes = item.split('./.');
 
   const [bloque, nombreAsignatura, seccion, Id, cupo, codigoAsignatura, tipo, run, semestre] = partes;
-  const rest = partes.slice(1).join('/');
+  const rest = partes.slice(1).join('./.');
 
   if (!grouped[rest]) {
     grouped[rest] = [];
   }
   grouped[rest].push(bloque);
 });
-
+console.log(grouped);
 // Formatear el resultado en el formato de la imagen
 const resultado = Object.entries(grouped).map(([rest, bloques]) => {
-  const [nombreAsignatura, seccion, Id, cupo, codigoAsignatura, tipo, run, semestre] = rest.split('/');
+  const [nombreAsignatura, seccion, Id, cupo, codigoAsignatura, tipo, run, semestre] = rest.split('./.');
 
   return {
     profesor: {
@@ -669,12 +672,14 @@ const result = resultado.map(item => {
     if (!Asignatura){
         Asignatura = fichaSeleccionadaPAF.value?.Asignaturas?.[0]?.CodigoAsignatura;        ;
     }
+    console.log(data);
     await $axios.post(`/api/paf-en-linea/historial/post/${codigoPAF}/${Asignatura}/${comentario.value}`, data);
     alert('Datos enviados correctamente.');
     mostrarDialogo.value = false;
     await $axios.put(`/api/paf-en-linea/historial/${codigoPAF}/actualizarBanderaAceptacion`, {
       nuevaBanderaAceptacion: 1,
     });
+    limpiarSelecciones();
   } catch (error) {
     console.error('Error al enviar los datos:', error);
     alert('Hubo un error al enviar los datos.');
@@ -710,6 +715,7 @@ const coloresPAF = [
 
 .tabla-container {
   max-width: 100%;
+  overflow-x: auto;
 }
 
 .fichas-container {
@@ -723,12 +729,15 @@ const coloresPAF = [
 .tabla-horarios {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed; /* Fija el tamaño de las columnas */
 }
 
 .tabla-horarios th,
 .tabla-horarios td {
   padding: 8px;
   border: 1px solid #ccc;
+  width: 120px; /* Ancho fijo para columnas */
+  height: 60px; /* Alto fijo */
 }
 
 .tabla-horarios th {
