@@ -312,7 +312,7 @@ func GenerateExcel(historial []HistorialPafAceptadas, filePath string) error {
 	f.SetSheetName("Sheet1", sheetName)
 
 	// Encabezados
-	headers := []string{"Run", "IdPaf", "FechaInicioContrato", "FechaFinContrato", "CodigoAsignatura", "NombreAsignatura", "CantidadHoras", "Jerarquia", "Calidad", "SemestrePaf", "DesEstado", "EstadoProceso", "ProfesorRun", "Semestre", "Tipo", "ProfesorCodigoAsignatura", "Seccion", "Cupo", "UltimaModificacion", "Comentario", "Llave", "SemestreInicioPaf"}
+	headers := []string{"Run", "IdPaf", "CodigoAsignatura", "NombreAsignatura", "CantidadHoras", "Jerarquia", "Calidad", "Semestre", "Tipo", "Cupo", "Comentario"}
 
 	for col, header := range headers {
 		cell := fmt.Sprintf("%c1", 'A'+col)
@@ -322,10 +322,10 @@ func GenerateExcel(historial []HistorialPafAceptadas, filePath string) error {
 	// Datos
 	for row, h := range historial {
 		values := []interface{}{
-			h.Run, h.IdPaf, h.FechaInicioContrato.Format("2006-01-02"), h.FechaFinContrato.Format("2006-01-02"),
-			h.CodigoAsignatura, h.NombreAsignatura, h.CantidadHoras, h.Jerarquia, h.Calidad, h.SemestrePaf,
-			h.DesEstado, h.EstadoProceso, h.ProfesorRun, h.Semestre, h.Tipo, h.ProfesorCodigoAsignatura,
-			h.Seccion, h.Cupo, h.UltimaModificacion.Format("2006-01-02 15:04:05"), h.Comentario, h.Llave, h.SemestreInicioPaf,
+			h.Run, h.IdPaf,
+			h.CodigoAsignatura, h.NombreAsignatura, h.CantidadHoras, h.Jerarquia, h.Calidad,
+			h.Semestre,
+			h.Seccion, h.Cupo, h.Comentario,
 		}
 
 		for col, value := range values {

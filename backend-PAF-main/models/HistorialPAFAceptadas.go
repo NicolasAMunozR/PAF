@@ -23,20 +23,20 @@ type HistorialPafAceptadas struct {
 	DeletedAt gorm.DeletedAt `gorm:"index"` // Si no quieres soft delete, quita este campo
 
 	// Campos de Contrato
-	Run                 string    `gorm:"type:text;not null"`
-	IdPaf               int       `gorm:"type:numeric;not null"`
-	FechaInicioContrato time.Time `gorm:"type:timestamp;not null"`
-	FechaFinContrato    time.Time `gorm:"type:timestamp;not null"`
-	CodigoAsignatura    string    `gorm:"type:text;not null"`
-	NombreAsignatura    string    `gorm:"type:text;not null"`
-	CantidadHoras       int       `gorm:"type:int;not null"`
-	Jerarquia           string    `gorm:"type:text;not null"`
-	Calidad             string    `gorm:"type:text;not null"`
+	Run                 string    `gorm:"type:text"`
+	IdPaf               int       `gorm:"type:numeric"`
+	FechaInicioContrato time.Time `gorm:"type:timestamp"`
+	FechaFinContrato    time.Time `gorm:"type:timestamp"`
+	CodigoAsignatura    string    `gorm:"type:text"`
+	NombreAsignatura    string    `gorm:"type:text"`
+	CantidadHoras       int       `gorm:"type:int"`
+	Jerarquia           string    `gorm:"type:text"`
+	Calidad             string    `gorm:"type:text"`
 	SemestrePaf         string    `gorm:"type:text"`
 	DesEstado           string    `gorm:"type:text"`
 
 	// Campos de Proceso
-	EstadoProceso string `gorm:"type:text;not null"`
+	EstadoProceso string `gorm:"type:text"`
 
 	// Indicadores de Modificación
 	CodigoModificacion      int     `gorm:"type:int;null" json:"codigo_modificacion"`
