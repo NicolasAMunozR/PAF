@@ -1,14 +1,17 @@
 # Imagen base de Node.js
 FROM node:20-alpine
 
+# Instalar dependencias
+RUN npm install -g http-server
+
 # Establecer directorio de trabajo
 WORKDIR /app
 
 # Copiar archivos package.json y package-lock.json para instalar dependencias
 COPY package*.json ./
 
-# Instalar dependencias
 RUN npm install
+
 
 # Copiar el resto de los archivos al contenedor
 COPY . .
@@ -20,4 +23,4 @@ RUN npm run build
 EXPOSE 3001
 
 # Comando para iniciar la aplicación en modo producción
-CMD ["npm", "run", "start"]
+CMD ["http-server", "dist"]
