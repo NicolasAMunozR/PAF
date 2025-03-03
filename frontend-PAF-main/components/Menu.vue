@@ -78,7 +78,7 @@ export default {
         { path: "/principal/estadisticaPAF", label: "Estadísticas de PAF", pages: ["/principal/seguimientoPAF", "/principal/estadisticaPAF", "/principal/creacionContratoPAF"] },
         { path: "/principal/unidadMayorPAF", label: "Gestión de Unidad Mayor", pages: ["/principal/unidadMayorPAF", "/principal/estadisticaUnidadPAF"] },
         { path: "/principal/estadisticaUnidadPAF", label: "Estadísticas de Unidad", pages: ["/principal/unidadMayorPAF", "/principal/estadisticaUnidadPAF"] },
-       // { path: "/principal/creacionContratoPAF", label: "creacion de contratos", pages: ["/principal/seguimientoPAF", "/principal/estadisticaPAF","/principal/creacionContratoPAF" ] },
+        { path: "/principal/creacionContratoPAF", label: "creacion de contratos", pages: ["/principal/seguimientoPAF", "/principal/estadisticaPAF","/principal/creacionContratoPAF" ] },
 
       ],
     };

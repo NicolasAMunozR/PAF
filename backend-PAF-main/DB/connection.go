@@ -12,12 +12,12 @@ import (
 var (
 	DBPersonal *gorm.DB
 )
-var DSN = "host=localhost user=postgres password=conan2084 dbname=personal port=5432 sslmode=disable"
+var DSN = "host=localhost user=postgres password=alonsoreyes104 dbname=personal port=5432 sslmode=disable"
 var DB *gorm.DB
 
 // Conexiones para múltiples bases de datos
 var (
-	DSNTPersonal = "host=localhost user=postgres password=conan2084 dbname=personal port=5432 sslmode=disable"
+	DSNTPersonal = "host=localhost user=postgres password=alonsoreyes104 dbname=personal1 port=5432 sslmode=disable"
 )
 
 // InitDBConnections inicializa las conexiones a todas las bases de datos.

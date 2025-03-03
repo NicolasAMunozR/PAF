@@ -120,6 +120,10 @@
     <div class="filter-item">
       <button @click="applyFilters" class="btn confirm-btn">Confirmar Filtros</button>
     </div>
+    <br />
+    <div>
+      <button @click="Excel" class="btn confirm-btn">Importal Excel</button>
+    </div>
   </div>
     
     <!-- Tabla -->
@@ -318,7 +322,27 @@ const nombreAsig = computed(() => {
   return nombreAsignatura; // O retorna [ultimoSemestre] si
 });
 
-    const applyFilters = () => {
+const Excel = async () => {
+  try {
+    const response = await $axios.get("/api/paf-en-linea/historial/importarExcel", {
+      responseType: "blob", // Importante para recibir el archivo correctamente
+    });
+
+    // Crear un enlace de descarga
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "historial.xlsx"); // Nombre del archivo
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error("Error al descargar el archivo Excel:", error);
+  }
+};
+
+
+const applyFilters = () => {
   filtros1.value = {
   codigoPAF: codigoPAF_filtro.value,
   run: run_filtro.value,
