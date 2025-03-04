@@ -1,4 +1,3 @@
-// filepath: /home/t_toto104/Escritorio/PAF/frontend-PAF-main/nuxt.config.ts
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
@@ -13,9 +12,5 @@ export default defineNuxtConfig({
   },
   app: {
     baseURL: '/paf-en-linea' // Prefijo para las rutas de la aplicación
-  },
-  target: 'static',
-  generate: {
-    dir: '.output/public'
   }
 })

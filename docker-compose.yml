@@ -4,9 +4,9 @@ services:
   frontend:
     build:
       context: ./frontend-PAF-main
-      dockerfile: DockerFile
+      dockerfile: Dockerfile
     ports:
-      - "3001:3001"
+      - "3001:80"  # Exponemos el puerto 80 del contenedor en 3001 del host
     depends_on:
       - backend
 
@@ -32,7 +32,7 @@ services:
       POSTGRES_PASSWORD: alonsoreyes104
       POSTGRES_DB: personal1
     ports:
-      - "5433:5432"  # Cambia el puerto del host a 5433
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
