@@ -6,11 +6,11 @@ services:
       context: ./frontend-PAF-main
       dockerfile: Dockerfile
     ports:
-      - "3001:80"  # 🔹 Servimos el frontend en el puerto 3001
+      - "3001:80"  # Servimos el frontend en el puerto 3001
     depends_on:
       - backend
     environment:
-      - API_BASE_URL=http://backend:3000  # 🔹 Cambia esto en tu nuxt.config.js
+      - API_BASE_URL=http://backend:3000  # Cambia esto en tu nuxt.config.js
 
   backend:
     build:
@@ -19,30 +19,9 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DB_HOST=db
+      - DB_HOST=host.docker.internal  # Conéctate a la base de datos existente
       - DB_USER=postgres
-      - DB_PASSWORD=alonsoreyes104
-      - DB_NAME=personal
+      - DB_PASSWORD=conan2084
+      - DB_NAME_PERSONAL=personal
+      - DB_NAME_PERSONAL1=personal
       - DB_PORT=5432
-    depends_on:
-      db:
-        condition: service_healthy  # 🔹 Asegura que PostgreSQL está listo antes de arrancar el backend
-
-  db:
-    image: postgres:13
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: alonsoreyes104
-      POSTGRES_DB: personal1
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
-      interval: 10s
-      retries: 5
-      timeout: 5s
-
-volumes:
-  postgres_data:

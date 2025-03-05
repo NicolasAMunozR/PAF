@@ -33,9 +33,6 @@
               required
             />
           </div>
-          <p class="role-info">
-            Iniciarás sesión como: <strong>{{ selectedRole }}</strong>
-          </p>
           <button type="submit">Ingresar</button>
         </form>
   
@@ -54,7 +51,7 @@
         errorMessage: "",
         roleOptions: [
           { value: "profesor", label: "Docente" },
-          { value: "personal-dei", label: "Personal del Dipre" },
+          { value: "personal-dei", label: "DIPRE" },
           { value: "encargado", label: "Encargado" },
         ],
       };
