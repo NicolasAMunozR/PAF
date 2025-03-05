@@ -4,13 +4,18 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss'],
   runtimeConfig: {
     public: {
-      apiBase: 'http://localhost:3000' // Cambia esta URL según tu entorno
+      apiBase: 'http://localhost:3000' // 🔹 Ajusta si usas Docker
     }
   },
-  devServer: {
-    port: 3001
-  },
   app: {
-    baseURL: '/paf-en-linea' // Prefijo para las rutas de la aplicación
+    baseURL: '/' // 🔹 No uses '/paf-en-linea' si no es necesario
+  },
+  routeRules: {
+    '/**': { prerender: true } // 🔹 Fuerza la generación estática de todas las rutas
+  },
+  nitro: {
+    output: {
+      publicDir: 'dist' // 🔹 Reemplaza generate.dir con esto
+    }
   }
 })
