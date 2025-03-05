@@ -48,9 +48,15 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 		return nil, fmt.Errorf("error al deserializar bloquesJSON: %w", err)
 	}
 
-	// Verificar si hemos obtenido el codigo_asignatura
+	// Verificar si se obtuvo al menos un codigo_asignatura
 	if len(bloquesParsed) == 0 {
-		return nil, fmt.Errorf("no se encontró el codigo_asignatura en los bloques")
+		return nil, fmt.Errorf("no se encontró el codigoAsignatura en los bloques")
+	}
+
+	// Extraer los códigos de asignatura únicos
+	codigosAsignatura := make(map[string]struct{})
+	for _, bloque := range bloquesParsed {
+		codigosAsignatura[bloque.CodigoAsignatura] = struct{}{}
 	}
 
 	// Iniciar una transacción para garantizar consistencia
@@ -77,6 +83,21 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 	} else if err != gorm.ErrRecordNotFound {
 		tx.Rollback()
 		return nil, fmt.Errorf("error al buscar historial existente: %w", err)
+	}
+
+	// Buscar los nombres de asignaturas con los mismos códigos en la tabla profesorDB
+	var nombresAsignaturasExtras []string
+	for codigo := range codigosAsignatura {
+		var asignaturas []models.ProfesorDB
+		if err := tx.Where("codigo_asignatura = ?", codigo).Find(&asignaturas).Error; err != nil {
+			tx.Rollback()
+			return nil, fmt.Errorf("error al buscar asignaturas en profesorDB: %w", err)
+		}
+
+		// Agregar los nombres de las asignaturas encontradas
+		for _, asignatura := range asignaturas {
+			nombresAsignaturasExtras = append(nombresAsignaturasExtras, asignatura.NombreAsignatura)
+		}
 	}
 
 	// Crear el nuevo registro de historial sin cambiar el estado
@@ -106,8 +127,7 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 		Bloque:                  bloquesJSON, // Bloques en JSON
 		BanderaAceptacion:       0,
 		Comentario:              comentario,
-		// añadir el parametro semestre_inicio_paf cuando sepamos a lo que se refiere.
-		// se trabaja: se obtiene un una tabla que va a llegar
+		NombreAsignaturasExtras: nombresAsignaturasExtras, // Guardar nombres de asignaturas extras
 	}
 
 	// Insertar el nuevo historial en la base de datos
@@ -124,6 +144,7 @@ func (s *HistorialPafAceptadasService) CrearHistorial(codigoPAF int, profesor mo
 	log.Println("Nuevo registro creado con éxito")
 	return &historial, nil
 }
+
 
 func parseBloques(bloquesRaw []string) ([]models.BloqueDTO, error) {
 	var bloques []models.BloqueDTO

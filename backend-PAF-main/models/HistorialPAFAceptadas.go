@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
@@ -59,4 +60,5 @@ type HistorialPafAceptadas struct {
 	BanderaAceptacion int    `gorm:"type:int;null"`
 	Llave             string `gorm:"type:text"`
 	SemestreInicioPaf string `gorm:"type:text"`
+	NombreAsignaturasExtras pq.StringArray `gorm:"type:text[]" json:"comentarios_extras"`
 }
