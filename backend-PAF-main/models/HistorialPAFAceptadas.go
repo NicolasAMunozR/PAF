@@ -61,4 +61,5 @@ type HistorialPafAceptadas struct {
 	Llave             string `gorm:"type:text"`
 	SemestreInicioPaf string `gorm:"type:text"`
 	NombreAsignaturasExtras pq.StringArray `gorm:"type:text[]" json:"comentarios_extras"`
+	CodigoAsignaturasExtras pq.StringArray `gorm:"type:text[]" json:"codigos_extras"`
 }
