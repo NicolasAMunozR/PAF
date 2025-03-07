@@ -29,6 +29,12 @@ func setupRoutes(r *gin.Engine) {
 		historialRoutes.GET("/importarExcel", historialController.ExportarExcelHandler)
 	}
 
+	  // Rutas para login
+	  authRoutes := r.Group("/api/paf-en-linea")
+	  {
+		  authRoutes.POST("/login", controller.LoginController)
+	  }
+
 	// Pipelsoft
 	pipelsoftService := service.NewPipelsoftService(DB.DBPersonal)
 	pipelsoftController := controller.NewPipelsoftController(pipelsoftService)
