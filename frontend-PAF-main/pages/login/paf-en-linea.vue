@@ -9,27 +9,25 @@
       <div class="content">
         <h2>Inicio de Sesión</h2>
   
-        <!-- Selector de roles como secciones -->
-        <div class="role-selector">
-          <button
-            v-for="option in roleOptions"
-            :key="option.value"
-            :class="{ active: selectedRole === option.value }"
-            @click="selectRole(option.value)"
-          >
-            {{ option.label }}
-          </button>
-        </div>
-  
         <!-- Formulario de inicio de sesión -->
-        <form @submit.prevent="handleLogin" v-if="selectedRole" class="login-form">
+        <form @submit.prevent="handleLogin" class="login-form">
           <div class="form-group">
-            <label for="run">RUN:</label>
+            <label for="username">username:</label>
             <input
               type="text"
-              id="run"
-              v-model="run"
-              placeholder="Ingresa tu RUN"
+              id="username"
+              v-model="username"
+              placeholder="Ingresa tu username"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="password">password:</label>
+            <input
+              type="password"
+              id="password"
+              v-model="password"
+              placeholder="Ingresa tu contraseña"
               required
             />
           </div>
@@ -38,6 +36,31 @@
   
         <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
       </div>
+      <!-- Modal para seleccionar rol -->
+    <div v-if="showRoleModal" class="modal">
+      <div class="modal-content">
+        <h3>Selecciona un Rol</h3>
+        <div class="form-group">
+          <label for="role">Rol:</label>
+          <select v-model="roleElegido" id="role">
+            <option value="personal-dei">DIPRE</option>
+            <option value="encargado">Encargado</option>
+            <option value="profesor">Profesor</option>
+          </select>
+        </div>
+        <div v-if="roleElegido === 'profesor'" class="form-group">
+          <label for="newRut">Nuevo RUT:</label>
+          <input
+            type="text"
+            id="newRut"
+            v-model="newRut"
+            placeholder="Ingresa el nuevo RUT"
+          />
+        </div>
+        <button @click="confirmRole">Confirmar</button>
+        <button @click="closeRoleModal">Cancelar</button>
+      </div>
+    </div>
     </div>
   </template>
   
@@ -49,6 +72,9 @@
         run: "",
         selectedRole: "",
         errorMessage: "",
+        showRoleModal: false,
+        roleElegido: "",
+        newRut: "",
         roleOptions: [
           { value: "profesor", label: "Docente" },
           { value: "personal-dei", label: "DIPRE" },
@@ -63,6 +89,68 @@
       },
       async handleLogin() {
         sessionStorage.clear();
+        if (this.password && this.username) {
+        const data = {
+          User: this.username,
+          Password: this.password
+        };
+
+        try {
+          const response = await Promise.race([
+            this.$axios.post("/api/paf-en-linea/login", data),
+            new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000))
+          ]);
+          const rut = response.data.data.rut;
+          sessionStorage.setItem("rut", rut);
+          console.log(response.data);
+          const response2 = await this.$axios.get(`/api/paf-en-linea/pipelsoft/contratos-run/${rut}`);
+          console.log(response2.data);
+            if (!response2.data || response2.data.length === 0) {
+              const response1 = await this.$axios.get(`/api/paf-en-linea/usuario/rut/${rut}`);
+          console.log(response1.data);
+          if (response1.data[0].Rol === "admin") {
+            this.showRoleModal = true;
+        }
+          if(response1.data[0].Rol === "personal-dei") {
+            this.$router.push("paf-en-linea/personas");
+          }
+          if(response1.data[0].Rol === "encargado") {
+            console.log(response1.data[0].Acceso);
+            if (response1.data[0].Acceso === 0) {
+              this.errorMessage = "Este usuario no posee accesos.";
+              return;
+            }
+            console.log(response1.data[0].Vista_universidad);
+            if (response1.data[0].Vista_universidad === 1) {
+              this.$router.push("paf-en-linea/seguimientoPAF");
+            } 
+            console.log(response1.data[0].Vista_facultad);
+            if(response1.data[0].Vista_facultad === 1) {
+              console.log(response1.data[0].UnidadMayor);
+              sessionStorage.setItem("unidadMayor", response1.data[0].UnidadMayor);
+              this.$router.push(`paf-en-linea/unidadMayorPAF?UnidadMayor=${response1.data[0].UnidadMayor}`);
+            }
+            if (response1.data[0].Acceso === 1 && response1.data[0].Vista_facultad === 0 && response1.data[0].Vista_universidad === 0) {
+              sessionStorage.setItem("unidadMayor", response1.data[0].UnidadMayor);
+              sessionStorage.setItem("unidadMenor", response1.data[0].UnidadMenor);
+            this.$router.push(`paf-en-linea/unidadMayorPAF?UnidadMayor=${response1.data[0].UnidadMayor}&UnidadMenor=${response1.data[0].UnidadMenor}`)
+          }
+        } 
+            }
+            else {
+              this.$router.push(`paf-en-linea/profesorPAF?run=${rut}`);
+              
+            }
+        } catch (error) {
+          if (error.message === "timeout") {
+            this.errorMessage = "La solicitud ha tardado demasiado. Por favor, inténtalo de nuevo.";
+          } else {
+            this.errorMessage = "Usuario o contraseña no válidos.";
+          }
+          return;
+        }
+      } 
+  /*   
   if (this.run && this.selectedRole) {
     sessionStorage.setItem("rut", this.run); // Guardar en sesión
     try {
@@ -119,110 +207,156 @@
       this.errorMessage = "Hubo un error al iniciar sesión.";
       console.error(error);
     }
-  } else {
+  }*/
+   else {
     this.errorMessage = "Por favor, completa todos los campos.";
   }
-}
+},
+confirmRole() {
+  if (this.roleElegido === "personal-dei") {
+            this.$router.push("paf-en-linea/personas");
+  } 
+  else if (this.roleElegido === "encargado") {
+            if (response1.data[0].Acceso === 0) {
+              this.errorMessage = "Este usuario no posee accesos.";
+              return;
+            } else if (response1.data[0].Vista_universidad === 1) {
+              this.$router.push("paf-en-linea/seguimientoPAF");
+            } else if (response1.data[0].Vista_facultad === 1) {
+              sessionStorage.setItem("unidadMayor", response1.data[0].UnidadMayor);
+              this.$router.push(`paf-en-linea/unidadMayorPAF?UnidadMayor=${response1.data[0].UnidadMayor}`);
+            } else if (response1.data[0].Acceso === 1 && response1.data[0].Vista_facultad === 0 && response1.data[0].Vista_universidad === 0) {
+              sessionStorage.setItem("unidadMayor", response1.data[0].UnidadMayor);
+              sessionStorage.setItem("unidadMenor", response1.data[0].UnidadMenor);
+              this.$router.push(`paf-en-linea/unidadMayorPAF?UnidadMayor=${response1.data[0].UnidadMayor}&UnidadMenor=${response1.data[0].UnidadMenor}`);
+      }
+    }
+    else if (this.roleElegido === "profesor") {
+      this.$router.push(`paf-en-linea/profesorPAF?run=${newRut}`);
+    } 
+      this.closeRoleModal();
+    },
+    closeRoleModal() {
+      this.showRoleModal = false;
+      this.roleElegido = "";
+      this.newRut = "";
+    }
     },
   };
-  </script>
-  
-  
-  <style scoped>
-  /* Página principal */
-  .login-page {
-    max-width: 500px;
-    margin: 20px auto;
-    border: 1px solid #394049;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
-  }
-  
-  /* Barra superior */
-  .header-bar {
-    background-color: #00a499;
-    color: #fff;
-    padding: 10px;
-    font-family: "Bebas Neue Pro", sans-serif;
-    font-size: 1.5rem;
-    font-weight: bold;
-  }
-  
-  /* Contenido principal */
-  .content {
-    padding: 20px;
-  }
-  
-  /* Selector de roles */
-  .role-selector {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  
-  .role-selector button {
-    background-color: #f0f0f0;
-    border: 1px solid #394049;
-    border-radius: 4px;
-    padding: 10px 15px;
-    font-family: "Helvetica Neue LT", sans-serif;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .role-selector button.active {
-    background-color: #00A499;
-    color: #fff;
-  }
-  
-  /* Formulario */
-  .login-form {
-    margin-top: 20px;
-  }
-  
-  .form-group {
-    margin-bottom: 15px;
-  }
-  
-  .form-group label {
-    display: block;
-    font-family: "Helvetica Neue LT", sans-serif;
-    font-size: 0.9rem;
-    text-align: left;
-    margin-bottom: 5px;
-  }
-  
-  .form-group input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 0.9rem;
-  }
-  
-  button[type="submit"] {
-    background-color: #EA7600;
-    border: none;
-    color: white;
-    font-family: "Bebas Neue Pro", sans-serif;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  button[type="submit"]:hover {
-    background-color: #C8102E;
-  }
-  
-  /* Errores */
-  .error {
-    color: red;
-    margin-top: 10px;
-    font-size: 0.9rem;
-  }
-  </style>
-  
+</script>
+
+<style scoped>
+/* Página principal */
+.login-page {
+  max-width: 500px;
+  margin: 20px auto;
+  border: 1px solid #394049;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+/* Barra superior */
+.header-bar {
+  background-color: #00a499;
+  color: #fff;
+  padding: 10px;
+  font-family: "Bebas Neue Pro", sans-serif;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Contenido principal */
+.content {
+  padding: 20px;
+}
+
+/* Formulario */
+.login-form {
+  margin-top: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  font-family: "Helvetica Neue LT", sans-serif;
+  font-size: 0.9rem;
+  text-align: left;
+  margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+button[type="submit"] {
+  background-color: #EA7600;
+  border: none;
+  color: white;
+  font-family: "Bebas Neue Pro", sans-serif;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button[type="submit"]:hover {
+  background-color: #C8102E;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.modal-content .form-group {
+  margin-bottom: 15px;
+}
+
+button {
+  background-color: #EA7600;
+  border: none;
+  color: white;
+  font-family: "Bebas Neue Pro", sans-serif;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #C8102E;
+}
+
+/* Errores */
+.error {
+  color: red;
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+</style>
