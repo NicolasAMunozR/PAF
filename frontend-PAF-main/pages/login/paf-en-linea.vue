@@ -80,7 +80,7 @@
       }
       if (this.selectedRole === "profesor") {
         // Redirigir a la página de seguimiento de contratos
-        this.$router.push(`principal/profesorPAF?run=${this.run}`);
+        this.$router.push(`paf-en-linea/profesorPAF?run=${this.run}`);
       } 
       // Verificar cada caso en el array
       const userMatch = response.data.find(user =>
@@ -91,7 +91,7 @@
         if (userMatch) {
           // Redirigir según el caso encontrado
         if (userMatch.Rol === "personal-dei") {
-          this.$router.push("principal/personas");
+          this.$router.push("paf-en-linea/personas");
         }
         else if (userMatch.Rol === "encargado") {
           if (userMatch.Acceso === 0) {
@@ -99,16 +99,16 @@
             return;
           }
           else if (userMatch.Vista_universidad === 1) {
-            this.$router.push("principal/seguimientoPAF");
+            this.$router.push("paf-en-linea/seguimientoPAF");
           } 
           else if(userMatch.Vista_facultad === 1) {
             sessionStorage.setItem("unidadMayor", userMatch.UnidadMayor);
-            this.$router.push(`principal/unidadMayorPAF?UnidadMayor=${userMatch.UnidadMayor}`);
+            this.$router.push(`paf-en-linea/unidadMayorPAF?UnidadMayor=${userMatch.UnidadMayor}`);
           }
           else if (userMatch.Acceso === 1 && userMatch.Vista_facultad === 0 && userMatch.Vista_universidad === 0) {
             sessionStorage.setItem("unidadMayor", userMatch.UnidadMayor);
             sessionStorage.setItem("unidadMenor", userMatch.UnidadMenor);
-          this.$router.push(`principal/unidadMayorPAF?UnidadMayor=${userMatch.UnidadMayor}&UnidadMenor=${userMatch.UnidadMenor}`)
+          this.$router.push(`paf-en-linea/unidadMayorPAF?UnidadMayor=${userMatch.UnidadMayor}&UnidadMenor=${userMatch.UnidadMenor}`)
         }
         } 
       } 

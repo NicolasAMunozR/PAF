@@ -170,6 +170,8 @@ interface Persona {
   DesEstado: string;
   UltimaModificacion: string;
   Comentario: string;
+  codigos_extras: string[];
+  comentarios_extras: string[];
 }
 
 const personas = ref<Persona[]>([]);
@@ -191,8 +193,8 @@ const filteredPersonas = computed(() => {
   warnings.value = [];
   let filtered = personas.value.filter(persona => {
     return (
-      persona.NombreAsignatura?.toLowerCase().includes(filtros1.value.nombreAsignatura.toLowerCase() || '') &&
-      persona.CodigoAsignatura?.toLowerCase().includes(filtros1.value.codigoAsignatura.toLowerCase() || '') &&
+      persona.comentarios_extras?.join(' ').toLowerCase().includes(filtros1.value.nombreAsignatura.toLowerCase() || '') &&
+      persona.codigos_extras?.join(' ').toLowerCase().includes(filtros1.value.codigoAsignatura.toLowerCase() || '') &&
       (filtros1.value.estadoProceso ? persona.EstadoProceso.toString() === filtros1.value.estadoProceso : true) &&
       (filtros1.value.calidad ? persona.Calidad === filtros1.value.calidad : true) &&
       persona.IdPaf.toString().toLowerCase().includes(filtros1.value.codigoPAF.toLowerCase()) &&
@@ -239,6 +241,7 @@ const handleRowStatusChanged = (persona: Persona) => {
 onMounted(async () => {
   try {
     const response = await $axios.get('/api/paf-en-linea/historial');
+    console.log('Personas:', response.data);
     personas.value = response.data;
     semestreMasActual.value = response.data
   .map((item: Persona) => item.SemestrePaf) // Extrae el semestre de cada objeto
@@ -316,11 +319,13 @@ const semestres = computed(() => {
 });
 
 const nombreAsig = computed(() => {
-  const nombreAsignatura = [...new Set(personas.value.map(p => p.NombreAsignatura))]
-    .sort((a, b) => (String(a) || '').localeCompare(String(b) || '')); // Comparación lexicográfica adecuada para "AAAA-MM"
+  const nombreAsignatura = [
+    ...new Set(personas.value.flatMap(p => p.comentarios_extras))
+  ].sort((a, b) => (String(a) || '').localeCompare(String(b) || ''));
 
-  return nombreAsignatura; // O retorna [ultimoSemestre] si
+  return nombreAsignatura;
 });
+
 
 const Excel = async () => {
   try {

@@ -21,7 +21,6 @@ services:
     environment:
       - DB_HOST=host.docker.internal  # Conéctate a la base de datos existente
       - DB_USER=postgres
-      - DB_PASSWORD=conan2084
-      - DB_NAME_PERSONAL=personal
-      - DB_NAME_PERSONAL1=personal
+      - DB_PASSWORD=alonsoreyes104
+      - DB_NAME_PERSONAL=personal1
       - DB_PORT=5432

@@ -140,7 +140,7 @@ const dejarListaPaf = async (codigoPaf: string) => {
     await $axios.put(`/api/paf-en-linea/historial/${codigoPaf}/actualizarBanderaAceptacion`, {
       nuevaBanderaAceptacion: 1,
     });
-    router.push('/principal/personas');
+    router.push('/paf-en-linea/personas');
   } catch (error) {
     console.error('Error al procesar la PAF:', error);
   }

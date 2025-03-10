@@ -3,9 +3,9 @@
     <table class="w-full text-sm bg-white shadow-lg rounded-lg overflow-hidden">
       <thead class="bg-primary-color text-white">
         <tr>
+          <th class="px-4 py-3 text-left font-semibold">Run</th>
           <th v-if="contratos" class="px-4 py-3 text-left font-semibold">Código de la PAF</th>
           <th class="px-4 py-3 text-left font-semibold">Código de la Asignatura</th>
-          <th class="px-4 py-3 text-left font-semibold">Run</th>
           <th class="px-4 py-3 text-left font-semibold">Nombre de Asignatura</th>
           <th v-if="contratos" class="px-4 py-3 text-left font-semibold">Estado de Proceso</th>
           <th v-if="show" class="px-4 py-3 text-left font-semibold">Cantidad de horas</th>
@@ -20,10 +20,10 @@
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
         <tr v-for="persona in paginatedData" :key="persona.Id" :class="persona.rowClass" class="hover:bg-gray-50 transition-colors">
-          <td v-if="contratos" class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoPAF }} {{ persona.IdPaf }}</td>
-          <td class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoAsignatura }}</td>
           <td class="px-4 py-3 text-gray-700">{{ persona.Run }}</td>
-          <td class="px-4 py-3 text-gray-700">{{ persona.NombreAsignatura }} {{ persona.nombre_asignatura }}</td>
+          <td v-if="contratos" class="px-4 py-3 text-gray-900 font-medium">{{ persona.CodigoPAF }} {{ persona.IdPaf }}</td>
+          <td class="px-4 py-3 text-gray-900 font-medium">{{ (persona.codigos_extras || []).map(item => `- ${item}`).join('\n') || persona.CodigoAsignatura }}</td>
+          <td class="px-4 py-3 text-gray-700 whitespace-pre-line"> {{ (persona.comentarios_extras || []).map(item => `- ${item}`).join('\n') || persona.NombreAsignatura || persona.nombre_asignatura }} </td>
           <td v-if="contratos" class="px-4 py-3 text-gray-700">{{ persona.DesEstado }}</td>
           <td v-if="show" class="px-4 py-3 text-gray-700">{{ persona.CantidadHoras }}</td>
           <td v-if="showButton || show" class="px-4 py-3 text-gray-700">{{ persona.seccion }}</td>
@@ -31,31 +31,31 @@
           <td class="px-4 py-3 text-gray-700">{{ persona.Semestre }} {{ persona.SemestrePaf }}</td>
           <td v-if="showButton" class="px-4 py-3 text-gray-700">{{ persona.Comentario }}</td>
           <td v-if="showButtons" class="px-4 py-3">
-            <NuxtLink :to="`/principal/personas/paf?codigoPaf=${persona.CodigoPAF}`" class="button">Ver PAF</NuxtLink>
+            <NuxtLink :to="`/paf-en-linea/personas/paf?codigoPaf=${persona.CodigoPAF}`" class="button">Ver PAF</NuxtLink>
             <br>
             <br>
             <NuxtLink 
-    :to="`/principal/personas/horario?run=${persona.Run}`"
+    :to="`/paf-en-linea/personas/horario?run=${persona.Run}`"
     class="button" 
     @click.prevent="storeDetalle(1)">
     Ver Horarios
   </NuxtLink>
   <br><br>
   <NuxtLink 
-    :to="`/principal/personas/horario?run=${persona.Run}`"
+    :to="`/paf-en-linea/personas/horario?run=${persona.Run}`"
     class="button"
     @click.prevent="storeDetalle(2)">
     Ver Horarios detallado
   </NuxtLink>
           </td>
           <td v-if="showButton" class="px-4 py-3">
-            <NuxtLink :to="`/principal/personas/paf?codigoPaf=${persona.IdPaf}`" class="button">Ver PAF</NuxtLink>
+            <NuxtLink :to="`/paf-en-linea/personas/paf?codigoPaf=${persona.IdPaf}`" class="button">Ver PAF</NuxtLink>
             <br>
             <br>
             <button @click="deletePAF(persona.IdPaf)" class="buttons">Eliminar</button>
           </td>
           <td v-if="show" class="px-4 py-3">
-            <NuxtLink :to="`/principal/creacionContratoPAF/formularioContrato`" class="button">Formulario</NuxtLink>
+            <NuxtLink :to="`/paf-en-linea/creacionContratoPAF/formularioContrato`" class="button">Formulario</NuxtLink>
           </td>
         </tr>
       </tbody>
@@ -198,7 +198,7 @@ export default {
 <style scoped>
 /* Colores institucionales */
 :root {
-  --primary-color: #EA7600; /* Color principal USACH */
+  --primary-color: #EA7600; /* Color paf-en-linea USACH */
   --secondary-color: #394049; /* Color secundario USACH */
   --accent-color: #C8102E; /* Complementario */
   --background-color: #1d558d; /* Fondo neutro */

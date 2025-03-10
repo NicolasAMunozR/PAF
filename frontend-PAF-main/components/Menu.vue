@@ -7,33 +7,21 @@
         v-if="$route.path !== '/profesorPAF'"
         class="menu-button"
       >
-      <svg
-  v-if="!isMenuOpen"
-  class="hamburger-icon"
->
-  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-</svg>
-<svg
-  v-else
-  class="hamburger-icon"
->
-  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-</svg>
+        <svg v-if="!isMenuOpen" class="hamburger-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <svg v-else class="hamburger-icon">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
       </button>
       <div class="header-container">
         <h1 class="header-title">PAF - Sistema de Gestión</h1>
       </div>
-
-
       <button @click="logout" class="logout-button">Cerrar sesión</button>
     </div>
 
     <!-- Superposición detrás del menú -->
-    <div
-      v-if="isMenuOpen"
-      class="overlay"
-      @click="toggleMenu"
-    ></div>
+    <div v-if="isMenuOpen" class="overlay" @click="toggleMenu"></div>
 
     <!-- Menú lateral -->
     <div
@@ -46,18 +34,29 @@
     >
       <div class="menu-content">
         <ul class="menu-list">
-          <li v-for="link in filteredMenu" :key="link.path">
-            <a :href="link.path" class="menu-link">{{ link.label }}</a>
+          <li
+            v-for="link in filteredMenu"
+            :key="link.path"
+            
+            @mouseleave="hideDropdown(link.path)"
+            class="menu-item"
+          >
+            <a @click.prevent="navigateTo(link.path)" class="menu-link">{{ link.label }}</a>
+            <ul v-if="dropdownVisible[link.path]" class="dropdown-menu">
+              <li v-for="page in link.pages" :key="page">
+                <a @click.prevent="navigateTo(page)" class="dropdown-link">{{ page }}</a>
+              </li>
+            </ul>
           </li>
         </ul>
       </div>
     </div>
 
-    <!-- Contenido principal -->
+    <!-- Contenido paf-en-linea -->
     <div
       :class="{
-        'ml-64': isMenuOpen && $route.path !== '/principal/profesorPAF',
-        'ml-0': !isMenuOpen || $route.path === '/principal/profesorPAF'
+        'ml-64': isMenuOpen && $route.path !== '/paf-en-linea/profesorPAF',
+        'ml-0': !isMenuOpen || $route.path === '/paf-en-linea/profesorPAF'
       }"
       class="content"
     >
@@ -67,19 +66,21 @@
 </template>
 
 <script>
+import { reactive } from 'vue';
+
 export default {
   data() {
     return {
       isMenuOpen: false,
+      dropdownVisible: reactive({}),
       menuItems: [
-        { path: "/principal/personas", label: "Personas", pages: ["/principal/personas", "/principal/historyPAF", "/principal/personas/horario", "/principal/personas/paf"] },
-        { path: "/principal/historyPAF", label: "Historial de PAF", pages: ["/principal/personas", "/principal/historyPAF", "/principal/personas/horario", "/principal/personas/paf"] },
-        { path: "/principal/seguimientoPAF", label: "Seguimiento de la PAF", pages: ["/principal/seguimientoPAF", "/principal/estadisticaPAF", "/principal/creacionContratoPAF"] },
-        { path: "/principal/estadisticaPAF", label: "Estadísticas de PAF", pages: ["/principal/seguimientoPAF", "/principal/estadisticaPAF", "/principal/creacionContratoPAF"] },
-        { path: "/principal/unidadMayorPAF", label: "Gestión de Unidad Mayor", pages: ["/principal/unidadMayorPAF", "/principal/estadisticaUnidadPAF"] },
-        { path: "/principal/estadisticaUnidadPAF", label: "Estadísticas de Unidad", pages: ["/principal/unidadMayorPAF", "/principal/estadisticaUnidadPAF"] },
-        { path: "/principal/creacionContratoPAF", label: "creacion de contratos", pages: ["/principal/seguimientoPAF", "/principal/estadisticaPAF","/principal/creacionContratoPAF" ] },
-
+        { path: "/paf-en-linea/personas", label: "Personas", pages: ["/paf-en-linea/personas", "/paf-en-linea/historyPAF", "/paf-en-linea/personas/horario", "/paf-en-linea/personas/paf"] },
+        { path: "/paf-en-linea/historyPAF", label: "Historial de PAF", pages: ["/paf-en-linea/personas", "/paf-en-linea/historyPAF", "/paf-en-linea/personas/horario", "/paf-en-linea/personas/paf"] },
+        { path: "/paf-en-linea/seguimientoPAF", label: "Seguimiento de la PAF", pages: ["/paf-en-linea/seguimientoPAF", "/paf-en-linea/estadisticaPAF", "/paf-en-linea/creacionContratoPAF"] },
+        { path: "/paf-en-linea/estadisticaPAF", label: "Estadísticas de PAF", pages: ["/paf-en-linea/seguimientoPAF", "/paf-en-linea/estadisticaPAF", "/paf-en-linea/creacionContratoPAF"] },
+        { path: "/paf-en-linea/unidadMayorPAF", label: "Gestión de Unidad Mayor", pages: ["/paf-en-linea/unidadMayorPAF", "/paf-en-linea/estadisticaUnidadPAF"] },
+        { path: "/paf-en-linea/estadisticaUnidadPAF", label: "Estadísticas de Unidad", pages: ["/paf-en-linea/unidadMayorPAF", "/paf-en-linea/estadisticaUnidadPAF"] },
+        { path: "/paf-en-linea/creacionContratoPAF", label: "creacion de contratos", pages: ["/paf-en-linea/seguimientoPAF", "/paf-en-linea/estadisticaPAF","/paf-en-linea/creacionContratoPAF" ] },
       ],
     };
   },
@@ -91,15 +92,25 @@ export default {
   },
   methods: {
     toggleMenu() {
-      if (this.$route.path === "/principal/profesorPAF") {
+      if (this.$route.path === "/paf-en-linea/profesorPAF") {
         return; // Evitar que el menú se abra/cierre en ProfesorPAF
       }
       this.isMenuOpen = !this.isMenuOpen;
+    },
+    navigateTo(path) {
+      this.$router.push(path);
+      this.isMenuOpen = false; // Cierra el menú después de la navegación
     },
     logout() {
       localStorage.clear();
       sessionStorage.clear();
       this.$router.push('/');
+    },
+    showDropdown(path) {
+      this.dropdownVisible[path] = true;
+    },
+    hideDropdown(path) {
+      this.dropdownVisible[path] = false;
     },
   },
 };
@@ -140,8 +151,8 @@ export default {
 
 .dropdown-menu {
   position: absolute;
-  top: 50px;
-  left: 10px;
+  top: 100%;
+  left: 0;
   background: white;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -170,6 +181,17 @@ export default {
   background-color: #f0f0f0;
 }
 
+.dropdown-link {
+  text-decoration: none;
+  color: #333;
+  display: block;
+  padding: 10px;
+  cursor: pointer; /* Hace que el cursor cambie a una mano al pasar */
+}
+
+.dropdown-link:hover {
+  background-color: #f0f0f0;
+}
 
 /* Barra superior */
 .top-bar {
@@ -200,7 +222,6 @@ export default {
   font-size: 1.5rem;
   font-weight: bold;
 }
-
 
 /* Superposición detrás del menú */
 .overlay {
@@ -235,15 +256,22 @@ export default {
   padding: 0;
 }
 
-.menu-link {
-  display: block;
-  padding: 10px 15px;
-  font-family: "Helvetica Neue LT", sans-serif;
-  color: white;
-  text-decoration: none;
-  border-radius: 4px;
-  background-color: #00A499;
-  transition: background-color 0.3s;
+.menu-item {
+  position: relative;
 }
 
+.menu-link {
+  text-decoration: none;
+  color: white;
+  background-color: #00897b;
+  display: block;
+  padding: 10px;
+  cursor: pointer; /* Hace que el cursor cambie a una mano al pasar */
+  margin: 5px 0;
+  border-radius: 10px;
+}
+
+.menu-link:hover {
+  background-color: #026c62;
+}
 </style>
