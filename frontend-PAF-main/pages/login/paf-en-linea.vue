@@ -74,6 +74,8 @@
         errorMessage: "",
         showRoleModal: false,
         roleElegido: "",
+        username: "",
+        password: "",
         newRut: "",
         roleOptions: [
           { value: "profesor", label: "Docente" },
@@ -115,18 +117,14 @@
             this.$router.push("paf-en-linea/personas");
           }
           if(response1.data[0].Rol === "encargado") {
-            console.log(response1.data[0].Acceso);
             if (response1.data[0].Acceso === 0) {
               this.errorMessage = "Este usuario no posee accesos.";
               return;
             }
-            console.log(response1.data[0].Vista_universidad);
             if (response1.data[0].Vista_universidad === 1) {
               this.$router.push("paf-en-linea/seguimientoPAF");
             } 
-            console.log(response1.data[0].Vista_facultad);
             if(response1.data[0].Vista_facultad === 1) {
-              console.log(response1.data[0].UnidadMayor);
               sessionStorage.setItem("unidadMayor", response1.data[0].UnidadMayor);
               this.$router.push(`paf-en-linea/unidadMayorPAF?UnidadMayor=${response1.data[0].UnidadMayor}`);
             }
@@ -137,6 +135,7 @@
           }
         } 
             }
+
             else {
               this.$router.push(`paf-en-linea/profesorPAF?run=${rut}`);
               
@@ -212,11 +211,12 @@
     this.errorMessage = "Por favor, completa todos los campos.";
   }
 },
-confirmRole() {
+async confirmRole() {
   if (this.roleElegido === "personal-dei") {
             this.$router.push("paf-en-linea/personas");
   } 
   else if (this.roleElegido === "encargado") {
+    const response1 = await this.$axios.get(`/api/paf-en-linea/usuario/rut/${sessionStorage.getItem("rut")}`);
             if (response1.data[0].Acceso === 0) {
               this.errorMessage = "Este usuario no posee accesos.";
               return;
@@ -232,7 +232,7 @@ confirmRole() {
       }
     }
     else if (this.roleElegido === "profesor") {
-      this.$router.push(`paf-en-linea/profesorPAF?run=${newRut}`);
+      this.$router.push(`paf-en-linea/profesorPAF?run=${this.newRut}`);
     } 
       this.closeRoleModal();
     },
